@@ -2,17 +2,10 @@
 
 import { useState } from "react";
 
-const API_BASE = "http://170.64.209.149:8001";
-
 type ManualJobResponse = {
   job_id?: string;
-  job_type?: string;
-  restaurant_name?: string;
-  restaurant_slug?: string;
   status?: string;
-  progress?: number;
   uploaded_count?: number;
-  phase_b_enabled?: boolean;
   message?: string;
   files?: string[];
   error?: string;
@@ -23,354 +16,180 @@ export default function Home() {
   const [restaurantName, setRestaurantName] = useState("");
   const [files, setFiles] = useState<File[]>([]);
   const [jobId, setJobId] = useState("");
-  const [status, setStatus] = useState("Waiting for manual upload");
-  const [message, setMessage] = useState("");
+  const [status, setStatus] = useState("Waiting for upload");
   const [uploadedCount, setUploadedCount] = useState(0);
   const [jobFiles, setJobFiles] = useState<string[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const selected = Array.from(e.target.files || []);
     setFiles(selected);
     setError("");
-    setStatus(selected.length ? "Files selected" : "Waiting for manual upload");
   }
 
-  async function createManualJob() {
+  async function createJob() {
     if (!restaurantName.trim()) {
-      setError("Enter a restaurant name first.");
+      setError("Enter restaurant name");
       return;
     }
 
     if (!files.length) {
-      setError("Upload screenshots, images, or a ZIP first.");
+      setError("Upload files first");
       return;
     }
 
     setLoading(true);
     setError("");
+    setStatus("Uploading...");
     setMessage("");
-    setJobId("");
-    setUploadedCount(0);
     setJobFiles([]);
-    setStatus("Uploading manual Phase A files...");
 
     try {
       const form = new FormData();
-      form.append("restaurant_name", restaurantName.trim());
+      form.append("restaurant_name", restaurantName);
 
-      for (const file of files) {
-        form.append("files", file);
-      }
+      files.forEach(f => form.append("files", f));
 
-      const res = await fetch(`${API_BASE}/api/dpo/manual-jobs`, {
+      const res = await fetch("/api/dpo/manual-jobs", {
         method: "POST",
         body: form,
       });
 
-      const data: ManualJobResponse = await res.json();
+      let data: ManualJobResponse;
 
-      if (!res.ok || data.ok === false || data.error) {
-        throw new Error(data.error || "Manual Phase A upload failed.");
+      try {
+        data = await res.json();
+      } catch {
+        throw new Error("Backend returned invalid response");
+      }
+
+      if (!res.ok || data.error) {
+        throw new Error(data.error || "Upload failed");
       }
 
       setJobId(data.job_id || "");
       setStatus(data.status || "phase_a_review");
-      setMessage(data.message || "Manual Phase A upload complete. Review files before Phase B.");
       setUploadedCount(data.uploaded_count || 0);
       setJobFiles(data.files || []);
+      setMessage(data.message || "Upload complete");
     } catch (err) {
-      console.error(err);
       setStatus("Upload failed");
-      setError(err instanceof Error ? err.message : "Unknown upload error");
+      setError(err instanceof Error ? err.message : "Unknown error");
     } finally {
       setLoading(false);
     }
   }
 
-  function resetForm() {
+  function reset() {
     setRestaurantName("");
     setFiles([]);
     setJobId("");
-    setStatus("Waiting for manual upload");
-    setMessage("");
+    setStatus("Waiting for upload");
     setUploadedCount(0);
     setJobFiles([]);
+    setMessage("");
     setError("");
 
-    const input = document.getElementById("manual-files") as HTMLInputElement | null;
+    const input = document.getElementById("file-input") as HTMLInputElement;
     if (input) input.value = "";
   }
 
-  const canUpload = restaurantName.trim().length > 0 && files.length > 0 && !loading;
-
   return (
-    <main
-      style={{
-        minHeight: "100vh",
-        padding: 40,
-        fontFamily: "Arial, sans-serif",
-        background: "#f6f7f9",
-        color: "#111827",
-      }}
-    >
-      <section
+    <main style={{ padding: 40, fontFamily: "Arial", background: "#f5f5f5" }}>
+      <div
         style={{
-          maxWidth: 900,
+          maxWidth: 800,
           margin: "0 auto",
           background: "#fff",
-          borderRadius: 18,
           padding: 30,
-          boxShadow: "0 18px 45px rgba(15, 23, 42, 0.08)",
-          border: "1px solid #e5e7eb",
+          borderRadius: 12,
+          boxShadow: "0 10px 30px rgba(0,0,0,0.05)",
         }}
       >
-        <p
-          style={{
-            display: "inline-block",
-            margin: 0,
-            padding: "6px 10px",
-            borderRadius: 999,
-            background: "#111827",
-            color: "#fff",
-            fontSize: 13,
-            fontWeight: 700,
-          }}
-        >
-          Manual Phase A
+        <h1>🚀 DPO Image Engine</h1>
+
+        <p style={{ color: "#555" }}>
+          Upload screenshots. Phase A only. Phase B disabled.
         </p>
 
-        <h1 style={{ marginTop: 18, marginBottom: 8, fontSize: 34 }}>
-          🚀 DPO Image Engine
-        </h1>
-
-        <p style={{ color: "#4b5563", fontSize: 16, lineHeight: 1.6, marginTop: 0 }}>
-          Upload high-quality screenshots or original food images. The system will store them
-          for Phase A review first. Phase B enhancement stays disabled until the upload list is
-          confirmed.
-        </p>
-
-        <div
-          style={{
-            marginTop: 26,
-            display: "grid",
-            gap: 18,
-          }}
-        >
-          <label style={{ fontWeight: 700 }}>
-            Restaurant name
+        {/* Restaurant */}
+        <div style={{ marginTop: 20 }}>
+          <label>
+            <b>Restaurant</b>
             <input
               value={restaurantName}
               onChange={(e) => setRestaurantName(e.target.value)}
-              placeholder="Example: Napolitano Pizza"
-              style={{
-                width: "100%",
-                boxSizing: "border-box",
-                marginTop: 8,
-                padding: 13,
-                fontSize: 16,
-                borderRadius: 10,
-                border: "1px solid #d1d5db",
-                outline: "none",
-              }}
+              style={{ width: "100%", padding: 10, marginTop: 6 }}
             />
           </label>
+        </div>
 
-          <label style={{ fontWeight: 700 }}>
-            Upload screenshots, images, or ZIP
+        {/* Files */}
+        <div style={{ marginTop: 20 }}>
+          <label>
+            <b>Upload images</b>
             <input
-              id="manual-files"
+              id="file-input"
               type="file"
               multiple
-              accept=".png,.jpg,.jpeg,.webp,.zip"
               onChange={handleFileChange}
-              style={{
-                width: "100%",
-                boxSizing: "border-box",
-                marginTop: 8,
-                padding: 13,
-                fontSize: 15,
-                borderRadius: 10,
-                border: "1px dashed #9ca3af",
-                background: "#f9fafb",
-              }}
+              style={{ width: "100%", marginTop: 6 }}
             />
           </label>
+        </div>
 
-          {files.length > 0 && (
-            <div
-              style={{
-                padding: 14,
-                borderRadius: 12,
-                background: "#f3f4f6",
-                border: "1px solid #e5e7eb",
-              }}
-            >
-              <b>Selected files:</b> {files.length}
-              <ul style={{ marginBottom: 0, paddingLeft: 20, color: "#374151" }}>
-                {files.slice(0, 10).map((file) => (
-                  <li key={`${file.name}-${file.size}`}>{file.name}</li>
-                ))}
-              </ul>
-              {files.length > 10 && (
-                <p style={{ marginBottom: 0, color: "#6b7280" }}>
-                  + {files.length - 10} more files
-                </p>
-              )}
-            </div>
-          )}
-
-          <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
-            <button
-              onClick={createManualJob}
-              disabled={!canUpload}
-              style={{
-                padding: "13px 18px",
-                fontSize: 16,
-                borderRadius: 10,
-                border: "none",
-                cursor: canUpload ? "pointer" : "not-allowed",
-                background: canUpload ? "#111827" : "#9ca3af",
-                color: "#fff",
-                fontWeight: 800,
-              }}
-            >
-              {loading ? "Uploading..." : "Create Phase A Job"}
-            </button>
-
-            <button
-              onClick={resetForm}
-              disabled={loading}
-              style={{
-                padding: "13px 18px",
-                fontSize: 16,
-                borderRadius: 10,
-                border: "1px solid #d1d5db",
-                cursor: loading ? "not-allowed" : "pointer",
-                background: "#fff",
-                color: "#111827",
-                fontWeight: 700,
-              }}
-            >
-              Reset
-            </button>
+        {/* Selected */}
+        {files.length > 0 && (
+          <div style={{ marginTop: 10 }}>
+            <b>{files.length} files selected</b>
           </div>
+        )}
+
+        {/* Buttons */}
+        <div style={{ marginTop: 20, display: "flex", gap: 10 }}>
+          <button onClick={createJob} disabled={loading}>
+            {loading ? "Uploading..." : "Create Job"}
+          </button>
+
+          <button onClick={reset}>Reset</button>
         </div>
 
-        <div
-          style={{
-            marginTop: 28,
-            padding: 18,
-            borderRadius: 14,
-            border: "1px solid #e5e7eb",
-            background: "#fafafa",
-          }}
-        >
-          <p style={{ marginTop: 0 }}>
-            <b>Job ID:</b> {jobId || "-"}
-          </p>
-          <p>
-            <b>Status:</b> {status}
-          </p>
-          <p>
-            <b>Uploaded count:</b> {uploadedCount || "-"}
-          </p>
-          <p style={{ marginBottom: 0 }}>
-            <b>Phase B:</b>{" "}
-            <span style={{ color: "#dc2626", fontWeight: 800 }}>Disabled for now</span>
-          </p>
+        {/* Status */}
+        <div style={{ marginTop: 20 }}>
+          <p><b>Job ID:</b> {jobId || "-"}</p>
+          <p><b>Status:</b> {status}</p>
+          <p><b>Uploaded:</b> {uploadedCount}</p>
         </div>
 
+        {/* Message */}
         {message && (
-          <div
-            style={{
-              marginTop: 18,
-              padding: 16,
-              borderRadius: 12,
-              background: "#ecfdf5",
-              border: "1px solid #86efac",
-              color: "#166534",
-              fontWeight: 700,
-            }}
-          >
-            {message}
-          </div>
+          <div style={{ marginTop: 10, color: "green" }}>{message}</div>
         )}
 
+        {/* Error */}
         {error && (
-          <div
-            style={{
-              marginTop: 18,
-              padding: 16,
-              borderRadius: 12,
-              background: "#fef2f2",
-              border: "1px solid #fecaca",
-              color: "#b91c1c",
-              fontWeight: 700,
-            }}
-          >
-            {error}
-          </div>
+          <div style={{ marginTop: 10, color: "red" }}>{error}</div>
         )}
 
+        {/* Files */}
         {jobFiles.length > 0 && (
-          <div style={{ marginTop: 26 }}>
-            <h2 style={{ fontSize: 22, marginBottom: 10 }}>Phase A Review List</h2>
-            <p style={{ color: "#6b7280", marginTop: 0 }}>
-              These are the uploaded files stored by the backend. Next step will be
-              auto-name detection, manual edit, delete, replace, then Run Phase B.
-            </p>
-
-            <div
-              style={{
-                display: "grid",
-                gap: 10,
-                marginTop: 14,
-              }}
-            >
-              {jobFiles.map((file, index) => {
-                const name = file.split("/").pop() || file;
-                return (
-                  <div
-                    key={`${file}-${index}`}
-                    style={{
-                      padding: 12,
-                      border: "1px solid #e5e7eb",
-                      borderRadius: 10,
-                      background: "#fff",
-                      display: "flex",
-                      justifyContent: "space-between",
-                      gap: 12,
-                      alignItems: "center",
-                    }}
-                  >
-                    <span>
-                      <b>{String(index + 1).padStart(2, "0")}.</b> {name}
-                    </span>
-                    <span style={{ color: "#6b7280", fontSize: 13 }}>uploaded</span>
-                  </div>
-                );
-              })}
-            </div>
+          <div style={{ marginTop: 20 }}>
+            <h3>Uploaded Files</h3>
+            <ul>
+              {jobFiles.map((f, i) => (
+                <li key={i}>{f.split("/").pop()}</li>
+              ))}
+            </ul>
           </div>
         )}
 
-        <div
-          style={{
-            marginTop: 30,
-            padding: 16,
-            borderRadius: 12,
-            background: "#fffbeb",
-            border: "1px solid #fde68a",
-            color: "#92400e",
-          }}
-        >
-          <b>Current plan:</b> scrape mode is deprecated. Manual upload is now the
-          primary Phase A. Phase B will be re-enabled only after review/rename/replace
-          controls are built.
+        {/* Notice */}
+        <div style={{ marginTop: 20, color: "#a16207" }}>
+          Phase B disabled until review tools are built.
         </div>
-      </section>
+      </div>
     </main>
   );
 }
