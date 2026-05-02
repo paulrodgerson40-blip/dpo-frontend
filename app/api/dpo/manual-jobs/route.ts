@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-const BACKEND = "http://170.64.209.149:8001";
+const BACKEND = "https://170.64.209.149.sslip.io";
 
 export async function POST(req: Request) {
   try {
