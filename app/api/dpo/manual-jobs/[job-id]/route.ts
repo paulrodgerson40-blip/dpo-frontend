@@ -4,10 +4,9 @@ type RouteContext = {
   params: Promise<{ "job-id": string }>;
 };
 
-const BACKEND_URL =
-  process.env.DPO_BACKEND_URL || "http://127.0.0.1:8001";
+const BACKEND = "https://170.64.209.149.sslip.io";
 
-export async function GET(req: NextRequest, context: RouteContext) {
+export async function GET(_req: NextRequest, context: RouteContext) {
   const params = await context.params;
   const jobId = params["job-id"];
 
@@ -16,7 +15,7 @@ export async function GET(req: NextRequest, context: RouteContext) {
   }
 
   try {
-    const res = await fetch(`${BACKEND_URL}/api/dpo/manual-jobs/${jobId}`, {
+    const res = await fetch(`${BACKEND}/api/dpo/manual-jobs/${jobId}`, {
       method: "GET",
       cache: "no-store",
     });
@@ -26,7 +25,7 @@ export async function GET(req: NextRequest, context: RouteContext) {
     return NextResponse.json(data ?? { error: "Invalid backend response" }, {
       status: res.status,
     });
-  } catch (err) {
+  } catch {
     return NextResponse.json(
       { error: "Failed to contact backend" },
       { status: 500 }
