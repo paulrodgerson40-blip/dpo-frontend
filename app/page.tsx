@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-const API_BASE = "http://170.64.209.149:8001";
+const API_BASE = "";
 
 export default function Home() {
   const [url, setUrl] = useState("");
