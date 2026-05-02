@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-const API_BASE = "";
+const API_BASE = "http://170.64.209.149:8001";
 
 type ManualJobResponse = {
   job_id?: string;
