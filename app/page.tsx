@@ -17,11 +17,18 @@ export default function Home() {
   const [verificationUrl, setVerificationUrl] = useState("");
 
   async function startVerification() {
+    if (!url.trim()) {
+      alert("Paste an Uber Eats URL first.");
+      return;
+    }
+
     setVerificationStarting(true);
 
     try {
       const res = await fetch(`${API_BASE}/api/dpo/verify/open`, {
         method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url }),
       });
 
       const data = await res.json();
@@ -30,8 +37,7 @@ export default function Home() {
         throw new Error(data.error || "Failed to start verification browser");
       }
 
-      const vncUrl =
-        data.vnc_url || "http://170.64.209.149:6080/vnc.html";
+      const vncUrl = data.vnc_url || "http://170.64.209.149:6080/vnc.html";
 
       setVerificationUrl(vncUrl);
       window.open(vncUrl, "_blank");
@@ -146,7 +152,7 @@ export default function Home() {
         }}
       />
 
-      <div style={{ marginTop: 20 }}>
+      <div style={{ marginTop: 20, display: "flex", gap: 10, flexWrap: "wrap" }}>
         <button
           onClick={startJob}
           disabled={buttonDisabled}
@@ -203,7 +209,7 @@ export default function Home() {
           <div style={{ marginTop: 14, display: "flex", gap: 10, flexWrap: "wrap" }}>
             <button
               onClick={startVerification}
-              disabled={verificationStarting}
+              disabled={verificationStarting || !url.trim()}
               style={{
                 padding: "10px 16px",
                 borderRadius: 8,
@@ -211,7 +217,7 @@ export default function Home() {
                 background: verificationStarting ? "#93c5fd" : "#2563eb",
                 color: "#fff",
                 fontWeight: 700,
-                cursor: verificationStarting ? "not-allowed" : "pointer",
+                cursor: verificationStarting || !url.trim() ? "not-allowed" : "pointer",
               }}
             >
               {verificationStarting ? "Opening..." : "Open Verification Browser"}
