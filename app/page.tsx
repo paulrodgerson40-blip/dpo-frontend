@@ -45,7 +45,7 @@ export default function Home() {
       form.append("restaurant_name", restaurantName);
       files.forEach((f) => form.append("files", f));
 
-      const res = await fetch("/api/dpo/manual-jobs", {
+      const res = await fetch("http://170.64.209.149.sslip.io/api/dpo/manual-jobs", {
         method: "POST",
         body: form,
       });
