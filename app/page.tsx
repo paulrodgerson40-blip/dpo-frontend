@@ -1,6 +1,11 @@
+cd /root/dpo_frontend
+
+cat > app/page.tsx <<'TSX'
 "use client";
 
 import { useState } from "react";
+
+const API_BASE = "http://170.64.209.149:8001";
 
 type ManualJobResponse = {
   job_id?: string;
@@ -24,48 +29,42 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const selected = Array.from(e.target.files || []);
-    setFiles(selected);
+    setFiles(Array.from(e.target.files || []));
     setError("");
   }
 
   async function createJob() {
-    if (!restaurantName.trim()) {
-      setError("Enter restaurant name");
-      return;
-    }
-
-    if (!files.length) {
-      setError("Upload files first");
-      return;
-    }
+    if (!restaurantName.trim()) return setError("Enter restaurant name first.");
+    if (!files.length) return setError("Upload images or a ZIP first.");
 
     setLoading(true);
     setError("");
-    setStatus("Uploading...");
     setMessage("");
+    setStatus("Uploading...");
     setJobFiles([]);
+    setUploadedCount(0);
+    setJobId("");
 
     try {
       const form = new FormData();
-      form.append("restaurant_name", restaurantName);
+      form.append("restaurant_name", restaurantName.trim());
+      files.forEach((f) => form.append("files", f));
 
-      files.forEach(f => form.append("files", f));
-
-      const res = await fetch("/api/dpo/manual-jobs", {
+      const res = await fetch(`${API_BASE}/api/dpo/manual-jobs`, {
         method: "POST",
         body: form,
       });
 
+      const text = await res.text();
       let data: ManualJobResponse;
 
       try {
-        data = await res.json();
+        data = JSON.parse(text);
       } catch {
-        throw new Error("Backend returned invalid response");
+        throw new Error(text || "Backend returned invalid response");
       }
 
-      if (!res.ok || data.error) {
+      if (!res.ok || data.ok === false || data.error) {
         throw new Error(data.error || "Upload failed");
       }
 
@@ -73,7 +72,7 @@ export default function Home() {
       setStatus(data.status || "phase_a_review");
       setUploadedCount(data.uploaded_count || 0);
       setJobFiles(data.files || []);
-      setMessage(data.message || "Upload complete");
+      setMessage(data.message || "Manual Phase A upload complete.");
     } catch (err) {
       setStatus("Upload failed");
       setError(err instanceof Error ? err.message : "Unknown error");
@@ -91,105 +90,83 @@ export default function Home() {
     setJobFiles([]);
     setMessage("");
     setError("");
-
-    const input = document.getElementById("file-input") as HTMLInputElement;
+    const input = document.getElementById("manual-files") as HTMLInputElement | null;
     if (input) input.value = "";
   }
 
+  const canUpload = restaurantName.trim() && files.length && !loading;
+
   return (
-    <main style={{ padding: 40, fontFamily: "Arial", background: "#f5f5f5" }}>
-      <div
-        style={{
-          maxWidth: 800,
-          margin: "0 auto",
-          background: "#fff",
-          padding: 30,
-          borderRadius: 12,
-          boxShadow: "0 10px 30px rgba(0,0,0,0.05)",
-        }}
-      >
+    <main style={{ minHeight: "100vh", padding: 40, fontFamily: "Arial, sans-serif", background: "#f6f7f9" }}>
+      <section style={{ maxWidth: 900, margin: "0 auto", background: "#fff", padding: 30, borderRadius: 18 }}>
+        <div style={{ display: "inline-block", background: "#111827", color: "#fff", padding: "6px 10px", borderRadius: 999, fontWeight: 700 }}>
+          Manual Phase A
+        </div>
+
         <h1>🚀 DPO Image Engine</h1>
+        <p>Upload screenshots or original food images. Phase B is disabled until review tools are built.</p>
 
-        <p style={{ color: "#555" }}>
-          Upload screenshots. Phase A only. Phase B disabled.
-        </p>
+        <label style={{ fontWeight: 700 }}>
+          Restaurant name
+          <input
+            value={restaurantName}
+            onChange={(e) => setRestaurantName(e.target.value)}
+            placeholder="Example: Napolitano Pizza"
+            style={{ width: "100%", padding: 12, marginTop: 8, marginBottom: 18 }}
+          />
+        </label>
 
-        {/* Restaurant */}
-        <div style={{ marginTop: 20 }}>
-          <label>
-            <b>Restaurant</b>
-            <input
-              value={restaurantName}
-              onChange={(e) => setRestaurantName(e.target.value)}
-              style={{ width: "100%", padding: 10, marginTop: 6 }}
-            />
-          </label>
-        </div>
+        <label style={{ fontWeight: 700 }}>
+          Upload screenshots, images, or ZIP
+          <input
+            id="manual-files"
+            type="file"
+            multiple
+            accept=".png,.jpg,.jpeg,.webp,.zip"
+            onChange={handleFileChange}
+            style={{ width: "100%", padding: 12, marginTop: 8, marginBottom: 18 }}
+          />
+        </label>
 
-        {/* Files */}
-        <div style={{ marginTop: 20 }}>
-          <label>
-            <b>Upload images</b>
-            <input
-              id="file-input"
-              type="file"
-              multiple
-              onChange={handleFileChange}
-              style={{ width: "100%", marginTop: 6 }}
-            />
-          </label>
-        </div>
-
-        {/* Selected */}
         {files.length > 0 && (
-          <div style={{ marginTop: 10 }}>
-            <b>{files.length} files selected</b>
+          <div style={{ background: "#f3f4f6", padding: 14, borderRadius: 10, marginBottom: 18 }}>
+            <b>Selected files:</b> {files.length}
+            <ul>
+              {files.slice(0, 10).map((f) => <li key={f.name}>{f.name}</li>)}
+            </ul>
+            {files.length > 10 && <p>+ {files.length - 10} more</p>}
           </div>
         )}
 
-        {/* Buttons */}
-        <div style={{ marginTop: 20, display: "flex", gap: 10 }}>
-          <button onClick={createJob} disabled={loading}>
-            {loading ? "Uploading..." : "Create Job"}
-          </button>
+        <button onClick={createJob} disabled={!canUpload} style={{ padding: "12px 18px", marginRight: 10 }}>
+          {loading ? "Uploading..." : "Create Phase A Job"}
+        </button>
+        <button onClick={reset} disabled={loading} style={{ padding: "12px 18px" }}>
+          Reset
+        </button>
 
-          <button onClick={reset}>Reset</button>
-        </div>
-
-        {/* Status */}
-        <div style={{ marginTop: 20 }}>
+        <div style={{ marginTop: 24, padding: 16, background: "#fafafa", border: "1px solid #ddd", borderRadius: 10 }}>
           <p><b>Job ID:</b> {jobId || "-"}</p>
           <p><b>Status:</b> {status}</p>
-          <p><b>Uploaded:</b> {uploadedCount}</p>
+          <p><b>Uploaded count:</b> {uploadedCount || "-"}</p>
+          <p><b>Phase B:</b> <span style={{ color: "red", fontWeight: 700 }}>Disabled for now</span></p>
         </div>
 
-        {/* Message */}
-        {message && (
-          <div style={{ marginTop: 10, color: "green" }}>{message}</div>
-        )}
+        {message && <p style={{ color: "green", fontWeight: 700 }}>{message}</p>}
+        {error && <p style={{ color: "red", fontWeight: 700 }}>{error}</p>}
 
-        {/* Error */}
-        {error && (
-          <div style={{ marginTop: 10, color: "red" }}>{error}</div>
-        )}
-
-        {/* Files */}
         {jobFiles.length > 0 && (
-          <div style={{ marginTop: 20 }}>
-            <h3>Uploaded Files</h3>
-            <ul>
-              {jobFiles.map((f, i) => (
-                <li key={i}>{f.split("/").pop()}</li>
-              ))}
-            </ul>
+          <div style={{ marginTop: 24 }}>
+            <h2>Phase A Review List</h2>
+            {jobFiles.map((f, i) => (
+              <div key={f} style={{ padding: 10, borderBottom: "1px solid #eee" }}>
+                <b>{String(i + 1).padStart(2, "0")}.</b> {f.split("/").pop()}
+              </div>
+            ))}
           </div>
         )}
-
-        {/* Notice */}
-        <div style={{ marginTop: 20, color: "#a16207" }}>
-          Phase B disabled until review tools are built.
-        </div>
-      </div>
+      </section>
     </main>
   );
 }
+TSX
