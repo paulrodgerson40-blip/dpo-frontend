@@ -69,7 +69,7 @@ export default function Home() {
       form.append("restaurant_name", restaurantName.trim());
       files.forEach((f) => form.append("files", f));
 
-      const res = await fetch("/api/dpo/manual-jobs", {
+      const res = await fetch(`${BACKEND_URL}/api/dpo/manual-jobs`, {
         method: "POST",
         body: form,
       });
