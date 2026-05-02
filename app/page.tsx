@@ -44,7 +44,7 @@ export default function Home() {
 
         setStatus(data.status || "processing...");
 
-        if (["completed", "complete", "phase_b_complete"].includes(data.status)) {
+        if (["completed", "complete", "phase_b_complete", "ready"].includes(data.status)) {
           clearInterval(timer);
           setLoading(false);
           window.open(`${API_BASE}/download-latest`, "_blank");
