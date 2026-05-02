@@ -47,7 +47,7 @@ export default function Home() {
         if (["completed", "complete", "phase_b_complete", "ready"].includes(data.status)) {
           clearInterval(timer);
           setLoading(false);
-          window.open(`${API_BASE}/download-latest`, "_blank");
+          window.open("http://170.64.209.149:8001/download-latest", "_blank");
         }
 
         if (data.status === "failed") {
