@@ -107,7 +107,8 @@ export default function Home() {
       {downloadReady && (
         <div style={{ marginTop: 20 }}>
           <a
-            href="http://170.64.209.149:8001/download-latest"
+            href="/api/dpo/download-latest"
+            download
             target="_blank"
             rel="noopener noreferrer"
             style={{
