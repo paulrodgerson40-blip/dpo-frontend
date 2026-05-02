@@ -20,7 +20,7 @@ export default function Home() {
     setVerificationStarting(true);
 
     try {
-      const res = await fetch(`${API_BASE}/api/dpo/verify/start`, {
+      const res = await fetch(`${API_BASE}/api/dpo/verify/open`, {
         method: "POST",
       });
 
