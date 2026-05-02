@@ -1,30 +1,34 @@
 import { NextRequest, NextResponse } from "next/server";
 
-type Params = {
-  params: Promise<{
-    job_id: string;
-  }>;
+type RouteContext = {
+  params: Promise<{ "job-id": string }>;
 };
 
-// GET /api/dpo/manual-jobs/[job_id]
-export async function GET(req: NextRequest, context: Params) {
+const BACKEND_URL =
+  process.env.DPO_BACKEND_URL || "http://127.0.0.1:8001";
+
+export async function GET(req: NextRequest, context: RouteContext) {
+  const params = await context.params;
+  const jobId = params["job-id"];
+
+  if (!jobId) {
+    return NextResponse.json({ error: "Missing job id" }, { status: 400 });
+  }
+
   try {
-    const { job_id } = await context.params;
+    const res = await fetch(`${BACKEND_URL}/api/dpo/manual-jobs/${jobId}`, {
+      method: "GET",
+      cache: "no-store",
+    });
 
-    // 🔧 TODO: replace with real lookup (file/db)
-    const job = {
-      job_id,
-      status: "phase_a_review",
-      progress: 0,
-      message: "Manual Phase A upload complete. Review before Phase B.",
-    };
+    const data = await res.json().catch(() => null);
 
-    return NextResponse.json(job);
+    return NextResponse.json(data ?? { error: "Invalid backend response" }, {
+      status: res.status,
+    });
   } catch (err) {
-    console.error("GET job error:", err);
-
     return NextResponse.json(
-      { error: "Failed to fetch job" },
+      { error: "Failed to contact backend" },
       { status: 500 }
     );
   }
