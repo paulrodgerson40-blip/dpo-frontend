@@ -4,279 +4,373 @@ import { useState } from "react";
 
 const API_BASE = "";
 
-export default function Home() {
-  const [url, setUrl] = useState("");
-  const [jobId, setJobId] = useState("");
-  const [status, setStatus] = useState("Waiting");
-  const [progress, setProgress] = useState(0);
-  const [loading, setLoading] = useState(false);
-  const [downloadReady, setDownloadReady] = useState(false);
-  const [error, setError] = useState("");
-  const [errorCode, setErrorCode] = useState("");
-  const [verificationStarting, setVerificationStarting] = useState(false);
-  const [verificationUrl, setVerificationUrl] = useState("");
+type ManualJobResponse = {
+  job_id?: string;
+  job_type?: string;
+  restaurant_name?: string;
+  restaurant_slug?: string;
+  status?: string;
+  progress?: number;
+  uploaded_count?: number;
+  phase_b_enabled?: boolean;
+  message?: string;
+  files?: string[];
+  error?: string;
+  ok?: boolean;
+};
 
-  async function startVerification() {
-    if (!url.trim()) {
-      alert("Paste an Uber Eats URL first.");
+export default function Home() {
+  const [restaurantName, setRestaurantName] = useState("");
+  const [files, setFiles] = useState<File[]>([]);
+  const [jobId, setJobId] = useState("");
+  const [status, setStatus] = useState("Waiting for manual upload");
+  const [message, setMessage] = useState("");
+  const [uploadedCount, setUploadedCount] = useState(0);
+  const [jobFiles, setJobFiles] = useState<string[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const selected = Array.from(e.target.files || []);
+    setFiles(selected);
+    setError("");
+    setStatus(selected.length ? "Files selected" : "Waiting for manual upload");
+  }
+
+  async function createManualJob() {
+    if (!restaurantName.trim()) {
+      setError("Enter a restaurant name first.");
       return;
     }
 
-    setVerificationStarting(true);
+    if (!files.length) {
+      setError("Upload screenshots, images, or a ZIP first.");
+      return;
+    }
+
+    setLoading(true);
+    setError("");
+    setMessage("");
+    setJobId("");
+    setUploadedCount(0);
+    setJobFiles([]);
+    setStatus("Uploading manual Phase A files...");
 
     try {
-      const res = await fetch(`${API_BASE}/api/dpo/verify/open`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ url }),
-      });
+      const form = new FormData();
+      form.append("restaurant_name", restaurantName.trim());
 
-      const data = await res.json();
-
-      if (!res.ok || data.ok === false) {
-        throw new Error(data.error || "Failed to start verification browser");
+      for (const file of files) {
+        form.append("files", file);
       }
 
-      const vncUrl = data.vnc_url || "http://170.64.209.149:6080/vnc.html";
-
-      setVerificationUrl(vncUrl);
-      window.open(vncUrl, "_blank");
-    } catch (err) {
-      console.error(err);
-      alert(err instanceof Error ? err.message : "Failed to start verification browser");
-    } finally {
-      setVerificationStarting(false);
-    }
-  }
-
-  async function startJob() {
-    setLoading(true);
-    setDownloadReady(false);
-    setError("");
-    setErrorCode("");
-    setJobId("");
-    setProgress(0);
-    setStatus("Starting job...");
-
-    try {
-      const res = await fetch(`${API_BASE}/api/dpo/jobs`, {
+      const res = await fetch(`${API_BASE}/api/dpo/manual-jobs`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ url }),
+        body: form,
       });
 
-      const data = await res.json();
+      const data: ManualJobResponse = await res.json();
 
-      if (data.job_id) setJobId(data.job_id);
-
-      if (!res.ok || data.ok === false) {
-        setStatus("Job failed");
-        setError(data.error || "Job failed to start");
-        setErrorCode(data.error_code || "");
-        setProgress(100);
-        setLoading(false);
-        return;
+      if (!res.ok || data.ok === false || data.error) {
+        throw new Error(data.error || "Manual Phase A upload failed.");
       }
 
       setJobId(data.job_id || "");
-      setStatus(data.status || "Processing...");
-      setProgress(data.progress || 5);
-
-      if (data.job_id) pollJob(data.job_id);
+      setStatus(data.status || "phase_a_review");
+      setMessage(data.message || "Manual Phase A upload complete. Review files before Phase B.");
+      setUploadedCount(data.uploaded_count || 0);
+      setJobFiles(data.files || []);
     } catch (err) {
       console.error(err);
-      setStatus("Job failed");
-      setError(err instanceof Error ? err.message : "Unknown error");
+      setStatus("Upload failed");
+      setError(err instanceof Error ? err.message : "Unknown upload error");
+    } finally {
       setLoading(false);
     }
   }
 
-  function pollJob(id: string) {
-    const timer = setInterval(async () => {
-      try {
-        const res = await fetch(`${API_BASE}/api/dpo/jobs/${id}`, {
-          cache: "no-store",
-        });
+  function resetForm() {
+    setRestaurantName("");
+    setFiles([]);
+    setJobId("");
+    setStatus("Waiting for manual upload");
+    setMessage("");
+    setUploadedCount(0);
+    setJobFiles([]);
+    setError("");
 
-        const data = await res.json();
-
-        if (data.ok === false || data.status === "failed") {
-          clearInterval(timer);
-          setLoading(false);
-          setStatus("Job failed");
-          setError(data.error || "Unknown job error");
-          setErrorCode(data.error_code || "");
-          setProgress(data.progress || 100);
-          return;
-        }
-
-        setStatus(data.status || "Processing...");
-        setProgress(data.progress || 0);
-
-        if (data.status === "phase_b_complete") {
-          clearInterval(timer);
-          setLoading(false);
-          setDownloadReady(true);
-          setProgress(100);
-          setStatus("Ready to download");
-        }
-      } catch (err) {
-        console.error(err);
-        setError("Could not check job status");
-      }
-    }, 3000);
+    const input = document.getElementById("manual-files") as HTMLInputElement | null;
+    if (input) input.value = "";
   }
 
-  const blockedByUber = errorCode === "UBER_CHALLENGE";
-  const buttonDisabled = loading || !url.trim();
+  const canUpload = restaurantName.trim().length > 0 && files.length > 0 && !loading;
 
   return (
-    <main style={{ padding: 40, fontFamily: "Arial, sans-serif", maxWidth: 720 }}>
-      <h1>🚀 DPO Image Engine</h1>
-
-      <p style={{ color: "#555" }}>
-        Paste an Uber Eats store URL, scrape the menu, enhance images, then download the package.
-      </p>
-
-      <input
-        value={url}
-        onChange={(e) => setUrl(e.target.value)}
-        placeholder="Paste Uber Eats store URL"
+    <main
+      style={{
+        minHeight: "100vh",
+        padding: 40,
+        fontFamily: "Arial, sans-serif",
+        background: "#f6f7f9",
+        color: "#111827",
+      }}
+    >
+      <section
         style={{
-          width: "100%",
-          padding: 12,
-          fontSize: 16,
-          borderRadius: 8,
-          border: "1px solid #ccc",
-          marginTop: 12,
+          maxWidth: 900,
+          margin: "0 auto",
+          background: "#fff",
+          borderRadius: 18,
+          padding: 30,
+          boxShadow: "0 18px 45px rgba(15, 23, 42, 0.08)",
+          border: "1px solid #e5e7eb",
         }}
-      />
-
-      <div style={{ marginTop: 20, display: "flex", gap: 10, flexWrap: "wrap" }}>
-        <button
-          onClick={startJob}
-          disabled={buttonDisabled}
+      >
+        <p
           style={{
-            padding: "12px 18px",
-            fontSize: 16,
-            borderRadius: 8,
-            border: "none",
-            cursor: buttonDisabled ? "not-allowed" : "pointer",
-            background: loading ? "#777" : "#000",
+            display: "inline-block",
+            margin: 0,
+            padding: "6px 10px",
+            borderRadius: 999,
+            background: "#111827",
             color: "#fff",
-            opacity: buttonDisabled ? 0.65 : 1,
+            fontSize: 13,
+            fontWeight: 700,
           }}
         >
-          {loading ? "Processing..." : "Start Job"}
-        </button>
-      </div>
+          Manual Phase A
+        </p>
 
-      <div style={{ marginTop: 28 }}>
-        <p><b>Job ID:</b> {jobId || "-"}</p>
-        <p><b>Status:</b> {status}</p>
-        <p><b>Progress:</b> {progress}%</p>
+        <h1 style={{ marginTop: 18, marginBottom: 8, fontSize: 34 }}>
+          🚀 DPO Image Engine
+        </h1>
 
-        <div style={{ width: "100%", height: 14, background: "#e5e7eb", borderRadius: 999 }}>
-          <div
-            style={{
-              width: `${Math.min(progress, 100)}%`,
-              height: "100%",
-              background: blockedByUber ? "#f59e0b" : "#16a34a",
-              borderRadius: 999,
-              transition: "width 0.3s ease",
-            }}
-          />
-        </div>
-      </div>
+        <p style={{ color: "#4b5563", fontSize: 16, lineHeight: 1.6, marginTop: 0 }}>
+          Upload high-quality screenshots or original food images. The system will store them
+          for Phase A review first. Phase B enhancement stays disabled until the upload list is
+          confirmed.
+        </p>
 
-      {blockedByUber && (
         <div
           style={{
-            marginTop: 24,
-            padding: 18,
-            border: "1px solid #f59e0b",
-            background: "#fffbeb",
-            borderRadius: 10,
+            marginTop: 26,
+            display: "grid",
+            gap: 18,
           }}
         >
-          <h3 style={{ marginTop: 0 }}>⚠️ Blocked by Uber</h3>
-
-          <p>
-            Uber showed a verification challenge. Open the verification browser,
-            complete the Uber check, then retry the scrape.
-          </p>
-
-          <div style={{ marginTop: 14, display: "flex", gap: 10, flexWrap: "wrap" }}>
-            <button
-              onClick={startVerification}
-              disabled={verificationStarting || !url.trim()}
+          <label style={{ fontWeight: 700 }}>
+            Restaurant name
+            <input
+              value={restaurantName}
+              onChange={(e) => setRestaurantName(e.target.value)}
+              placeholder="Example: Napolitano Pizza"
               style={{
-                padding: "10px 16px",
-                borderRadius: 8,
-                border: "none",
-                background: verificationStarting ? "#93c5fd" : "#2563eb",
-                color: "#fff",
-                fontWeight: 700,
-                cursor: verificationStarting || !url.trim() ? "not-allowed" : "pointer",
+                width: "100%",
+                boxSizing: "border-box",
+                marginTop: 8,
+                padding: 13,
+                fontSize: 16,
+                borderRadius: 10,
+                border: "1px solid #d1d5db",
+                outline: "none",
+              }}
+            />
+          </label>
+
+          <label style={{ fontWeight: 700 }}>
+            Upload screenshots, images, or ZIP
+            <input
+              id="manual-files"
+              type="file"
+              multiple
+              accept=".png,.jpg,.jpeg,.webp,.zip"
+              onChange={handleFileChange}
+              style={{
+                width: "100%",
+                boxSizing: "border-box",
+                marginTop: 8,
+                padding: 13,
+                fontSize: 15,
+                borderRadius: 10,
+                border: "1px dashed #9ca3af",
+                background: "#f9fafb",
+              }}
+            />
+          </label>
+
+          {files.length > 0 && (
+            <div
+              style={{
+                padding: 14,
+                borderRadius: 12,
+                background: "#f3f4f6",
+                border: "1px solid #e5e7eb",
               }}
             >
-              {verificationStarting ? "Opening..." : "Open Verification Browser"}
+              <b>Selected files:</b> {files.length}
+              <ul style={{ marginBottom: 0, paddingLeft: 20, color: "#374151" }}>
+                {files.slice(0, 10).map((file) => (
+                  <li key={`${file.name}-${file.size}`}>{file.name}</li>
+                ))}
+              </ul>
+              {files.length > 10 && (
+                <p style={{ marginBottom: 0, color: "#6b7280" }}>
+                  + {files.length - 10} more files
+                </p>
+              )}
+            </div>
+          )}
+
+          <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
+            <button
+              onClick={createManualJob}
+              disabled={!canUpload}
+              style={{
+                padding: "13px 18px",
+                fontSize: 16,
+                borderRadius: 10,
+                border: "none",
+                cursor: canUpload ? "pointer" : "not-allowed",
+                background: canUpload ? "#111827" : "#9ca3af",
+                color: "#fff",
+                fontWeight: 800,
+              }}
+            >
+              {loading ? "Uploading..." : "Create Phase A Job"}
             </button>
 
             <button
-              onClick={startJob}
-              disabled={!url.trim()}
+              onClick={resetForm}
+              disabled={loading}
               style={{
-                padding: "10px 16px",
-                borderRadius: 8,
-                border: "none",
-                background: "#f59e0b",
-                color: "#111",
+                padding: "13px 18px",
+                fontSize: 16,
+                borderRadius: 10,
+                border: "1px solid #d1d5db",
+                cursor: loading ? "not-allowed" : "pointer",
+                background: "#fff",
+                color: "#111827",
                 fontWeight: 700,
-                cursor: !url.trim() ? "not-allowed" : "pointer",
               }}
             >
-              Retry Scrape
+              Reset
             </button>
           </div>
-
-          {verificationUrl && (
-            <p style={{ marginTop: 12, fontSize: 14 }}>
-              Verification browser opened. If it did not open,{" "}
-              <a href={verificationUrl} target="_blank" rel="noopener noreferrer">
-                click here
-              </a>.
-            </p>
-          )}
         </div>
-      )}
 
-      {error && !blockedByUber && (
-        <p style={{ color: "#dc2626", marginTop: 18 }}>
-          <b>Error:</b> {error}
-        </p>
-      )}
+        <div
+          style={{
+            marginTop: 28,
+            padding: 18,
+            borderRadius: 14,
+            border: "1px solid #e5e7eb",
+            background: "#fafafa",
+          }}
+        >
+          <p style={{ marginTop: 0 }}>
+            <b>Job ID:</b> {jobId || "-"}
+          </p>
+          <p>
+            <b>Status:</b> {status}
+          </p>
+          <p>
+            <b>Uploaded count:</b> {uploadedCount || "-"}
+          </p>
+          <p style={{ marginBottom: 0 }}>
+            <b>Phase B:</b>{" "}
+            <span style={{ color: "#dc2626", fontWeight: 800 }}>Disabled for now</span>
+          </p>
+        </div>
 
-      {downloadReady && (
-        <div style={{ marginTop: 24 }}>
-          <a
-            href="/api/dpo/download-latest"
-            download
+        {message && (
+          <div
             style={{
-              display: "inline-block",
-              padding: "12px 18px",
-              background: "#16a34a",
-              color: "white",
-              textDecoration: "none",
-              borderRadius: 8,
-              fontSize: 16,
-              fontWeight: 600,
+              marginTop: 18,
+              padding: 16,
+              borderRadius: 12,
+              background: "#ecfdf5",
+              border: "1px solid #86efac",
+              color: "#166534",
+              fontWeight: 700,
             }}
           >
-            ⬇ Download Images
-          </a>
+            {message}
+          </div>
+        )}
+
+        {error && (
+          <div
+            style={{
+              marginTop: 18,
+              padding: 16,
+              borderRadius: 12,
+              background: "#fef2f2",
+              border: "1px solid #fecaca",
+              color: "#b91c1c",
+              fontWeight: 700,
+            }}
+          >
+            {error}
+          </div>
+        )}
+
+        {jobFiles.length > 0 && (
+          <div style={{ marginTop: 26 }}>
+            <h2 style={{ fontSize: 22, marginBottom: 10 }}>Phase A Review List</h2>
+            <p style={{ color: "#6b7280", marginTop: 0 }}>
+              These are the uploaded files stored by the backend. Next step will be
+              auto-name detection, manual edit, delete, replace, then Run Phase B.
+            </p>
+
+            <div
+              style={{
+                display: "grid",
+                gap: 10,
+                marginTop: 14,
+              }}
+            >
+              {jobFiles.map((file, index) => {
+                const name = file.split("/").pop() || file;
+                return (
+                  <div
+                    key={`${file}-${index}`}
+                    style={{
+                      padding: 12,
+                      border: "1px solid #e5e7eb",
+                      borderRadius: 10,
+                      background: "#fff",
+                      display: "flex",
+                      justifyContent: "space-between",
+                      gap: 12,
+                      alignItems: "center",
+                    }}
+                  >
+                    <span>
+                      <b>{String(index + 1).padStart(2, "0")}.</b> {name}
+                    </span>
+                    <span style={{ color: "#6b7280", fontSize: 13 }}>uploaded</span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        <div
+          style={{
+            marginTop: 30,
+            padding: 16,
+            borderRadius: 12,
+            background: "#fffbeb",
+            border: "1px solid #fde68a",
+            color: "#92400e",
+          }}
+        >
+          <b>Current plan:</b> scrape mode is deprecated. Manual upload is now the
+          primary Phase A. Phase B will be re-enabled only after review/rename/replace
+          controls are built.
         </div>
-      )}
+      </section>
     </main>
   );
 }
