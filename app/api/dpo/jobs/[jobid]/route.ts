@@ -4,12 +4,15 @@ const BACKEND = "http://170.64.209.149:8001";
 
 export async function GET(
   req: Request,
-  { params }: { params: { jobId: string } }
+  context: { params: Promise<{ jobid: string }> }
 ) {
   try {
-    const { jobId } = params;
+    const { jobid } = await context.params;
 
-    const res = await fetch(`${BACKEND}/api/dpo/jobs/${jobId}`);
+    const res = await fetch(`${BACKEND}/api/dpo/jobs/${jobid}`, {
+      cache: "no-store",
+    });
+
     const data = await res.json();
 
     return NextResponse.json(data, { status: res.status });
