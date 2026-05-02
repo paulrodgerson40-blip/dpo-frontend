@@ -12,11 +12,13 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [downloadReady, setDownloadReady] = useState(false);
   const [error, setError] = useState("");
+  const [errorCode, setErrorCode] = useState("");
 
   async function startJob() {
     setLoading(true);
     setDownloadReady(false);
     setError("");
+    setErrorCode("");
     setJobId("");
     setProgress(0);
     setStatus("Starting job...");
@@ -30,8 +32,15 @@ export default function Home() {
 
       const data = await res.json();
 
+      if (data.job_id) setJobId(data.job_id);
+
       if (!res.ok || data.ok === false) {
-        throw new Error(data.error || "Job failed to start");
+        setStatus("Job failed");
+        setError(data.error || "Job failed to start");
+        setErrorCode(data.error_code || "");
+        setProgress(100);
+        setLoading(false);
+        return;
       }
 
       setJobId(data.job_id || "");
@@ -56,11 +65,13 @@ export default function Home() {
 
         const data = await res.json();
 
-        if (data.ok === false) {
+        if (data.ok === false || data.status === "failed") {
           clearInterval(timer);
           setLoading(false);
           setStatus("Job failed");
           setError(data.error || "Unknown job error");
+          setErrorCode(data.error_code || "");
+          setProgress(data.progress || 100);
           return;
         }
 
@@ -74,13 +85,6 @@ export default function Home() {
           setProgress(100);
           setStatus("Ready to download");
         }
-
-        if (data.status === "failed") {
-          clearInterval(timer);
-          setLoading(false);
-          setStatus("Job failed");
-          setError(data.error || "Job failed");
-        }
       } catch (err) {
         console.error(err);
         setError("Could not check job status");
@@ -88,19 +92,14 @@ export default function Home() {
     }, 3000);
   }
 
+  const blockedByUber = errorCode === "UBER_CHALLENGE";
   const buttonDisabled = loading || !url.trim();
 
   return (
-    <main
-      style={{
-        padding: 40,
-        fontFamily: "Arial, sans-serif",
-        maxWidth: 620,
-      }}
-    >
-      <h1 style={{ marginBottom: 8 }}>🚀 DPO Image Engine</h1>
+    <main style={{ padding: 40, fontFamily: "Arial, sans-serif", maxWidth: 680 }}>
+      <h1>🚀 DPO Image Engine</h1>
 
-      <p style={{ color: "#555", marginTop: 0 }}>
+      <p style={{ color: "#555" }}>
         Paste an Uber Eats store URL, scrape the menu, enhance images, then download the package.
       </p>
 
@@ -138,44 +137,64 @@ export default function Home() {
       </div>
 
       <div style={{ marginTop: 28 }}>
-        <p>
-          <b>Job ID:</b> {jobId || "-"}
-        </p>
+        <p><b>Job ID:</b> {jobId || "-"}</p>
+        <p><b>Status:</b> {status}</p>
+        <p><b>Progress:</b> {progress}%</p>
 
-        <p>
-          <b>Status:</b> {status}
-        </p>
-
-        <p>
-          <b>Progress:</b> {progress}%
-        </p>
-
-        <div
-          style={{
-            width: "100%",
-            height: 14,
-            background: "#e5e7eb",
-            borderRadius: 999,
-            overflow: "hidden",
-          }}
-        >
+        <div style={{ width: "100%", height: 14, background: "#e5e7eb", borderRadius: 999 }}>
           <div
             style={{
               width: `${Math.min(progress, 100)}%`,
               height: "100%",
-              background: "#16a34a",
+              background: blockedByUber ? "#f59e0b" : "#16a34a",
               borderRadius: 999,
               transition: "width 0.3s ease",
             }}
           />
         </div>
-
-        {error && (
-          <p style={{ color: "#dc2626", marginTop: 14 }}>
-            <b>Error:</b> {error}
-          </p>
-        )}
       </div>
+
+      {blockedByUber && (
+        <div
+          style={{
+            marginTop: 24,
+            padding: 18,
+            border: "1px solid #f59e0b",
+            background: "#fffbeb",
+            borderRadius: 10,
+          }}
+        >
+          <h3 style={{ marginTop: 0 }}>⚠️ Blocked by Uber</h3>
+          <p>
+            Uber showed a challenge page. Manual verification is required before this store can be scraped.
+          </p>
+          <p style={{ marginBottom: 8 }}>
+            Open the store manually in the VPS Chrome session, complete the challenge, then press retry.
+          </p>
+
+          <button
+            onClick={startJob}
+            style={{
+              marginTop: 10,
+              padding: "10px 16px",
+              borderRadius: 8,
+              border: "none",
+              background: "#f59e0b",
+              color: "#111",
+              fontWeight: 700,
+              cursor: "pointer",
+            }}
+          >
+            Retry After Verification
+          </button>
+        </div>
+      )}
+
+      {error && !blockedByUber && (
+        <p style={{ color: "#dc2626", marginTop: 18 }}>
+          <b>Error:</b> {error}
+        </p>
+      )}
 
       {downloadReady && (
         <div style={{ marginTop: 24 }}>
