@@ -13,6 +13,35 @@ export default function Home() {
   const [downloadReady, setDownloadReady] = useState(false);
   const [error, setError] = useState("");
   const [errorCode, setErrorCode] = useState("");
+  const [verificationStarting, setVerificationStarting] = useState(false);
+  const [verificationUrl, setVerificationUrl] = useState("");
+
+  async function startVerification() {
+    setVerificationStarting(true);
+
+    try {
+      const res = await fetch(`${API_BASE}/api/dpo/verify/start`, {
+        method: "POST",
+      });
+
+      const data = await res.json();
+
+      if (!res.ok || data.ok === false) {
+        throw new Error(data.error || "Failed to start verification browser");
+      }
+
+      const vncUrl =
+        data.vnc_url || "http://170.64.209.149:6080/vnc.html";
+
+      setVerificationUrl(vncUrl);
+      window.open(vncUrl, "_blank");
+    } catch (err) {
+      console.error(err);
+      alert(err instanceof Error ? err.message : "Failed to start verification browser");
+    } finally {
+      setVerificationStarting(false);
+    }
+  }
 
   async function startJob() {
     setLoading(true);
@@ -96,7 +125,7 @@ export default function Home() {
   const buttonDisabled = loading || !url.trim();
 
   return (
-    <main style={{ padding: 40, fontFamily: "Arial, sans-serif", maxWidth: 680 }}>
+    <main style={{ padding: 40, fontFamily: "Arial, sans-serif", maxWidth: 720 }}>
       <h1>🚀 DPO Image Engine</h1>
 
       <p style={{ color: "#555" }}>
@@ -165,28 +194,54 @@ export default function Home() {
           }}
         >
           <h3 style={{ marginTop: 0 }}>⚠️ Blocked by Uber</h3>
+
           <p>
-            Uber showed a challenge page. Manual verification is required before this store can be scraped.
-          </p>
-          <p style={{ marginBottom: 8 }}>
-            Open the store manually in the VPS Chrome session, complete the challenge, then press retry.
+            Uber showed a verification challenge. Open the verification browser,
+            complete the Uber check, then retry the scrape.
           </p>
 
-          <button
-            onClick={startJob}
-            style={{
-              marginTop: 10,
-              padding: "10px 16px",
-              borderRadius: 8,
-              border: "none",
-              background: "#f59e0b",
-              color: "#111",
-              fontWeight: 700,
-              cursor: "pointer",
-            }}
-          >
-            Retry After Verification
-          </button>
+          <div style={{ marginTop: 14, display: "flex", gap: 10, flexWrap: "wrap" }}>
+            <button
+              onClick={startVerification}
+              disabled={verificationStarting}
+              style={{
+                padding: "10px 16px",
+                borderRadius: 8,
+                border: "none",
+                background: verificationStarting ? "#93c5fd" : "#2563eb",
+                color: "#fff",
+                fontWeight: 700,
+                cursor: verificationStarting ? "not-allowed" : "pointer",
+              }}
+            >
+              {verificationStarting ? "Opening..." : "Open Verification Browser"}
+            </button>
+
+            <button
+              onClick={startJob}
+              disabled={!url.trim()}
+              style={{
+                padding: "10px 16px",
+                borderRadius: 8,
+                border: "none",
+                background: "#f59e0b",
+                color: "#111",
+                fontWeight: 700,
+                cursor: !url.trim() ? "not-allowed" : "pointer",
+              }}
+            >
+              Retry Scrape
+            </button>
+          </div>
+
+          {verificationUrl && (
+            <p style={{ marginTop: 12, fontSize: 14 }}>
+              Verification browser opened. If it did not open,{" "}
+              <a href={verificationUrl} target="_blank" rel="noopener noreferrer">
+                click here
+              </a>.
+            </p>
+          )}
         </div>
       )}
 
