@@ -340,13 +340,27 @@ export default function Home() {
     }
   }
 
+  function requirePrompt(message: string, requiredText: string) {
+    const typed = window.prompt(`${message}
+
+Type ${requiredText} to confirm.`);
+    return typed === requiredText;
+  }
+
   async function deleteImage(folder: string, filename: string) {
     if (!activeRestaurantSlug) {
       setError("Select a restaurant first.");
       return;
     }
 
-    const ok = window.confirm(`Delete ${filename} from ${folder}?`);
+    const ok = requirePrompt(
+      `Delete this image?
+
+Restaurant: ${activeRestaurantName}
+Folder: ${folder}
+Image: ${filename}`,
+      "DELETE"
+    );
     if (!ok) return;
 
     setLoading(true);
@@ -416,6 +430,15 @@ export default function Home() {
       return;
     }
 
+    const ok = requirePrompt(
+      `Enhance this image into the Enhanced folder?
+
+Restaurant: ${activeRestaurantName}
+Image: ${filename}`,
+      "ENHANCE"
+    );
+    if (!ok) return;
+
     setLoading(true);
     setError("");
     setMessage("");
@@ -448,7 +471,15 @@ export default function Home() {
       return;
     }
 
-    const ok = window.confirm(`Enhance all originals for ${activeRestaurantName}?`);
+    const ok = requirePrompt(
+      `Start Phase B and enhance ALL originals for this restaurant?
+
+Restaurant: ${activeRestaurantName}
+Originals: ${originalImages.length}
+
+This may use image-generation credits.`,
+      "ENHANCE ALL"
+    );
     if (!ok) return;
 
     setLoading(true);
