@@ -5,7 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 const BACKEND_URL = "https://170.64.209.149.sslip.io";
 
 type RestaurantMode = "new" | "existing";
-type ActiveTab = "original" | "compare" | "enhanced" | "header" | "headerEnhanced";
+type ActiveTab = "originals" | "compare" | "enhanced" | "headers" | "headerEnhanced";
 type UploadType = "menu" | "header";
 
 type LibraryImage = {
@@ -13,18 +13,18 @@ type LibraryImage = {
   name?: string;
   url?: string;
   size?: number;
-  modified?: number;
   updated_at?: string;
+  modified?: number;
 };
 
 type Restaurant = {
   slug: string;
   name: string;
   originals_count?: number;
-  approved_count?: number;
   enhanced_count?: number;
   headers_count?: number;
   outputs_count?: number;
+  header_enhanced_count?: number;
 };
 
 type ManualJobResponse = {
@@ -36,12 +36,26 @@ type ManualJobResponse = {
   error?: string;
 };
 
+type PreviewImage = {
+  title: string;
+  url: string;
+  filename: string;
+};
+
+const TAB_LABELS: Record<ActiveTab, string> = {
+  originals: "Original",
+  compare: "Old Vs New",
+  enhanced: "Enhanced",
+  headers: "Header",
+  headerEnhanced: "Header Enhanced",
+};
+
 const IMAGE_FOLDERS: Record<ActiveTab, string> = {
-  original: "originals_approved",
+  originals: "originals_approved",
   compare: "originals_approved",
   enhanced: "enhanced",
-  header: "headers",
-  headerEnhanced: "outputs",
+  headers: "headers",
+  headerEnhanced: "header_enhanced",
 };
 
 function fileName(path: string) {
@@ -56,36 +70,25 @@ function slugifyRestaurant(name: string) {
   return name
     .trim()
     .toLowerCase()
-    .replace(/[^a-z0-9 _-]/g, "-")
-    .replace(/[\s_]+/g, "-")
+    .replace(/_/g, "-")
+    .replace(/[^a-z0-9 -]/g, "-")
+    .replace(/\s+/g, "-")
     .replace(/-+/g, "-")
     .replace(/^-+|-+$/g, "");
 }
 
-function jobImageUrl(jobId: string, filename: string) {
+function imageUrl(jobId: string, filename: string) {
   return `${BACKEND_URL}/api/dpo/manual-jobs/${jobId}/files/${encodeURIComponent(filename)}`;
 }
 
-function normalizeImages(images: any[] | undefined): LibraryImage[] {
-  return (images || []).map((img) => {
-    const filename = img.filename || img.name || "image";
-    const rawUrl = img.url || "";
-    return {
-      ...img,
-      filename,
-      name: filename,
-      url: rawUrl && rawUrl.startsWith("http") ? rawUrl : rawUrl ? `${BACKEND_URL}${rawUrl}` : undefined,
-    };
-  });
-}
-
-function confirmPhrase(message: string, phrase: string) {
-  const value = window.prompt(`${message}\n\nType ${phrase} to confirm.`);
-  return value === phrase;
+function fullImageUrl(url?: string) {
+  if (!url) return "";
+  if (url.startsWith("http")) return url;
+  return `${BACKEND_URL}${url}`;
 }
 
 export default function Home() {
-  const [mode, setMode] = useState<RestaurantMode>("existing");
+  const [mode, setMode] = useState<RestaurantMode>("new");
   const [restaurantName, setRestaurantName] = useState("");
   const [selectedRestaurant, setSelectedRestaurant] = useState("");
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
@@ -100,37 +103,29 @@ export default function Home() {
 
   const [lastJobId, setLastJobId] = useState("");
   const [lastUploadedFiles, setLastUploadedFiles] = useState<string[]>([]);
-  const [activeTab, setActiveTab] = useState<ActiveTab>("original");
+  const [activeTab, setActiveTab] = useState<ActiveTab>("originals");
 
   const [originalImages, setOriginalImages] = useState<LibraryImage[]>([]);
   const [enhancedImages, setEnhancedImages] = useState<LibraryImage[]>([]);
   const [headerImages, setHeaderImages] = useState<LibraryImage[]>([]);
-  const [headerOutputImages, setHeaderOutputImages] = useState<LibraryImage[]>([]);
-  const [previewImage, setPreviewImage] = useState<LibraryImage | null>(null);
+  const [headerEnhancedImages, setHeaderEnhancedImages] = useState<LibraryImage[]>([]);
 
-  const [phaseBRunning, setPhaseBRunning] = useState(false);
-  const [phaseBProgress, setPhaseBProgress] = useState(0);
-  const [enhancingFile, setEnhancingFile] = useState("");
+  const [previewImage, setPreviewImage] = useState<PreviewImage | null>(null);
+  const [workingLabel, setWorkingLabel] = useState("");
+  const [progress, setProgress] = useState(0);
 
-  const activeRestaurantName = useMemo(() => {
-    if (mode === "new") return restaurantName.trim();
-    const found = restaurants.find((r) => r.slug === selectedRestaurant);
-    return found?.name || prettyName(selectedRestaurant);
-  }, [mode, restaurantName, selectedRestaurant, restaurants]);
-
-  const activeRestaurantSlug = useMemo(() => {
-    if (mode === "new") return slugifyRestaurant(restaurantName);
-    return selectedRestaurant;
-  }, [mode, restaurantName, selectedRestaurant]);
-
-  const comparisonRows = useMemo(() => {
-    const enhancedByName = new Map(enhancedImages.map((img) => [img.filename, img]));
-    return originalImages.map((original) => ({
-      filename: original.filename,
-      original,
-      enhanced: enhancedByName.get(original.filename) || null,
-    }));
-  }, [originalImages, enhancedImages]);
+  function normaliseLibraryImages(images: any[] | undefined): LibraryImage[] {
+    return (images || []).map((img) => {
+      const filename = img.filename || img.name || "image";
+      const rawUrl = img.url || "";
+      return {
+        ...img,
+        filename,
+        name: filename,
+        url: rawUrl && rawUrl.startsWith("http") ? rawUrl : rawUrl ? `${BACKEND_URL}${rawUrl}` : undefined,
+      };
+    });
+  }
 
   async function loadRestaurants() {
     setRestaurantsLoading(true);
@@ -159,17 +154,17 @@ export default function Home() {
       const data = await res.json();
       const folders = data.folders || {};
 
-      setOriginalImages(normalizeImages(folders.originals));
-      setEnhancedImages(normalizeImages(folders.enhanced));
-      setHeaderImages(normalizeImages(folders.headers));
-      setHeaderOutputImages(normalizeImages(folders.outputs));
+      setOriginalImages(normaliseLibraryImages(folders.originals || folders.originals_approved));
+      setEnhancedImages(normaliseLibraryImages(folders.enhanced));
+      setHeaderImages(normaliseLibraryImages(folders.headers));
+      setHeaderEnhancedImages(normaliseLibraryImages(folders.header_enhanced || folders.outputs));
 
       setStatus("Library loaded");
     } catch {
       setOriginalImages([]);
       setEnhancedImages([]);
       setHeaderImages([]);
-      setHeaderOutputImages([]);
+      setHeaderEnhancedImages([]);
       setStatus("Ready");
       setError("Could not load saved images for this restaurant.");
     }
@@ -181,26 +176,49 @@ export default function Home() {
 
   useEffect(() => {
     if (mode !== "existing" || !selectedRestaurant) return;
-    clearRestaurantScopedState(false);
+    clearRestaurantScopedState();
     loadRestaurantImages(selectedRestaurant);
-    setActiveTab("original");
+    setActiveTab("originals");
   }, [mode, selectedRestaurant]);
 
   useEffect(() => {
-    if (!phaseBRunning) return;
+    if (!workingLabel) return;
 
-    setPhaseBProgress(8);
+    setProgress(8);
     const timer = window.setInterval(() => {
-      setPhaseBProgress((p) => {
+      setProgress((p) => {
         if (p >= 92) return p;
-        return Math.min(92, p + Math.floor(Math.random() * 8) + 3);
+        return p + Math.max(2, Math.floor((92 - p) / 5));
       });
-    }, 900);
+    }, 700);
 
     return () => window.clearInterval(timer);
-  }, [phaseBRunning]);
+  }, [workingLabel]);
 
-  function clearRestaurantScopedState(clearSelection = true) {
+  const activeRestaurantName = useMemo(() => {
+    if (mode === "new") return restaurantName.trim();
+    const found = restaurants.find((r) => r.slug === selectedRestaurant);
+    return found?.name || prettyName(selectedRestaurant);
+  }, [mode, restaurantName, selectedRestaurant, restaurants]);
+
+  const activeRestaurantSlug = useMemo(() => {
+    if (mode === "new") return slugifyRestaurant(restaurantName);
+    return selectedRestaurant;
+  }, [mode, restaurantName, selectedRestaurant]);
+
+  const enhancedByFilename = useMemo(() => {
+    const map = new Map<string, LibraryImage>();
+    enhancedImages.forEach((img) => map.set(img.filename, img));
+    return map;
+  }, [enhancedImages]);
+
+  const headerEnhancedByFilename = useMemo(() => {
+    const map = new Map<string, LibraryImage>();
+    headerEnhancedImages.forEach((img) => map.set(img.filename, img));
+    return map;
+  }, [headerEnhancedImages]);
+
+  function clearRestaurantScopedState() {
     setFiles([]);
     setStatus("Ready");
     setMessage("");
@@ -210,10 +228,7 @@ export default function Home() {
     setOriginalImages([]);
     setEnhancedImages([]);
     setHeaderImages([]);
-    setHeaderOutputImages([]);
-    setPreviewImage(null);
-
-    if (clearSelection) setSelectedRestaurant("");
+    setHeaderEnhancedImages([]);
 
     const input = document.getElementById("file") as HTMLInputElement | null;
     if (input) input.value = "";
@@ -224,7 +239,7 @@ export default function Home() {
       const filename = fileName(path);
       return {
         filename,
-        url: jobImageUrl(jobId, filename),
+        url: imageUrl(jobId, filename),
       };
     });
   }
@@ -244,9 +259,9 @@ export default function Home() {
   function resetAll() {
     setRestaurantName("");
     setSelectedRestaurant("");
-    setMode("existing");
+    setMode("new");
     setUploadType("menu");
-    setActiveTab("original");
+    setActiveTab("originals");
     clearRestaurantScopedState();
   }
 
@@ -305,12 +320,12 @@ export default function Home() {
 
       if (uploadType === "header") {
         setHeaderImages(previews);
-        setActiveTab("header");
-        setMessage("Header files uploaded. Approve latest to save them into this restaurant.");
+        setActiveTab("headers");
+        setMessage("Header files uploaded. Approve latest to save them to the Header library.");
       } else {
         setOriginalImages(previews);
-        setActiveTab("original");
-        setMessage("Images uploaded. Click Approve latest to save them into Originals.");
+        setActiveTab("originals");
+        setMessage("Original images uploaded. Approve latest to save them to the restaurant library.");
       }
 
       resetUploadOnly();
@@ -364,13 +379,12 @@ export default function Home() {
       }
 
       setStatus("Approved");
-      setMessage(`${data.approved_count || images.length} file(s) approved and saved.`);
-      setLastJobId("");
-      setLastUploadedFiles([]);
+      setMessage(`${data.approved_count || images.length} file(s) approved.`);
 
-      await loadRestaurants();
-      if (activeRestaurantSlug) await loadRestaurantImages(activeRestaurantSlug);
-      setActiveTab(uploadType === "header" ? "header" : "original");
+      if (activeRestaurantSlug) {
+        await loadRestaurants();
+        await loadRestaurantImages(activeRestaurantSlug);
+      }
     } catch (err) {
       setStatus("Approval failed");
       setError(err instanceof Error ? err.message : "Approval failed");
@@ -385,9 +399,11 @@ export default function Home() {
       return;
     }
 
-    if (!confirmPhrase(`Delete restaurant "${activeRestaurantName}" and archive all its files?`, "DELETE")) {
-      return;
-    }
+    const check = window.prompt(
+      `Delete restaurant "${activeRestaurantName}" and archive all its files?\n\nType DELETE to confirm.`
+    );
+
+    if (check !== "DELETE") return;
 
     setLoading(true);
     setError("");
@@ -395,31 +411,33 @@ export default function Home() {
     setStatus("Deleting restaurant...");
 
     try {
-      const res = await fetch(`/api/dpo/restaurants/${encodeURIComponent(activeRestaurantSlug)}`, {
+      const res = await fetch(`${BACKEND_URL}/api/dpo/restaurants/${encodeURIComponent(activeRestaurantSlug)}`, {
         method: "DELETE",
       });
 
       const data = await res.json();
 
-      if (!res.ok) {
+      if (!res.ok || data.ok === false) {
         throw new Error(data.detail || data.error || "Delete failed");
       }
 
-      setMessage("Restaurant deleted and archived.");
       resetAll();
       await loadRestaurants();
+      setStatus("Deleted");
+      setMessage("Restaurant archived successfully.");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Delete restaurant failed");
+      setStatus("Delete failed");
+      setError(err instanceof Error ? err.message : "Delete failed");
     } finally {
       setLoading(false);
-      setStatus("Ready");
     }
   }
 
   async function deleteImage(img: LibraryImage, folder: string) {
     if (!activeRestaurantSlug) return;
 
-    if (!confirmPhrase(`Delete "${img.filename}" from ${folder}?`, "DELETE")) return;
+    const check = window.prompt(`Delete "${img.filename}"?\n\nType DELETE to confirm.`);
+    if (check !== "DELETE") return;
 
     setLoading(true);
     setError("");
@@ -434,32 +452,32 @@ export default function Home() {
 
       const data = await res.json();
 
-      if (!res.ok) {
+      if (!res.ok || data.ok === false) {
         throw new Error(data.detail || data.error || "Delete failed");
       }
 
-      setMessage(`${img.filename} deleted.`);
       await loadRestaurantImages(activeRestaurantSlug);
+      setStatus("Deleted");
+      setMessage(`Deleted ${img.filename}.`);
     } catch (err) {
+      setStatus("Delete failed");
       setError(err instanceof Error ? err.message : "Delete failed");
     } finally {
       setLoading(false);
-      setStatus("Ready");
     }
   }
 
   async function enhanceImage(img: LibraryImage) {
     if (!activeRestaurantSlug) return;
 
-    if (!confirmPhrase(`Enhance "${img.filename}"?`, "ENHANCE")) return;
+    const check = window.prompt(`Enhance "${img.filename}"?\n\nType ENHANCE to confirm.`);
+    if (check !== "ENHANCE") return;
 
-    setPhaseBRunning(true);
-    setPhaseBProgress(0);
-    setEnhancingFile(img.filename);
     setLoading(true);
+    setWorkingLabel(`Enhancing ${img.filename}...`);
     setError("");
     setMessage("");
-    setStatus(`Enhancing ${img.filename}...`);
+    setStatus("Enhancing image...");
 
     try {
       const res = await fetch(
@@ -469,38 +487,33 @@ export default function Home() {
 
       const data = await res.json();
 
-      if (!res.ok) {
+      if (!res.ok || data.ok === false) {
         throw new Error(data.detail || data.error || "Enhance failed");
       }
 
-      setPhaseBProgress(100);
-      setMessage(`${img.filename} enhanced.`);
+      setProgress(100);
       await loadRestaurantImages(activeRestaurantSlug);
       setActiveTab("enhanced");
+      setStatus("Enhanced");
+      setMessage(`${img.filename} enhanced successfully.`);
     } catch (err) {
+      setStatus("Enhance failed");
       setError(err instanceof Error ? err.message : "Enhance failed");
     } finally {
       setLoading(false);
-      setStatus("Ready");
-      setEnhancingFile("");
-      setTimeout(() => {
-        setPhaseBRunning(false);
-        setPhaseBProgress(0);
-      }, 700);
+      setWorkingLabel("");
+      setProgress(0);
     }
   }
 
-  async function enhanceAll() {
+  async function enhanceAllOriginals() {
     if (!activeRestaurantSlug) return;
 
-    if (!confirmPhrase(`Enhance all originals for "${activeRestaurantName}"?`, "ENHANCE ALL")) {
-      return;
-    }
+    const check = window.prompt("Enhance all original images?\n\nType ENHANCE ALL to confirm.");
+    if (check !== "ENHANCE ALL") return;
 
-    setPhaseBRunning(true);
-    setPhaseBProgress(0);
-    setEnhancingFile("All originals");
     setLoading(true);
+    setWorkingLabel("Running Phase B on all originals...");
     setError("");
     setMessage("");
     setStatus("Phase B running...");
@@ -512,54 +525,168 @@ export default function Home() {
 
       const data = await res.json();
 
-      if (!res.ok) {
+      if (!res.ok || data.ok === false) {
         throw new Error(data.detail || data.error || "Enhance all failed");
       }
 
-      setPhaseBProgress(100);
-      setMessage(`Phase B complete. Enhanced ${data.count || data.processed?.length || 0} image(s).`);
+      setProgress(100);
       await loadRestaurantImages(activeRestaurantSlug);
       setActiveTab("enhanced");
+      setStatus("Phase B complete");
+      setMessage(`Enhanced ${data.count || data.processed?.length || 0} original image(s).`);
     } catch (err) {
+      setStatus("Phase B failed");
       setError(err instanceof Error ? err.message : "Enhance all failed");
     } finally {
       setLoading(false);
-      setStatus("Ready");
-      setEnhancingFile("");
-      setTimeout(() => {
-        setPhaseBRunning(false);
-        setPhaseBProgress(0);
-      }, 700);
+      setWorkingLabel("");
+      setProgress(0);
+    }
+  }
+
+  async function enhanceHeaderImage(img: LibraryImage) {
+    if (!activeRestaurantSlug) return;
+
+    const check = window.prompt(`Enhance header "${img.filename}" as a 16:9 banner?\n\nType ENHANCE to confirm.`);
+    if (check !== "ENHANCE") return;
+
+    setLoading(true);
+    setWorkingLabel(`Enhancing header ${img.filename}...`);
+    setError("");
+    setMessage("");
+    setStatus("Enhancing header...");
+
+    try {
+      const res = await fetch(
+        `/api/dpo/restaurants/${encodeURIComponent(activeRestaurantSlug)}/headers/${encodeURIComponent(img.filename)}/enhance`,
+        { method: "POST" }
+      );
+
+      const data = await res.json();
+
+      if (!res.ok || data.ok === false) {
+        throw new Error(data.detail || data.error || "Header enhance failed");
+      }
+
+      setProgress(100);
+      await loadRestaurantImages(activeRestaurantSlug);
+      setActiveTab("headerEnhanced");
+      setStatus("Header enhanced");
+      setMessage(`${img.filename} enhanced as a 16:9 header.`);
+    } catch (err) {
+      setStatus("Header enhance failed");
+      setError(err instanceof Error ? err.message : "Header enhance failed");
+    } finally {
+      setLoading(false);
+      setWorkingLabel("");
+      setProgress(0);
+    }
+  }
+
+  async function enhanceAllHeaders() {
+    if (!activeRestaurantSlug) return;
+
+    const check = window.prompt("Enhance all headers as 16:9 banners?\n\nType ENHANCE ALL to confirm.");
+    if (check !== "ENHANCE ALL") return;
+
+    setLoading(true);
+    setWorkingLabel("Enhancing all headers...");
+    setError("");
+    setMessage("");
+    setStatus("Header Phase B running...");
+
+    try {
+      const res = await fetch(`/api/dpo/restaurants/${encodeURIComponent(activeRestaurantSlug)}/headers/enhance-all`, {
+        method: "POST",
+      });
+
+      const data = await res.json();
+
+      if (!res.ok || data.ok === false) {
+        throw new Error(data.detail || data.error || "Enhance all headers failed");
+      }
+
+      setProgress(100);
+      await loadRestaurantImages(activeRestaurantSlug);
+      setActiveTab("headerEnhanced");
+      setStatus("Header Phase B complete");
+      setMessage(`Enhanced ${data.count || data.processed?.length || 0} header image(s).`);
+    } catch (err) {
+      setStatus("Header Phase B failed");
+      setError(err instanceof Error ? err.message : "Enhance all headers failed");
+    } finally {
+      setLoading(false);
+      setWorkingLabel("");
+      setProgress(0);
     }
   }
 
   function downloadImage(img: LibraryImage, folder: string) {
     if (!activeRestaurantSlug) return;
-    window.location.href = `/api/dpo/restaurants/${encodeURIComponent(activeRestaurantSlug)}/download-file/${encodeURIComponent(folder)}/${encodeURIComponent(img.filename)}`;
+
+    const href = `/api/dpo/restaurants/${encodeURIComponent(activeRestaurantSlug)}/download-file/${encodeURIComponent(folder)}/${encodeURIComponent(img.filename)}`;
+    const a = document.createElement("a");
+    a.href = href;
+    a.download = img.filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
   }
 
   function downloadAllRestaurantFiles() {
     if (!activeRestaurantSlug) return;
-    window.location.href = `/api/dpo/restaurants/${encodeURIComponent(activeRestaurantSlug)}/download-all`;
+
+    const a = document.createElement("a");
+    a.href = `/api/dpo/restaurants/${encodeURIComponent(activeRestaurantSlug)}/download-all`;
+    a.download = `${activeRestaurantSlug}_full_export.zip`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
   }
 
   const emptyLibraryText = activeRestaurantSlug
-    ? "No images found yet. Upload files and approve them to build this restaurant library."
+    ? "No saved images found yet. Upload files and approve them to build this restaurant library."
     : "Select or create a restaurant to begin.";
 
   return (
-    <main style={pageStyle}>
+    <main
+      style={{
+        minHeight: "100vh",
+        background:
+          "radial-gradient(circle at top left, rgba(99,102,241,0.16), transparent 34%), linear-gradient(180deg, #f8fafc 0%, #eef2f7 100%)",
+        padding: "34px 20px 56px",
+        fontFamily:
+          'Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+        color: "#0f172a",
+      }}
+    >
+      {workingLabel && <ProgressOverlay label={workingLabel} progress={progress} />}
+
+      {previewImage && (
+        <PreviewModal
+          image={previewImage}
+          onClose={() => setPreviewImage(null)}
+        />
+      )}
+
       <section style={{ maxWidth: 1220, margin: "0 auto" }}>
         <Hero />
 
-        <div style={layoutGrid}>
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "minmax(320px, 420px) minmax(0, 1fr)",
+            gap: 20,
+            alignItems: "start",
+          }}
+        >
           <Panel>
-            <div style={spaceBetween}>
+            <div style={{ display: "flex", justifyContent: "space-between", gap: 14, alignItems: "center" }}>
               <div>
                 <Kicker>Restaurant setup</Kicker>
                 <h2 style={sectionTitle}>Choose library</h2>
               </div>
-              <StatusPill text={status} tone={status.toLowerCase().includes("failed") ? "bad" : status === "Approved" ? "good" : "neutral"} />
+              <StatusPill text={status} tone={status.toLowerCase().includes("failed") ? "bad" : status.includes("complete") || status === "Approved" || status === "Enhanced" ? "good" : "neutral"} />
             </div>
 
             <div style={{ marginTop: 18 }}>
@@ -571,8 +698,8 @@ export default function Home() {
                 ]}
                 onChange={(v) => {
                   setMode(v as RestaurantMode);
-                  clearRestaurantScopedState(v === "new");
-                  setActiveTab("original");
+                  clearRestaurantScopedState();
+                  setActiveTab("originals");
                 }}
               />
             </div>
@@ -584,7 +711,7 @@ export default function Home() {
                   value={restaurantName}
                   onChange={(e) => {
                     setRestaurantName(e.target.value);
-                    clearRestaurantScopedState(false);
+                    clearRestaurantScopedState();
                   }}
                   placeholder="e.g. Napolitano Pizza"
                   style={inputStyle}
@@ -598,7 +725,7 @@ export default function Home() {
                   value={selectedRestaurant}
                   onChange={(e) => {
                     setSelectedRestaurant(e.target.value);
-                    clearRestaurantScopedState(false);
+                    clearRestaurantScopedState();
                   }}
                   style={inputStyle}
                 >
@@ -609,7 +736,7 @@ export default function Home() {
                     </option>
                   ))}
                 </select>
-                <HelpText>Selecting a restaurant loads saved originals, enhanced images, and headers.</HelpText>
+                <HelpText>Selecting a restaurant loads its Original, Enhanced, Header and Header Enhanced libraries.</HelpText>
               </div>
             )}
 
@@ -626,14 +753,14 @@ export default function Home() {
                   ]}
                   onChange={(v) => {
                     setUploadType(v as UploadType);
-                    setActiveTab(v === "header" ? "header" : "original");
+                    setActiveTab(v === "header" ? "headers" : "originals");
                   }}
                 />
               </div>
             </div>
 
             <div style={{ marginTop: 18 }}>
-              <Label>{uploadType === "header" ? "Upload header/banner files" : "Upload original image files"}</Label>
+              <Label>{uploadType === "header" ? "Upload header/banner files" : "Upload original food/menu images"}</Label>
               <input
                 id="file"
                 type="file"
@@ -642,7 +769,9 @@ export default function Home() {
                 onChange={handleFiles}
                 style={{ ...inputStyle, padding: 12, background: "#f8fafc" }}
               />
-              <HelpText>Duplicate filenames are blocked. Delete the old file first or rename the new file.</HelpText>
+              <HelpText>
+                Rename files locally first. Duplicate filenames are blocked until the existing file is deleted.
+              </HelpText>
             </div>
 
             {files.length > 0 && (
@@ -673,15 +802,9 @@ export default function Home() {
               Reset workspace
             </button>
 
-            {activeRestaurantSlug && (
-              <button onClick={deleteRestaurant} disabled={loading} style={{ ...dangerButton(loading), width: "100%", marginTop: 10 }}>
-                Delete restaurant
-              </button>
-            )}
-
-            {phaseBRunning && (
-              <ProgressBox label={enhancingFile ? `Enhancing: ${enhancingFile}` : "Phase B running"} progress={phaseBProgress} />
-            )}
+            <button onClick={deleteRestaurant} disabled={loading || !activeRestaurantSlug} style={{ ...dangerButton(loading || !activeRestaurantSlug), width: "100%", marginTop: 10 }}>
+              Delete restaurant
+            </button>
 
             {message && <Notice tone="good">{message}</Notice>}
             {error && <Notice tone="bad">{error}</Notice>}
@@ -689,7 +812,7 @@ export default function Home() {
 
           <div style={{ display: "grid", gap: 20 }}>
             <Panel>
-              <div style={spaceBetween}>
+              <div style={{ display: "flex", justifyContent: "space-between", gap: 18, alignItems: "center" }}>
                 <div>
                   <Kicker>Active restaurant</Kicker>
                   <h2 style={{ ...sectionTitle, marginTop: 4 }}>
@@ -698,7 +821,7 @@ export default function Home() {
                   <p style={{ margin: "6px 0 0", color: "#64748b" }}>
                     {activeRestaurantSlug
                       ? `Library folder: ${activeRestaurantSlug}`
-                      : "Create or select a restaurant to manage images."}
+                      : "Create or select a restaurant to manage its images."}
                   </p>
                 </div>
 
@@ -709,24 +832,27 @@ export default function Home() {
                 </div>
               </div>
 
-              <Tabs active={activeTab} setActive={setActiveTab} />
-
-              <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginTop: 18 }}>
-                <button onClick={downloadAllRestaurantFiles} disabled={!activeRestaurantSlug || loading} style={secondaryButton(!activeRestaurantSlug || loading)}>
-                  Download all restaurant files
-                </button>
-                <button onClick={enhanceAll} disabled={!activeRestaurantSlug || loading || originalImages.length === 0} style={primaryButton(!activeRestaurantSlug || loading || originalImages.length === 0)}>
-                  Phase B: Enhance all originals
-                </button>
+              <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "center", marginTop: 20, flexWrap: "wrap" }}>
+                <Tabs active={activeTab} setActive={setActiveTab} />
+                <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+                  <button onClick={downloadAllRestaurantFiles} disabled={!activeRestaurantSlug} style={miniButton(!activeRestaurantSlug)}>
+                    Download all restaurant files
+                  </button>
+                  <button onClick={enhanceAllOriginals} disabled={loading || !activeRestaurantSlug || originalImages.length === 0} style={miniDarkButton(loading || !activeRestaurantSlug || originalImages.length === 0)}>
+                    Phase B: Enhance all originals
+                  </button>
+                  <button onClick={enhanceAllHeaders} disabled={loading || !activeRestaurantSlug || headerImages.length === 0} style={miniDarkButton(loading || !activeRestaurantSlug || headerImages.length === 0)}>
+                    Enhance all headers
+                  </button>
+                </div>
               </div>
 
-              {activeTab === "original" && (
+              {activeTab === "originals" && (
                 <ImageGrid
                   title="Original"
-                  subtitle="Approved Phase A source images. These are the source of truth for enhancement."
+                  subtitle="Approved Phase A source images. These are the source of truth for menu-item enhancement."
                   images={originalImages}
                   emptyText={emptyLibraryText}
-                  actionLabel="Delete"
                   folder="originals_approved"
                   restaurantSlug={activeRestaurantSlug}
                   onPreview={setPreviewImage}
@@ -734,24 +860,25 @@ export default function Home() {
                   onDelete={(img) => deleteImage(img, "originals_approved")}
                   onEnhance={enhanceImage}
                   showEnhance
+                  enhanceLabel="Enhance"
                 />
               )}
 
               {activeTab === "compare" && (
                 <CompareGrid
-                  rows={comparisonRows}
-                  onPreview={setPreviewImage}
+                  originals={originalImages}
+                  enhancedByFilename={enhancedByFilename}
                   emptyText={emptyLibraryText}
+                  onPreview={setPreviewImage}
                 />
               )}
 
               {activeTab === "enhanced" && (
                 <ImageGrid
                   title="Enhanced"
-                  subtitle="Phase B outputs. These are the polished delivery-platform images."
+                  subtitle="Phase B enhanced menu-item outputs."
                   images={enhancedImages}
-                  emptyText="No enhanced outputs yet. Enhance one image or run Phase B."
-                  actionLabel="Delete"
+                  emptyText="No enhanced outputs yet. Enhance an individual original or run Phase B."
                   folder="enhanced"
                   restaurantSlug={activeRestaurantSlug}
                   onPreview={setPreviewImage}
@@ -760,18 +887,20 @@ export default function Home() {
                 />
               )}
 
-              {activeTab === "header" && (
+              {activeTab === "headers" && (
                 <ImageGrid
                   title="Header"
-                  subtitle="Restaurant hero images, banners, storefront shots, and branding assets."
+                  subtitle="Original header/banner files. Header enhancement uses a separate 16:9 prompt."
                   images={headerImages}
                   emptyText="Upload header/banner files to start building this library."
-                  actionLabel="Delete"
                   folder="headers"
                   restaurantSlug={activeRestaurantSlug}
                   onPreview={setPreviewImage}
                   onDownload={downloadImage}
                   onDelete={(img) => deleteImage(img, "headers")}
+                  onEnhance={enhanceHeaderImage}
+                  showEnhance
+                  enhanceLabel="Enhance header"
                   wide
                 />
               )}
@@ -779,22 +908,21 @@ export default function Home() {
               {activeTab === "headerEnhanced" && (
                 <ImageGrid
                   title="Header Enhanced"
-                  subtitle="Enhanced restaurant header images."
-                  images={headerOutputImages}
-                  emptyText="No enhanced header outputs yet."
-                  actionLabel="Delete"
-                  folder="outputs"
+                  subtitle="16:9 enhanced restaurant/storefront header outputs."
+                  images={headerEnhancedImages}
+                  emptyText="No enhanced headers yet."
+                  folder="header_enhanced"
                   restaurantSlug={activeRestaurantSlug}
                   onPreview={setPreviewImage}
                   onDownload={downloadImage}
-                  onDelete={(img) => deleteImage(img, "outputs")}
+                  onDelete={(img) => deleteImage(img, "header_enhanced")}
                   wide
                 />
               )}
             </Panel>
 
             <Panel>
-              <div style={spaceBetween}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 14 }}>
                 <div>
                   <Kicker>Workflow</Kicker>
                   <h2 style={sectionTitle}>Production path</h2>
@@ -803,27 +931,46 @@ export default function Home() {
               </div>
 
               <div style={workflowGrid}>
-                <WorkflowStep number="01" title="Original" text="Upload and approve the restaurant’s source menu images." />
-                <WorkflowStep number="02" title="Old Vs New" text="Compare original and enhanced images side by side using matching filenames." />
-                <WorkflowStep number="03" title="Enhanced" text="Download final polished images or delete outputs you do not want." />
-                <WorkflowStep number="04" title="Headers" text="Keep restaurant banners separate from menu item images." />
+                <WorkflowStep number="01" title="Original" text="Upload and approve source images. Duplicate filenames are blocked." />
+                <WorkflowStep number="02" title="Old Vs New" text="Compare original and enhanced outputs side-by-side by filename." />
+                <WorkflowStep number="03" title="Enhanced" text="Generate menu-item outputs with the square food-photo prompt." />
+                <WorkflowStep number="04" title="Header" text="Upload banner/header assets separately from menu images." />
+                <WorkflowStep number="05" title="Header Enhanced" text="Generate 16:9 hero banners using the dedicated header prompt." />
               </div>
             </Panel>
           </div>
         </div>
       </section>
-
-      {previewImage && (
-        <PreviewModal image={previewImage} onClose={() => setPreviewImage(null)} />
-      )}
     </main>
   );
 }
 
 function Hero() {
   return (
-    <div style={heroStyle}>
-      <div style={heroGlow} />
+    <div
+      style={{
+        background: "linear-gradient(135deg, #0f172a 0%, #1e1b4b 52%, #312e81 100%)",
+        color: "white",
+        borderRadius: 30,
+        padding: 34,
+        marginBottom: 22,
+        boxShadow: "0 28px 70px rgba(15,23,42,0.28)",
+        position: "relative",
+        overflow: "hidden",
+      }}
+    >
+      <div
+        style={{
+          position: "absolute",
+          width: 260,
+          height: 260,
+          borderRadius: 999,
+          background: "rgba(59,130,246,0.24)",
+          right: -70,
+          top: -100,
+          filter: "blur(2px)",
+        }}
+      />
       <div style={{ position: "relative", display: "flex", justifyContent: "space-between", gap: 24, alignItems: "center" }}>
         <div>
           <div style={{ color: "#93c5fd", fontWeight: 900, letterSpacing: 1.2, textTransform: "uppercase", fontSize: 13 }}>
@@ -832,15 +979,85 @@ function Hero() {
           <h1 style={{ margin: "10px 0 8px", fontSize: 42, lineHeight: 1.05 }}>
             Restaurant Image Library
           </h1>
-          <p style={{ margin: 0, color: "#dbeafe", fontSize: 17, maxWidth: 760 }}>
-            Original → Old Vs New → Enhanced. Build consistent, high-converting restaurant image packs.
+          <p style={{ margin: 0, color: "#dbeafe", fontSize: 17, maxWidth: 720 }}>
+            Manage original images, compare old vs new, enhance menu assets, and create 16:9 restaurant headers.
           </p>
         </div>
 
-        <div style={heroBadge}>
+        <div
+          style={{
+            background: "rgba(255,255,255,0.10)",
+            border: "1px solid rgba(255,255,255,0.18)",
+            borderRadius: 22,
+            padding: 18,
+            minWidth: 210,
+            backdropFilter: "blur(12px)",
+          }}
+        >
           <div style={{ fontSize: 13, color: "#bfdbfe", fontWeight: 800 }}>Current mode</div>
           <div style={{ marginTop: 8, fontSize: 24, fontWeight: 950 }}>Phase B</div>
-          <div style={{ marginTop: 4, color: "#dbeafe", fontSize: 13 }}>Approve → Enhance → Export</div>
+          <div style={{ marginTop: 4, color: "#dbeafe", fontSize: 13 }}>Original → Enhanced</div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ProgressOverlay({ label, progress }: { label: string; progress: number }) {
+  return (
+    <div
+      style={{
+        position: "fixed",
+        inset: 0,
+        background: "rgba(15,23,42,0.46)",
+        backdropFilter: "blur(8px)",
+        zIndex: 50,
+        display: "grid",
+        placeItems: "center",
+        padding: 24,
+      }}
+    >
+      <div style={{ width: "min(460px, 100%)", background: "white", borderRadius: 26, padding: 26, boxShadow: "0 30px 80px rgba(0,0,0,.28)" }}>
+        <div style={{ display: "flex", gap: 14, alignItems: "center" }}>
+          <div style={spinnerStyle} />
+          <div>
+            <div style={{ fontWeight: 950, fontSize: 19 }}>{label}</div>
+            <div style={{ color: "#64748b", marginTop: 4 }}>Please keep this page open.</div>
+          </div>
+        </div>
+        <div style={{ marginTop: 18, background: "#e2e8f0", height: 12, borderRadius: 999, overflow: "hidden" }}>
+          <div style={{ width: `${progress}%`, height: "100%", background: "linear-gradient(135deg,#4f46e5,#111827)", transition: "width .4s ease" }} />
+        </div>
+        <div style={{ marginTop: 8, textAlign: "right", fontWeight: 900, color: "#475569" }}>{progress}%</div>
+      </div>
+    </div>
+  );
+}
+
+function PreviewModal({ image, onClose }: { image: PreviewImage; onClose: () => void }) {
+  return (
+    <div
+      onClick={onClose}
+      style={{
+        position: "fixed",
+        inset: 0,
+        background: "rgba(2,6,23,0.82)",
+        zIndex: 60,
+        display: "grid",
+        placeItems: "center",
+        padding: 24,
+      }}
+    >
+      <div onClick={(e) => e.stopPropagation()} style={{ width: "min(1100px, 100%)" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", color: "white", marginBottom: 12, gap: 16 }}>
+          <div>
+            <div style={{ fontWeight: 950, fontSize: 20 }}>{image.title}</div>
+            <div style={{ color: "#cbd5e1", marginTop: 3 }}>{image.filename}</div>
+          </div>
+          <button onClick={onClose} style={{ ...ghostButton, width: 110 }}>Close</button>
+        </div>
+        <div style={{ background: "#0f172a", borderRadius: 22, overflow: "hidden", maxHeight: "82vh" }}>
+          <img src={image.url} alt={image.filename} style={{ width: "100%", height: "100%", maxHeight: "82vh", objectFit: "contain", display: "block" }} />
         </div>
       </div>
     </div>
@@ -848,19 +1065,36 @@ function Hero() {
 }
 
 function Panel({ children }: { children: React.ReactNode }) {
-  return <section style={panelStyle}>{children}</section>;
+  return (
+    <section
+      style={{
+        background: "rgba(255,255,255,0.88)",
+        border: "1px solid rgba(226,232,240,0.95)",
+        borderRadius: 26,
+        padding: 24,
+        boxShadow: "0 16px 40px rgba(15,23,42,0.08)",
+        backdropFilter: "blur(14px)",
+      }}
+    >
+      {children}
+    </section>
+  );
 }
 
 function Kicker({ children }: { children: React.ReactNode }) {
-  return <div style={kickerStyle}>{children}</div>;
+  return (
+    <div style={{ fontSize: 12, color: "#6366f1", fontWeight: 950, textTransform: "uppercase", letterSpacing: 0.9 }}>
+      {children}
+    </div>
+  );
 }
 
 function Label({ children }: { children: React.ReactNode }) {
-  return <label style={labelStyle}>{children}</label>;
+  return <label style={{ display: "block", fontSize: 13, color: "#334155", fontWeight: 900, marginBottom: 8 }}>{children}</label>;
 }
 
 function HelpText({ children }: { children: React.ReactNode }) {
-  return <div style={helpTextStyle}>{children}</div>;
+  return <div style={{ marginTop: 7, color: "#64748b", fontSize: 12.5, lineHeight: 1.35 }}>{children}</div>;
 }
 
 function SegmentedControl({
@@ -877,7 +1111,20 @@ function SegmentedControl({
       {options.map((option) => {
         const active = value === option.value;
         return (
-          <button key={option.value} onClick={() => onChange(option.value)} style={segmentedButton(active)}>
+          <button
+            key={option.value}
+            onClick={() => onChange(option.value)}
+            style={{
+              border: 0,
+              borderRadius: 12,
+              padding: "10px 12px",
+              background: active ? "white" : "transparent",
+              color: active ? "#0f172a" : "#64748b",
+              fontWeight: 900,
+              cursor: "pointer",
+              boxShadow: active ? "0 6px 16px rgba(15,23,42,0.10)" : "none",
+            }}
+          >
             {option.label}
           </button>
         );
@@ -888,19 +1135,31 @@ function SegmentedControl({
 
 function Tabs({ active, setActive }: { active: ActiveTab; setActive: (tab: ActiveTab) => void }) {
   const tabs: { id: ActiveTab; label: string }[] = [
-    { id: "original", label: "Original" },
+    { id: "originals", label: "Original" },
     { id: "compare", label: "Old Vs New" },
     { id: "enhanced", label: "Enhanced" },
-    { id: "header", label: "Header" },
+    { id: "headers", label: "Header" },
     { id: "headerEnhanced", label: "Header Enhanced" },
   ];
 
   return (
-    <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 22, borderBottom: "1px solid #e2e8f0", paddingBottom: 12 }}>
+    <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
       {tabs.map((tab) => {
         const isActive = active === tab.id;
         return (
-          <button key={tab.id} onClick={() => setActive(tab.id)} style={tabButton(isActive)}>
+          <button
+            key={tab.id}
+            onClick={() => setActive(tab.id)}
+            style={{
+              border: isActive ? "1px solid #4f46e5" : "1px solid #e2e8f0",
+              background: isActive ? "#eef2ff" : "white",
+              color: isActive ? "#3730a3" : "#475569",
+              borderRadius: 999,
+              padding: "9px 13px",
+              fontWeight: 900,
+              cursor: "pointer",
+            }}
+          >
             {tab.label}
           </button>
         );
@@ -914,27 +1173,28 @@ function ImageGrid({
   subtitle,
   images,
   emptyText,
-  actionLabel,
   folder,
+  restaurantSlug,
   onPreview,
   onDownload,
   onDelete,
   onEnhance,
   showEnhance = false,
+  enhanceLabel = "Enhance",
   wide = false,
 }: {
   title: string;
   subtitle: string;
   images: LibraryImage[];
   emptyText: string;
-  actionLabel: string;
   folder: string;
   restaurantSlug: string;
-  onPreview: (img: LibraryImage) => void;
+  onPreview: (img: PreviewImage) => void;
   onDownload: (img: LibraryImage, folder: string) => void;
   onDelete: (img: LibraryImage) => void;
   onEnhance?: (img: LibraryImage) => void;
   showEnhance?: boolean;
+  enhanceLabel?: string;
   wide?: boolean;
 }) {
   return (
@@ -948,36 +1208,97 @@ function ImageGrid({
       </div>
 
       {images.length === 0 ? (
-        <EmptyState text={emptyText} />
+        <EmptyBox>{emptyText}</EmptyBox>
       ) : (
-        <div style={imageGridStyle(wide)}>
-          {images.map((img) => (
-            <div key={img.filename} style={cardStyle}>
-              <button type="button" onClick={() => onPreview(img)} style={imageButtonStyle(wide)}>
-                {img.url ? (
-                  <img src={img.url} alt={img.filename} style={imageStyle} />
-                ) : null}
-              </button>
+        <div
+          style={{
+            marginTop: 16,
+            display: "grid",
+            gridTemplateColumns: wide
+              ? "repeat(auto-fill, minmax(320px, 1fr))"
+              : "repeat(auto-fill, minmax(210px, 1fr))",
+            gap: 16,
+          }}
+        >
+          {images.map((img) => {
+            const url = fullImageUrl(img.url);
+            return (
+              <div
+                key={`${folder}-${img.filename}`}
+                style={{
+                  background: "white",
+                  border: "1px solid #e2e8f0",
+                  borderRadius: 20,
+                  padding: 12,
+                  boxShadow: "0 10px 24px rgba(15,23,42,0.06)",
+                }}
+              >
+                <button
+                  type="button"
+                  onClick={() => onPreview({ title, url, filename: img.filename })}
+                  style={{
+                    width: "100%",
+                    height: wide ? 170 : 160,
+                    borderRadius: 16,
+                    overflow: "hidden",
+                    background: "linear-gradient(135deg, #e2e8f0, #f8fafc)",
+                    border: 0,
+                    padding: 0,
+                    cursor: "zoom-in",
+                  }}
+                >
+                  {url ? (
+                    <img
+                      src={url}
+                      alt={img.filename}
+                      style={{
+                        width: "100%",
+                        height: "100%",
+                        objectFit: "cover",
+                        display: "block",
+                      }}
+                    />
+                  ) : null}
+                </button>
 
-              <div style={filenameStyle} title={img.filename}>
-                {img.filename}
-              </div>
+                <div
+                  style={{
+                    marginTop: 10,
+                    fontWeight: 950,
+                    fontSize: 13,
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                  }}
+                  title={img.filename}
+                >
+                  {img.filename}
+                </div>
 
-              <div style={{ display: "grid", gap: 8, marginTop: 10 }}>
-                {showEnhance && onEnhance && (
-                  <button type="button" onClick={() => onEnhance(img)} style={enhanceButton}>
-                    Enhance
+                <div style={{ display: "grid", gridTemplateColumns: showEnhance ? "1fr 1fr" : "1fr", gap: 8, marginTop: 10 }}>
+                  <button type="button" onClick={() => onDownload(img, folder)} style={cardButton}>
+                    Download
                   </button>
-                )}
-                <button type="button" onClick={() => onDownload(img, folder)} style={cardButton}>
-                  Download
-                </button>
-                <button type="button" onClick={() => onDelete(img)} style={deleteSmallButton}>
-                  {actionLabel}
+                  {showEnhance && onEnhance && (
+                    <button type="button" onClick={() => onEnhance(img)} style={cardButtonDark}>
+                      {enhanceLabel}
+                    </button>
+                  )}
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => onDelete(img)}
+                  style={{
+                    ...cardButtonDanger,
+                    marginTop: 8,
+                  }}
+                >
+                  Delete
                 </button>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>
@@ -985,94 +1306,114 @@ function ImageGrid({
 }
 
 function CompareGrid({
-  rows,
-  onPreview,
+  originals,
+  enhancedByFilename,
   emptyText,
+  onPreview,
 }: {
-  rows: { filename: string; original: LibraryImage; enhanced: LibraryImage | null }[];
-  onPreview: (img: LibraryImage) => void;
+  originals: LibraryImage[];
+  enhancedByFilename: Map<string, LibraryImage>;
   emptyText: string;
+  onPreview: (img: PreviewImage) => void;
 }) {
-  if (rows.length === 0) {
-    return (
-      <div style={{ marginTop: 22 }}>
-        <h3 style={{ margin: 0, fontSize: 20 }}>Old Vs New</h3>
-        <EmptyState text={emptyText} />
-      </div>
-    );
-  }
-
   return (
     <div style={{ marginTop: 22 }}>
       <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "end" }}>
         <div>
           <h3 style={{ margin: 0, fontSize: 20 }}>Old Vs New</h3>
           <p style={{ margin: "6px 0 0", color: "#64748b", lineHeight: 1.45 }}>
-            Side-by-side comparison using matching filenames.
+            Side-by-side comparison of Original and Enhanced images using matching filenames.
           </p>
         </div>
-        <div style={{ color: "#64748b", fontWeight: 900 }}>{rows.length} item(s)</div>
+        <div style={{ color: "#64748b", fontWeight: 900 }}>{originals.length} pair(s)</div>
       </div>
 
-      <div style={{ display: "grid", gap: 18, marginTop: 16 }}>
-        {rows.map((row) => (
-          <div key={row.filename} style={compareCardStyle}>
-            <div style={compareHeaderStyle}>{row.filename}</div>
-            <div style={compareGridStyle}>
-              <CompareImage label="Original" image={row.original} onPreview={onPreview} />
-              {row.enhanced ? (
-                <CompareImage label="Enhanced" image={row.enhanced} onPreview={onPreview} />
-              ) : (
-                <div style={missingEnhancedStyle}>
-                  <div style={{ fontWeight: 950 }}>No enhanced version yet</div>
-                  <div style={{ marginTop: 6, color: "#64748b", fontSize: 13 }}>Enhance this original to compare it here.</div>
+      {originals.length === 0 ? (
+        <EmptyBox>{emptyText}</EmptyBox>
+      ) : (
+        <div style={{ display: "grid", gap: 18, marginTop: 16 }}>
+          {originals.map((orig) => {
+            const enhanced = enhancedByFilename.get(orig.filename);
+            const origUrl = fullImageUrl(orig.url);
+            const enhUrl = fullImageUrl(enhanced?.url);
+
+            return (
+              <div
+                key={`compare-${orig.filename}`}
+                style={{
+                  background: "white",
+                  border: "1px solid #e2e8f0",
+                  borderRadius: 22,
+                  padding: 14,
+                  boxShadow: "0 10px 24px rgba(15,23,42,0.06)",
+                }}
+              >
+                <div style={{ fontWeight: 950, marginBottom: 12 }}>{orig.filename}</div>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
+                  <CompareImage label="Original" url={origUrl} filename={orig.filename} onPreview={onPreview} />
+                  {enhanced ? (
+                    <CompareImage label="Enhanced" url={enhUrl} filename={enhanced.filename} onPreview={onPreview} />
+                  ) : (
+                    <div style={{ border: "1px dashed #cbd5e1", borderRadius: 18, background: "#f8fafc", display: "grid", placeItems: "center", minHeight: 230, color: "#64748b", fontWeight: 900 }}>
+                      Not enhanced yet
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function CompareImage({ label, image, onPreview }: { label: string; image: LibraryImage; onPreview: (img: LibraryImage) => void }) {
-  return (
-    <div>
-      <div style={{ fontWeight: 950, marginBottom: 8 }}>{label}</div>
-      <button type="button" onClick={() => onPreview(image)} style={compareImageButton}>
-        {image.url ? <img src={image.url} alt={image.filename} style={imageStyle} /> : null}
-      </button>
-    </div>
-  );
-}
-
-function PreviewModal({ image, onClose }: { image: LibraryImage; onClose: () => void }) {
-  return (
-    <div style={modalBackdrop} onClick={onClose}>
-      <div style={modalCard} onClick={(e) => e.stopPropagation()}>
-        <div style={spaceBetween}>
-          <div>
-            <Kicker>Preview</Kicker>
-            <h3 style={{ margin: "4px 0 0", fontSize: 20 }}>{image.filename}</h3>
-          </div>
-          <button onClick={onClose} style={closeButton}>Close</button>
+              </div>
+            );
+          })}
         </div>
-        <div style={{ marginTop: 16, borderRadius: 20, overflow: "hidden", background: "#020617" }}>
-          {image.url && <img src={image.url} alt={image.filename} style={{ width: "100%", maxHeight: "78vh", objectFit: "contain", display: "block" }} />}
-        </div>
-      </div>
+      )}
     </div>
   );
 }
 
-function EmptyState({ text }: { text: string }) {
-  return <div style={emptyStateStyle}>{text}</div>;
+function CompareImage({ label, url, filename, onPreview }: { label: string; url: string; filename: string; onPreview: (img: PreviewImage) => void }) {
+  return (
+    <button
+      type="button"
+      onClick={() => onPreview({ title: label, url, filename })}
+      style={{
+        border: "1px solid #e2e8f0",
+        borderRadius: 18,
+        padding: 0,
+        overflow: "hidden",
+        background: "#f8fafc",
+        cursor: "zoom-in",
+        minHeight: 230,
+        position: "relative",
+      }}
+    >
+      <div style={{ position: "absolute", left: 10, top: 10, zIndex: 2, background: "rgba(15,23,42,.72)", color: "white", borderRadius: 999, padding: "5px 9px", fontSize: 12, fontWeight: 900 }}>
+        {label}
+      </div>
+      <img src={url} alt={`${label} ${filename}`} style={{ width: "100%", height: 260, objectFit: "cover", display: "block" }} />
+    </button>
+  );
+}
+
+function EmptyBox({ children }: { children: React.ReactNode }) {
+  return (
+    <div
+      style={{
+        marginTop: 16,
+        border: "1px dashed #cbd5e1",
+        borderRadius: 22,
+        padding: 28,
+        background: "#f8fafc",
+        color: "#64748b",
+        textAlign: "center",
+        fontWeight: 800,
+      }}
+    >
+      {children}
+    </div>
+  );
 }
 
 function Metric({ label, value }: { label: string; value: string }) {
   return (
-    <div style={metricStyle}>
+    <div style={{ background: "#f8fafc", border: "1px solid #e2e8f0", borderRadius: 16, padding: "10px 12px", minWidth: 92 }}>
       <div style={{ fontSize: 11, color: "#64748b", fontWeight: 900, textTransform: "uppercase" }}>{label}</div>
       <div style={{ fontSize: 16, fontWeight: 950, marginTop: 3 }}>{value}</div>
     </div>
@@ -1081,7 +1422,7 @@ function Metric({ label, value }: { label: string; value: string }) {
 
 function WorkflowStep({ number, title, text }: { number: string; title: string; text: string }) {
   return (
-    <div style={workflowStepStyle}>
+    <div style={{ border: "1px solid #e2e8f0", borderRadius: 20, padding: 16, background: "#f8fafc" }}>
       <div style={{ color: "#4f46e5", fontWeight: 950 }}>{number}</div>
       <div style={{ marginTop: 7, fontWeight: 950 }}>{title}</div>
       <div style={{ marginTop: 5, color: "#64748b", lineHeight: 1.45, fontSize: 13 }}>{text}</div>
@@ -1097,27 +1438,27 @@ function StatusPill({ text, tone }: { text: string; tone: "good" | "bad" | "neut
         ? { bg: "#fee2e2", color: "#991b1b" }
         : { bg: "#eef2ff", color: "#3730a3" };
 
-  return <div style={{ background: styles.bg, color: styles.color, borderRadius: 999, padding: "8px 12px", fontWeight: 950, fontSize: 12 }}>{text}</div>;
-}
-
-function Notice({ children, tone }: { children: React.ReactNode; tone: "good" | "bad" }) {
   return (
-    <div style={{ marginTop: 16, borderRadius: 16, padding: 14, background: tone === "good" ? "#ecfdf5" : "#fef2f2", color: tone === "good" ? "#166534" : "#991b1b", fontWeight: 850, lineHeight: 1.4 }}>
-      {children}
+    <div style={{ background: styles.bg, color: styles.color, borderRadius: 999, padding: "8px 12px", fontWeight: 950, fontSize: 12 }}>
+      {text}
     </div>
   );
 }
 
-function ProgressBox({ label, progress }: { label: string; progress: number }) {
+function Notice({ children, tone }: { children: React.ReactNode; tone: "good" | "bad" }) {
   return (
-    <div style={progressBoxStyle}>
-      <div style={{ display: "flex", justifyContent: "space-between", gap: 12, fontWeight: 950 }}>
-        <span>{label}</span>
-        <span>{progress}%</span>
-      </div>
-      <div style={progressTrackStyle}>
-        <div style={{ ...progressFillStyle, width: `${progress}%` }} />
-      </div>
+    <div
+      style={{
+        marginTop: 16,
+        borderRadius: 16,
+        padding: 14,
+        background: tone === "good" ? "#ecfdf5" : "#fef2f2",
+        color: tone === "good" ? "#166534" : "#991b1b",
+        fontWeight: 850,
+        lineHeight: 1.4,
+      }}
+    >
+      {children}
     </div>
   );
 }
@@ -1125,91 +1466,6 @@ function ProgressBox({ label, progress }: { label: string; progress: number }) {
 function Divider() {
   return <div style={{ height: 1, background: "#e2e8f0", margin: "22px 0" }} />;
 }
-
-const pageStyle: React.CSSProperties = {
-  minHeight: "100vh",
-  background: "radial-gradient(circle at top left, rgba(99,102,241,0.16), transparent 34%), linear-gradient(180deg, #f8fafc 0%, #eef2f7 100%)",
-  padding: "34px 20px 56px",
-  fontFamily: 'Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
-  color: "#0f172a",
-};
-
-const layoutGrid: React.CSSProperties = {
-  display: "grid",
-  gridTemplateColumns: "minmax(320px, 420px) minmax(0, 1fr)",
-  gap: 20,
-  alignItems: "start",
-};
-
-const spaceBetween: React.CSSProperties = {
-  display: "flex",
-  justifyContent: "space-between",
-  gap: 18,
-  alignItems: "center",
-};
-
-const heroStyle: React.CSSProperties = {
-  background: "linear-gradient(135deg, #0f172a 0%, #1e1b4b 52%, #312e81 100%)",
-  color: "white",
-  borderRadius: 30,
-  padding: 34,
-  marginBottom: 22,
-  boxShadow: "0 28px 70px rgba(15,23,42,0.28)",
-  position: "relative",
-  overflow: "hidden",
-};
-
-const heroGlow: React.CSSProperties = {
-  position: "absolute",
-  width: 260,
-  height: 260,
-  borderRadius: 999,
-  background: "rgba(59,130,246,0.24)",
-  right: -70,
-  top: -100,
-  filter: "blur(2px)",
-};
-
-const heroBadge: React.CSSProperties = {
-  background: "rgba(255,255,255,0.10)",
-  border: "1px solid rgba(255,255,255,0.18)",
-  borderRadius: 22,
-  padding: 18,
-  minWidth: 210,
-  backdropFilter: "blur(12px)",
-};
-
-const panelStyle: React.CSSProperties = {
-  background: "rgba(255,255,255,0.88)",
-  border: "1px solid rgba(226,232,240,0.95)",
-  borderRadius: 26,
-  padding: 24,
-  boxShadow: "0 16px 40px rgba(15,23,42,0.08)",
-  backdropFilter: "blur(14px)",
-};
-
-const kickerStyle: React.CSSProperties = {
-  fontSize: 12,
-  color: "#6366f1",
-  fontWeight: 950,
-  textTransform: "uppercase",
-  letterSpacing: 0.9,
-};
-
-const labelStyle: React.CSSProperties = {
-  display: "block",
-  fontSize: 13,
-  color: "#334155",
-  fontWeight: 900,
-  marginBottom: 8,
-};
-
-const helpTextStyle: React.CSSProperties = {
-  marginTop: 7,
-  color: "#64748b",
-  fontSize: 12.5,
-  lineHeight: 1.35,
-};
 
 const sectionTitle: React.CSSProperties = {
   margin: "4px 0 0",
@@ -1249,31 +1505,6 @@ const fileChip: React.CSSProperties = {
   whiteSpace: "nowrap",
 };
 
-function segmentedButton(active: boolean): React.CSSProperties {
-  return {
-    border: 0,
-    borderRadius: 12,
-    padding: "10px 12px",
-    background: active ? "white" : "transparent",
-    color: active ? "#0f172a" : "#64748b",
-    fontWeight: 900,
-    cursor: "pointer",
-    boxShadow: active ? "0 6px 16px rgba(15,23,42,0.10)" : "none",
-  };
-}
-
-function tabButton(active: boolean): React.CSSProperties {
-  return {
-    border: active ? "1px solid #4f46e5" : "1px solid #e2e8f0",
-    background: active ? "#eef2ff" : "white",
-    color: active ? "#3730a3" : "#475569",
-    borderRadius: 999,
-    padding: "9px 13px",
-    fontWeight: 900,
-    cursor: "pointer",
-  };
-}
-
 function primaryButton(disabled: boolean): React.CSSProperties {
   return {
     border: 0,
@@ -1284,18 +1515,6 @@ function primaryButton(disabled: boolean): React.CSSProperties {
     fontWeight: 950,
     cursor: disabled ? "not-allowed" : "pointer",
     boxShadow: disabled ? "none" : "0 12px 24px rgba(49,46,129,0.22)",
-  };
-}
-
-function secondaryButton(disabled: boolean): React.CSSProperties {
-  return {
-    border: "1px solid #cbd5e1",
-    borderRadius: 14,
-    padding: "12px 14px",
-    background: disabled ? "#f1f5f9" : "white",
-    color: disabled ? "#94a3b8" : "#334155",
-    fontWeight: 950,
-    cursor: disabled ? "not-allowed" : "pointer",
   };
 }
 
@@ -1314,12 +1533,36 @@ function successButton(disabled: boolean): React.CSSProperties {
 
 function dangerButton(disabled: boolean): React.CSSProperties {
   return {
-    border: "1px solid #fecaca",
+    border: 0,
     borderRadius: 14,
     padding: "12px 16px",
-    background: disabled ? "#f8fafc" : "#fef2f2",
-    color: disabled ? "#94a3b8" : "#991b1b",
+    background: disabled ? "#cbd5e1" : "linear-gradient(135deg, #dc2626, #991b1b)",
+    color: "white",
     fontWeight: 950,
+    cursor: disabled ? "not-allowed" : "pointer",
+  };
+}
+
+function miniButton(disabled: boolean): React.CSSProperties {
+  return {
+    border: "1px solid #cbd5e1",
+    borderRadius: 999,
+    padding: "9px 13px",
+    background: disabled ? "#f1f5f9" : "white",
+    color: disabled ? "#94a3b8" : "#334155",
+    fontWeight: 900,
+    cursor: disabled ? "not-allowed" : "pointer",
+  };
+}
+
+function miniDarkButton(disabled: boolean): React.CSSProperties {
+  return {
+    border: 0,
+    borderRadius: 999,
+    padding: "9px 13px",
+    background: disabled ? "#94a3b8" : "#111827",
+    color: "white",
+    fontWeight: 900,
     cursor: disabled ? "not-allowed" : "pointer",
   };
 }
@@ -1334,71 +1577,25 @@ const ghostButton: React.CSSProperties = {
   cursor: "pointer",
 };
 
-const imageGridStyle = (wide: boolean): React.CSSProperties => ({
-  marginTop: 16,
-  display: "grid",
-  gridTemplateColumns: wide ? "repeat(auto-fill, minmax(320px, 1fr))" : "repeat(auto-fill, minmax(210px, 1fr))",
-  gap: 16,
-});
-
-const cardStyle: React.CSSProperties = {
-  background: "white",
-  border: "1px solid #e2e8f0",
-  borderRadius: 20,
-  padding: 12,
-  boxShadow: "0 10px 24px rgba(15,23,42,0.06)",
-};
-
-const imageButtonStyle = (wide: boolean): React.CSSProperties => ({
-  width: "100%",
-  height: wide ? 170 : 160,
-  borderRadius: 16,
-  overflow: "hidden",
-  background: "linear-gradient(135deg, #e2e8f0, #f8fafc)",
-  border: 0,
-  padding: 0,
-  cursor: "zoom-in",
-});
-
-const imageStyle: React.CSSProperties = {
-  width: "100%",
-  height: "100%",
-  objectFit: "cover",
-  display: "block",
-};
-
-const filenameStyle: React.CSSProperties = {
-  marginTop: 10,
-  fontWeight: 950,
-  fontSize: 13,
-  whiteSpace: "nowrap",
-  overflow: "hidden",
-  textOverflow: "ellipsis",
-};
-
 const cardButton: React.CSSProperties = {
   width: "100%",
-  border: "1px solid #cbd5e1",
-  background: "white",
+  border: "1px solid #e2e8f0",
+  background: "#f8fafc",
   borderRadius: 12,
   padding: "9px 10px",
   fontWeight: 900,
-  color: "#334155",
+  color: "#475569",
   cursor: "pointer",
 };
 
-const enhanceButton: React.CSSProperties = {
-  width: "100%",
-  border: 0,
-  background: "linear-gradient(135deg, #4f46e5, #312e81)",
-  borderRadius: 12,
-  padding: "9px 10px",
-  fontWeight: 950,
+const cardButtonDark: React.CSSProperties = {
+  ...cardButton,
+  background: "#111827",
   color: "white",
-  cursor: "pointer",
+  border: "1px solid #111827",
 };
 
-const deleteSmallButton: React.CSSProperties = {
+const cardButtonDanger: React.CSSProperties = {
   width: "100%",
   border: "1px solid #fecaca",
   background: "#fef2f2",
@@ -1409,135 +1606,18 @@ const deleteSmallButton: React.CSSProperties = {
   cursor: "pointer",
 };
 
-const emptyStateStyle: React.CSSProperties = {
-  marginTop: 16,
-  border: "1px dashed #cbd5e1",
-  borderRadius: 22,
-  padding: 28,
-  background: "#f8fafc",
-  color: "#64748b",
-  textAlign: "center",
-  fontWeight: 800,
-};
-
-const metricStyle: React.CSSProperties = {
-  background: "#f8fafc",
-  border: "1px solid #e2e8f0",
-  borderRadius: 16,
-  padding: "10px 12px",
-  minWidth: 92,
-};
-
-const workflowStepStyle: React.CSSProperties = {
-  border: "1px solid #e2e8f0",
-  borderRadius: 20,
-  padding: 16,
-  background: "#f8fafc",
-};
-
 const workflowGrid: React.CSSProperties = {
   marginTop: 16,
   display: "grid",
-  gridTemplateColumns: "repeat(auto-fit, minmax(170px, 1fr))",
+  gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))",
   gap: 12,
 };
 
-const progressBoxStyle: React.CSSProperties = {
-  marginTop: 16,
-  border: "1px solid #c7d2fe",
-  background: "#eef2ff",
-  borderRadius: 16,
-  padding: 14,
-  color: "#312e81",
-};
-
-const progressTrackStyle: React.CSSProperties = {
-  marginTop: 10,
-  height: 10,
+const spinnerStyle: React.CSSProperties = {
+  width: 34,
+  height: 34,
   borderRadius: 999,
-  background: "rgba(99,102,241,0.18)",
-  overflow: "hidden",
-};
-
-const progressFillStyle: React.CSSProperties = {
-  height: "100%",
-  borderRadius: 999,
-  background: "linear-gradient(90deg, #4f46e5, #818cf8)",
-  transition: "width 450ms ease",
-};
-
-const modalBackdrop: React.CSSProperties = {
-  position: "fixed",
-  inset: 0,
-  background: "rgba(2,6,23,0.76)",
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  padding: 24,
-  zIndex: 50,
-};
-
-const modalCard: React.CSSProperties = {
-  width: "min(1100px, 96vw)",
-  maxHeight: "94vh",
-  background: "white",
-  borderRadius: 24,
-  padding: 18,
-  boxShadow: "0 30px 100px rgba(0,0,0,0.35)",
-  overflow: "auto",
-};
-
-const closeButton: React.CSSProperties = {
-  border: "1px solid #cbd5e1",
-  background: "white",
-  color: "#334155",
-  fontWeight: 950,
-  borderRadius: 12,
-  padding: "10px 14px",
-  cursor: "pointer",
-};
-
-const compareCardStyle: React.CSSProperties = {
-  border: "1px solid #e2e8f0",
-  borderRadius: 22,
-  background: "#fff",
-  padding: 14,
-  boxShadow: "0 10px 24px rgba(15,23,42,0.06)",
-};
-
-const compareHeaderStyle: React.CSSProperties = {
-  fontWeight: 950,
-  marginBottom: 12,
-  color: "#0f172a",
-};
-
-const compareGridStyle: React.CSSProperties = {
-  display: "grid",
-  gridTemplateColumns: "1fr 1fr",
-  gap: 14,
-};
-
-const compareImageButton: React.CSSProperties = {
-  width: "100%",
-  height: 250,
-  borderRadius: 18,
-  overflow: "hidden",
-  border: 0,
-  background: "linear-gradient(135deg, #e2e8f0, #f8fafc)",
-  padding: 0,
-  cursor: "zoom-in",
-};
-
-const missingEnhancedStyle: React.CSSProperties = {
-  border: "1px dashed #cbd5e1",
-  borderRadius: 18,
-  minHeight: 250,
-  background: "#f8fafc",
-  color: "#475569",
-  display: "flex",
-  flexDirection: "column",
-  alignItems: "center",
-  justifyContent: "center",
-  textAlign: "center",
-  padding: 18,
+  border: "4px solid #e2e8f0",
+  borderTopColor: "#4f46e5",
+  animation: "spin 0.9s linear infinite",
 };
