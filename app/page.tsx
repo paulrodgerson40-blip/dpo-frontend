@@ -66,6 +66,14 @@ export default function Home() {
   const [lastUploadedFiles, setLastUploadedFiles] = useState<string[]>([]);
   const [activeTab, setActiveTab] = useState<ActiveTab>("menu");
 
+  // Separate image state prevents menu uploads from appearing in Headers,
+  // and prevents old restaurant images from carrying over when switching restaurants.
+  const [menuImages, setMenuImages] = useState<LibraryImage[]>([]);
+  const [originalImages, setOriginalImages] = useState<LibraryImage[]>([]);
+  const [headerImages, setHeaderImages] = useState<LibraryImage[]>([]);
+  const [enhancedImages] = useState<LibraryImage[]>([]);
+  const [headerOutputImages] = useState<LibraryImage[]>([]);
+
   const activeRestaurantName = useMemo(() => {
     if (mode === "new") return restaurantName.trim();
     return prettyName(selectedRestaurant);
@@ -76,16 +84,30 @@ export default function Home() {
     return selectedRestaurant;
   }, [mode, restaurantName, selectedRestaurant]);
 
-  const uploadedPreviewImages: LibraryImage[] = useMemo(() => {
-    if (!lastJobId) return [];
-    return lastUploadedFiles.map((path) => {
+  function clearRestaurantScopedState() {
+    setFiles([]);
+    setStatus("Ready");
+    setMessage("");
+    setError("");
+    setLastJobId("");
+    setLastUploadedFiles([]);
+    setMenuImages([]);
+    setOriginalImages([]);
+    setHeaderImages([]);
+
+    const input = document.getElementById("file") as HTMLInputElement | null;
+    if (input) input.value = "";
+  }
+
+  function buildPreviewImages(jobId: string, filePaths: string[]): LibraryImage[] {
+    return filePaths.map((path) => {
       const filename = fileName(path);
       return {
         filename,
-        url: imageUrl(lastJobId, filename),
+        url: imageUrl(jobId, filename),
       };
     });
-  }, [lastJobId, lastUploadedFiles]);
+  }
 
   function handleFiles(e: React.ChangeEvent<HTMLInputElement>) {
     setFiles(Array.from(e.target.files || []));
@@ -102,14 +124,10 @@ export default function Home() {
   function resetAll() {
     setRestaurantName("");
     setSelectedRestaurant("");
-    setFiles([]);
-    setStatus("Ready");
-    setMessage("");
-    setError("");
-    setLastJobId("");
-    setLastUploadedFiles([]);
-    const input = document.getElementById("file") as HTMLInputElement | null;
-    if (input) input.value = "";
+    setMode("new");
+    setUploadType("menu");
+    setActiveTab("menu");
+    clearRestaurantScopedState();
   }
 
   async function uploadFiles() {
@@ -157,16 +175,25 @@ export default function Home() {
         throw new Error(data.error || "Upload failed");
       }
 
-      setLastJobId(data.job_id || "");
-      setLastUploadedFiles(data.files || []);
-      setStatus("Uploaded");
-      setMessage(
-        uploadType === "header"
-          ? "Header files uploaded. They will stay separate from menu images."
-          : "Menu images uploaded. Uploaded filenames will be used as final image names."
-      );
+      const jobId = data.job_id || "";
+      const uploadedFiles = data.files || [];
+      const previews = buildPreviewImages(jobId, uploadedFiles);
 
-      setActiveTab(uploadType === "header" ? "headers" : "menu");
+      setLastJobId(jobId);
+      setLastUploadedFiles(uploadedFiles);
+      setStatus("Uploaded");
+
+      if (uploadType === "header") {
+        setHeaderImages(previews);
+        setActiveTab("headers");
+        setMessage("Header files uploaded. They are kept separate from menu images.");
+      } else {
+        setMenuImages(previews);
+        setOriginalImages(previews);
+        setActiveTab("menu");
+        setMessage("Menu images uploaded. Uploaded filenames will be used as final image names.");
+      }
+
       resetUploadOnly();
     } catch (err) {
       setStatus("Upload failed");
@@ -272,8 +299,8 @@ export default function Home() {
                 ]}
                 onChange={(v) => {
                   setMode(v as RestaurantMode);
-                  setError("");
-                  setMessage("");
+                  clearRestaurantScopedState();
+                  setActiveTab("menu");
                 }}
               />
             </div>
@@ -283,7 +310,10 @@ export default function Home() {
                 <Label>New restaurant name</Label>
                 <input
                   value={restaurantName}
-                  onChange={(e) => setRestaurantName(e.target.value)}
+                  onChange={(e) => {
+                    setRestaurantName(e.target.value);
+                    clearRestaurantScopedState();
+                  }}
                   placeholder="e.g. Napolitano Pizza"
                   style={inputStyle}
                 />
@@ -294,7 +324,10 @@ export default function Home() {
                 <Label>Select restaurant</Label>
                 <select
                   value={selectedRestaurant}
-                  onChange={(e) => setSelectedRestaurant(e.target.value)}
+                  onChange={(e) => {
+                    setSelectedRestaurant(e.target.value);
+                    clearRestaurantScopedState();
+                  }}
                   style={inputStyle}
                 >
                   <option value="">Choose saved restaurant...</option>
@@ -390,7 +423,8 @@ export default function Home() {
                 </div>
 
                 <div style={{ display: "flex", gap: 10, flexWrap: "wrap", justifyContent: "flex-end" }}>
-                  <Metric label="Uploaded" value={String(lastUploadedFiles.length)} />
+                  <Metric label="Menu" value={String(menuImages.length)} />
+                  <Metric label="Headers" value={String(headerImages.length)} />
                   <Metric label="Job" value={lastJobId || "-"} />
                 </div>
               </div>
@@ -401,7 +435,7 @@ export default function Home() {
                 <ImageGrid
                   title="Approved menu images"
                   subtitle="Final menu source images. Uploaded filenames are preserved and used for outputs."
-                  images={uploadedPreviewImages}
+                  images={menuImages}
                   emptyText={emptyLibraryText}
                   actionLabel="Delete"
                 />
@@ -411,7 +445,7 @@ export default function Home() {
                 <ImageGrid
                   title="Original uploads"
                   subtitle="Untouched originals for audit, reprocessing, and fallback."
-                  images={uploadedPreviewImages}
+                  images={originalImages}
                   emptyText={emptyLibraryText}
                   actionLabel="Archive"
                 />
@@ -421,7 +455,7 @@ export default function Home() {
                 <ImageGrid
                   title="Enhanced outputs"
                   subtitle="Phase B processed menu images will appear here."
-                  images={[]}
+                  images={enhancedImages}
                   emptyText="No enhanced outputs yet. Phase B will generate these."
                   actionLabel="View"
                 />
@@ -431,7 +465,7 @@ export default function Home() {
                 <ImageGrid
                   title="Header originals"
                   subtitle="Restaurant hero images, banners, storefront shots, and branding assets."
-                  images={uploadType === "header" ? uploadedPreviewImages : []}
+                  images={headerImages}
                   emptyText="Upload header/banner files to start building this library."
                   actionLabel="Delete"
                   wide
@@ -442,7 +476,7 @@ export default function Home() {
                 <ImageGrid
                   title="Header outputs"
                   subtitle="Enhanced or generated restaurant header images will appear here."
-                  images={[]}
+                  images={headerOutputImages}
                   emptyText="No header outputs yet."
                   actionLabel="View"
                   wide
@@ -460,8 +494,8 @@ export default function Home() {
               </div>
 
               <div style={workflowGrid}>
-                <WorkflowStep number="01" title="Create / select restaurant" text="Every upload stays bound to the restaurant folder." />
-                <WorkflowStep number="02" title="Upload named files" text="Local filenames become the final approved names." />
+                <WorkflowStep number="01" title="Create / select restaurant" text="Switching restaurants clears previews so libraries do not mix." />
+                <WorkflowStep number="02" title="Upload named files" text="Menu and header files are held in separate tab states." />
                 <WorkflowStep number="03" title="Approve latest batch" text="Approved files become the source of truth for Phase B." />
                 <WorkflowStep number="04" title="Enhance outputs" text="Next stage creates polished menu and header assets." />
               </div>
