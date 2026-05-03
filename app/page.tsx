@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 const BACKEND_URL = "https://170.64.209.149.sslip.io";
 
@@ -8,11 +8,23 @@ type RestaurantMode = "new" | "existing";
 type ActiveTab = "menu" | "originals" | "enhanced" | "headers" | "headerOutputs";
 type UploadType = "menu" | "header";
 
+type RestaurantSummary = {
+  slug: string;
+  name: string;
+  originals_count?: number;
+  approved_count?: number;
+  enhanced_count?: number;
+  headers_count?: number;
+  outputs_count?: number;
+};
+
 type LibraryImage = {
   filename: string;
+  name?: string;
   url?: string;
   size?: number;
   updated_at?: string;
+  modified?: number;
 };
 
 type ManualJobResponse = {
@@ -45,15 +57,32 @@ function imageUrl(jobId: string, filename: string) {
   return `${BACKEND_URL}/api/dpo/manual-jobs/${jobId}/files/${encodeURIComponent(filename)}`;
 }
 
+function toAbsoluteBackendUrl(url?: string) {
+  if (!url) return "";
+  if (url.startsWith("http")) return url;
+  return `${BACKEND_URL}${url}`;
+}
+
+function normalizeLibraryImages(items: any[] = []): LibraryImage[] {
+  return items.map((img) => {
+    const filename = img.filename || img.name || fileName(img.url || "");
+    return {
+      filename,
+      name: img.name,
+      url: toAbsoluteBackendUrl(img.url),
+      size: img.size,
+      updated_at: img.updated_at,
+      modified: img.modified,
+    };
+  });
+}
+
 export default function Home() {
   const [mode, setMode] = useState<RestaurantMode>("new");
   const [restaurantName, setRestaurantName] = useState("");
   const [selectedRestaurant, setSelectedRestaurant] = useState("");
-  const [restaurants] = useState<string[]>([
-    "Napolitano_Pizza",
-    "Demo_Burger_Bar",
-    "Sample_Cafe",
-  ]);
+  const [restaurants, setRestaurants] = useState<RestaurantSummary[]>([]);
+  const [restaurantsLoading, setRestaurantsLoading] = useState(false);
 
   const [uploadType, setUploadType] = useState<UploadType>("menu");
   const [files, setFiles] = useState<File[]>([]);
@@ -71,8 +100,8 @@ export default function Home() {
   const [menuImages, setMenuImages] = useState<LibraryImage[]>([]);
   const [originalImages, setOriginalImages] = useState<LibraryImage[]>([]);
   const [headerImages, setHeaderImages] = useState<LibraryImage[]>([]);
-  const [enhancedImages] = useState<LibraryImage[]>([]);
-  const [headerOutputImages] = useState<LibraryImage[]>([]);
+  const [enhancedImages, setEnhancedImages] = useState<LibraryImage[]>([]);
+  const [headerOutputImages, setHeaderOutputImages] = useState<LibraryImage[]>([]);
 
   const activeRestaurantName = useMemo(() => {
     if (mode === "new") return restaurantName.trim();
@@ -84,6 +113,63 @@ export default function Home() {
     return selectedRestaurant;
   }, [mode, restaurantName, selectedRestaurant]);
 
+  async function loadRestaurants() {
+    setRestaurantsLoading(true);
+    try {
+      const res = await fetch("/api/dpo/restaurants", { cache: "no-store" });
+      const data = await res.json();
+      setRestaurants(data.restaurants || []);
+    } catch {
+      setRestaurants([]);
+    } finally {
+      setRestaurantsLoading(false);
+    }
+  }
+
+  async function loadRestaurantImages(slug: string) {
+    if (!slug) return;
+
+    setStatus("Loading library...");
+    setError("");
+    setMessage("");
+
+    try {
+      const res = await fetch(`/api/dpo/restaurants/${encodeURIComponent(slug)}/images`, {
+        cache: "no-store",
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.detail || data.error || "Failed to load restaurant images.");
+      }
+
+      const folders = data.folders || {};
+
+      const approved = normalizeLibraryImages(folders.approved || []);
+      const originals = normalizeLibraryImages(folders.originals || []);
+      const enhanced = normalizeLibraryImages(folders.enhanced || []);
+      const headers = normalizeLibraryImages(folders.headers || []);
+      const outputs = normalizeLibraryImages(folders.outputs || []);
+
+      setMenuImages(approved);
+      setOriginalImages(originals);
+      setEnhancedImages(enhanced);
+      setHeaderImages(headers);
+      setHeaderOutputImages(outputs);
+
+      setStatus("Library loaded");
+      setMessage(`Loaded ${data.name || prettyName(slug)} library.`);
+    } catch (err) {
+      setStatus("Library load failed");
+      setError(err instanceof Error ? err.message : "Failed to load restaurant images.");
+    }
+  }
+
+  useEffect(() => {
+    loadRestaurants();
+  }, []);
+
   function clearRestaurantScopedState() {
     setFiles([]);
     setStatus("Ready");
@@ -94,6 +180,8 @@ export default function Home() {
     setMenuImages([]);
     setOriginalImages([]);
     setHeaderImages([]);
+    setEnhancedImages([]);
+    setHeaderOutputImages([]);
 
     const input = document.getElementById("file") as HTMLInputElement | null;
     if (input) input.value = "";
@@ -128,6 +216,44 @@ export default function Home() {
     setUploadType("menu");
     setActiveTab("menu");
     clearRestaurantScopedState();
+  }
+
+  async function createRestaurantFolder() {
+    const slug = slugifyRestaurant(restaurantName);
+    if (!slug) {
+      setError("Enter a new restaurant name.");
+      return;
+    }
+
+    setLoading(true);
+    setError("");
+    setMessage("");
+    setStatus("Creating restaurant...");
+
+    try {
+      const res = await fetch(`${BACKEND_URL}/api/dpo/restaurants/${encodeURIComponent(slug)}`, {
+        method: "POST",
+      });
+
+      const data = await res.json();
+
+      if (!res.ok || data.ok === false) {
+        throw new Error(data.detail || data.error || "Failed to create restaurant.");
+      }
+
+      await loadRestaurants();
+      setMode("existing");
+      clearRestaurantScopedState();
+      setSelectedRestaurant(data.slug || slug);
+      setStatus("Restaurant created");
+      setMessage(`Created ${prettyName(data.slug || slug)}. You can now upload files into this workspace.`);
+      await loadRestaurantImages(data.slug || slug);
+    } catch (err) {
+      setStatus("Create failed");
+      setError(err instanceof Error ? err.message : "Failed to create restaurant.");
+    } finally {
+      setLoading(false);
+    }
   }
 
   async function uploadFiles() {
@@ -255,7 +381,7 @@ export default function Home() {
   }
 
   const emptyLibraryText = activeRestaurantSlug
-    ? "No saved images loaded yet. Upload files or connect the restaurant library endpoint next."
+    ? "No saved images found in this tab yet."
     : "Select or create a restaurant to begin.";
 
   return (
@@ -298,9 +424,12 @@ export default function Home() {
                   { value: "existing", label: "Existing" },
                 ]}
                 onChange={(v) => {
-                  setMode(v as RestaurantMode);
+                  const nextMode = v as RestaurantMode;
+                  setMode(nextMode);
                   clearRestaurantScopedState();
+                  setSelectedRestaurant("");
                   setActiveTab("menu");
+                  if (nextMode === "existing") loadRestaurants();
                 }}
               />
             </div>
@@ -318,6 +447,14 @@ export default function Home() {
                   style={inputStyle}
                 />
                 <HelpText>Creates a permanent restaurant folder using this name.</HelpText>
+                <button
+                  type="button"
+                  onClick={createRestaurantFolder}
+                  disabled={loading || !restaurantName.trim()}
+                  style={{ ...ghostButton, width: "100%", marginTop: 10 }}
+                >
+                  Create restaurant folder
+                </button>
               </div>
             ) : (
               <div style={{ marginTop: 18 }}>
@@ -325,19 +462,27 @@ export default function Home() {
                 <select
                   value={selectedRestaurant}
                   onChange={(e) => {
-                    setSelectedRestaurant(e.target.value);
+                    const slug = e.target.value;
                     clearRestaurantScopedState();
+                    setSelectedRestaurant(slug);
+                    setActiveTab("menu");
+                    if (slug) loadRestaurantImages(slug);
                   }}
+                  onFocus={() => loadRestaurants()}
                   style={inputStyle}
                 >
-                  <option value="">Choose saved restaurant...</option>
+                  <option value="">
+                    {restaurantsLoading ? "Loading restaurants..." : "Choose saved restaurant..."}
+                  </option>
                   {restaurants.map((r) => (
-                    <option key={r} value={r}>
-                      {prettyName(r)}
+                    <option key={r.slug} value={r.slug}>
+                      {r.name || prettyName(r.slug)}
                     </option>
                   ))}
                 </select>
-                <HelpText>This will load the restaurant library once backend list endpoints are wired.</HelpText>
+                <HelpText>
+                  Loads saved originals, approved menu images, enhanced outputs, and headers from the backend library.
+                </HelpText>
               </div>
             )}
 
@@ -722,7 +867,7 @@ function ImageGrid({
         >
           {images.map((img) => (
             <div
-              key={img.filename}
+              key={`${img.filename}-${img.url || ""}`}
               style={{
                 background: "white",
                 border: "1px solid #e2e8f0",
