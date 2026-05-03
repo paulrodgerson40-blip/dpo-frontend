@@ -5,7 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 const BACKEND_URL = "https://170.64.209.149.sslip.io";
 
 type RestaurantMode = "new" | "existing";
-type ActiveTab = "menu" | "originals" | "enhanced" | "headers" | "headerOutputs";
+type ActiveTab = "originals" | "enhanced" | "headers" | "headerOutputs";
 type UploadType = "menu" | "header";
 
 type LibraryImage = {
@@ -15,6 +15,7 @@ type LibraryImage = {
   size?: number;
   updated_at?: string;
   modified?: number;
+  folder?: string;
 };
 
 type Restaurant = {
@@ -47,10 +48,12 @@ function prettyName(slugOrName: string) {
 function slugifyRestaurant(name: string) {
   return name
     .trim()
-    .replace(/[^A-Za-z0-9 _-]/g, "_")
-    .replace(/\s+/g, "_")
-    .replace(/_+/g, "_")
-    .replace(/^_+|_+$/g, "");
+    .toLowerCase()
+    .replace(/_/g, "-")
+    .replace(/[^a-z0-9 -]/g, "-")
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-+|-+$/g, "");
 }
 
 function imageUrl(jobId: string, filename: string) {
@@ -58,7 +61,7 @@ function imageUrl(jobId: string, filename: string) {
 }
 
 export default function Home() {
-  const [mode, setMode] = useState<RestaurantMode>("new");
+  const [mode, setMode] = useState<RestaurantMode>("existing");
   const [restaurantName, setRestaurantName] = useState("");
   const [selectedRestaurant, setSelectedRestaurant] = useState("");
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
@@ -73,22 +76,20 @@ export default function Home() {
 
   const [lastJobId, setLastJobId] = useState("");
   const [lastUploadedFiles, setLastUploadedFiles] = useState<string[]>([]);
-  const [activeTab, setActiveTab] = useState<ActiveTab>("menu");
+  const [activeTab, setActiveTab] = useState<ActiveTab>("originals");
 
-  // Separate image state prevents menu uploads from appearing in Headers,
-  // and prevents old restaurant images from carrying over when switching restaurants.
-  const [menuImages, setMenuImages] = useState<LibraryImage[]>([]);
   const [originalImages, setOriginalImages] = useState<LibraryImage[]>([]);
-  const [headerImages, setHeaderImages] = useState<LibraryImage[]>([]);
   const [enhancedImages, setEnhancedImages] = useState<LibraryImage[]>([]);
+  const [headerImages, setHeaderImages] = useState<LibraryImage[]>([]);
   const [headerOutputImages, setHeaderOutputImages] = useState<LibraryImage[]>([]);
 
-  function normaliseLibraryImages(images: any[] | undefined, folder?: string): LibraryImage[] {
+  function normaliseLibraryImages(images: any[] | undefined, folder: string): LibraryImage[] {
     return (images || []).map((img) => {
       const filename = img.filename || img.name || "image";
       const rawUrl = img.url || "";
       return {
         ...img,
+        folder,
         filename,
         name: filename,
         url: rawUrl && rawUrl.startsWith("http") ? rawUrl : rawUrl ? `${BACKEND_URL}${rawUrl}` : undefined,
@@ -119,15 +120,15 @@ export default function Home() {
       const data = await res.json();
       const folders = data.folders || {};
 
-      setOriginalImages(normaliseLibraryImages(folders.originals));
-      setMenuImages(normaliseLibraryImages(folders.approved));
-      setEnhancedImages(normaliseLibraryImages(folders.enhanced));
-      setHeaderImages(normaliseLibraryImages(folders.headers));
-      setHeaderOutputImages(normaliseLibraryImages(folders.outputs));
+      const originals = (folders.originals && folders.originals.length ? folders.originals : folders.approved) || [];
+
+      setOriginalImages(normaliseLibraryImages(originals, "originals"));
+      setEnhancedImages(normaliseLibraryImages(folders.enhanced, "enhanced"));
+      setHeaderImages(normaliseLibraryImages(folders.headers, "headers"));
+      setHeaderOutputImages(normaliseLibraryImages(folders.outputs, "outputs"));
       setStatus("Library loaded");
     } catch (err) {
       setOriginalImages([]);
-      setMenuImages([]);
       setEnhancedImages([]);
       setHeaderImages([]);
       setHeaderOutputImages([]);
@@ -144,7 +145,7 @@ export default function Home() {
     if (mode !== "existing" || !selectedRestaurant) return;
     clearRestaurantScopedState();
     loadRestaurantImages(selectedRestaurant);
-    setActiveTab("menu");
+    setActiveTab("originals");
   }, [mode, selectedRestaurant]);
 
   const activeRestaurantName = useMemo(() => {
@@ -165,10 +166,9 @@ export default function Home() {
     setError("");
     setLastJobId("");
     setLastUploadedFiles([]);
-    setMenuImages([]);
     setOriginalImages([]);
-    setHeaderImages([]);
     setEnhancedImages([]);
+    setHeaderImages([]);
     setHeaderOutputImages([]);
 
     const input = document.getElementById("file") as HTMLInputElement | null;
@@ -180,6 +180,8 @@ export default function Home() {
       const filename = fileName(path);
       return {
         filename,
+        name: filename,
+        folder: uploadType === "header" ? "headers" : "originals",
         url: imageUrl(jobId, filename),
       };
     });
@@ -200,9 +202,9 @@ export default function Home() {
   function resetAll() {
     setRestaurantName("");
     setSelectedRestaurant("");
-    setMode("new");
+    setMode("existing");
     setUploadType("menu");
-    setActiveTab("menu");
+    setActiveTab("originals");
     clearRestaurantScopedState();
   }
 
@@ -223,7 +225,7 @@ export default function Home() {
     setLoading(true);
     setError("");
     setMessage("");
-    setStatus(uploadType === "header" ? "Uploading header files..." : "Uploading menu images...");
+    setStatus(uploadType === "header" ? "Uploading header files..." : "Uploading originals...");
     setLastJobId("");
     setLastUploadedFiles([]);
 
@@ -262,12 +264,11 @@ export default function Home() {
       if (uploadType === "header") {
         setHeaderImages(previews);
         setActiveTab("headers");
-        setMessage("Header files uploaded. They are kept separate from menu images.");
+        setMessage("Header files uploaded. They are kept separate from originals.");
       } else {
-        setMenuImages(previews);
         setOriginalImages(previews);
-        setActiveTab("menu");
-        setMessage("Menu images uploaded. Uploaded filenames will be used as final image names.");
+        setActiveTab("originals");
+        setMessage("Original images uploaded. Approve to save them permanently into this restaurant library.");
       }
 
       resetUploadOnly();
@@ -317,25 +318,19 @@ export default function Home() {
       }
 
       if (!res.ok) {
-        const msg = data.detail || data.error || "";
-        if (String(msg).toLowerCase().includes("already")) {
-          setStatus("Approved");
-          setError("");
-          setMessage("Phase A is already approved and locked for this upload.");
-          if (activeRestaurantSlug) {
-            await loadRestaurantImages(activeRestaurantSlug);
-          }
-          return;
+        const msg = String(data.detail || data.error || "Approval failed");
+        if (!msg.toLowerCase().includes("already")) {
+          throw new Error(msg);
         }
-        throw new Error(msg || "Approval failed");
       }
 
       setStatus("Approved");
-      setError("");
-      setMessage(`${data.approved_count || images.length} file(s) approved. Final names come from uploaded filenames.`);
+      setMessage(`${data.approved_count || images.length} file(s) approved. Originals are now saved to this restaurant.`);
+
       if (activeRestaurantSlug) {
-        await loadRestaurantImages(activeRestaurantSlug);
         await loadRestaurants();
+        await loadRestaurantImages(activeRestaurantSlug);
+        setActiveTab(uploadType === "header" ? "headers" : "originals");
       }
     } catch (err) {
       setStatus("Approval failed");
@@ -345,8 +340,144 @@ export default function Home() {
     }
   }
 
+  async function deleteImage(folder: string, filename: string) {
+    if (!activeRestaurantSlug) {
+      setError("Select a restaurant first.");
+      return;
+    }
+
+    const ok = window.confirm(`Delete ${filename} from ${folder}?`);
+    if (!ok) return;
+
+    setLoading(true);
+    setError("");
+    setMessage("");
+    setStatus("Deleting image...");
+
+    try {
+      const res = await fetch(
+        `${BACKEND_URL}/api/dpo/restaurants/${encodeURIComponent(activeRestaurantSlug)}/images/${encodeURIComponent(folder)}/${encodeURIComponent(filename)}`,
+        { method: "DELETE" }
+      );
+      const data = await res.json().catch(() => ({}));
+
+      if (!res.ok) throw new Error(data.detail || data.error || "Delete failed");
+
+      setStatus("Deleted");
+      setMessage(`${filename} deleted from ${folder}.`);
+      await loadRestaurantImages(activeRestaurantSlug);
+    } catch (err) {
+      setStatus("Delete failed");
+      setError(err instanceof Error ? err.message : "Delete failed");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function deleteRestaurant() {
+    if (!activeRestaurantSlug || mode !== "existing") {
+      setError("Select an existing restaurant first.");
+      return;
+    }
+
+    const typed = window.prompt(
+      `This will archive/delete the full restaurant library for ${activeRestaurantName}.\n\nType DELETE to confirm.`
+    );
+    if (typed !== "DELETE") return;
+
+    setLoading(true);
+    setError("");
+    setMessage("");
+    setStatus("Deleting restaurant...");
+
+    try {
+      const res = await fetch(`${BACKEND_URL}/api/dpo/restaurants/${encodeURIComponent(activeRestaurantSlug)}`, {
+        method: "DELETE",
+      });
+      const data = await res.json().catch(() => ({}));
+
+      if (!res.ok) throw new Error(data.detail || data.error || "Delete restaurant failed");
+
+      setStatus("Restaurant deleted");
+      setMessage(`${activeRestaurantName} archived/deleted.`);
+      resetAll();
+      await loadRestaurants();
+    } catch (err) {
+      setStatus("Delete failed");
+      setError(err instanceof Error ? err.message : "Delete restaurant failed");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function enhanceImage(filename: string) {
+    if (!activeRestaurantSlug) {
+      setError("Select a restaurant first.");
+      return;
+    }
+
+    setLoading(true);
+    setError("");
+    setMessage("");
+    setStatus("Enhancing image...");
+
+    try {
+      const res = await fetch(
+        `/api/dpo/restaurants/${encodeURIComponent(activeRestaurantSlug)}/images/${encodeURIComponent(filename)}/enhance`,
+        { method: "POST" }
+      );
+      const data = await res.json().catch(() => ({}));
+
+      if (!res.ok) throw new Error(data.detail || data.error || "Enhance failed");
+
+      setStatus("Enhanced");
+      setMessage(`${filename} enhanced and saved to Enhanced.`);
+      await loadRestaurantImages(activeRestaurantSlug);
+      setActiveTab("enhanced");
+    } catch (err) {
+      setStatus("Enhance failed");
+      setError(err instanceof Error ? err.message : "Enhance failed. Backend Phase B endpoint may not be installed yet.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function enhanceAll() {
+    if (!activeRestaurantSlug) {
+      setError("Select a restaurant first.");
+      return;
+    }
+
+    const ok = window.confirm(`Enhance all originals for ${activeRestaurantName}?`);
+    if (!ok) return;
+
+    setLoading(true);
+    setError("");
+    setMessage("");
+    setStatus("Enhancing all originals...");
+
+    try {
+      const res = await fetch(`/api/dpo/restaurants/${encodeURIComponent(activeRestaurantSlug)}/enhance-all`, {
+        method: "POST",
+      });
+      const data = await res.json().catch(() => ({}));
+
+      if (!res.ok) throw new Error(data.detail || data.error || "Enhance all failed");
+
+      setStatus("Enhanced");
+      setMessage(`${data.enhanced_count || "All"} image(s) enhanced.`);
+      await loadRestaurantImages(activeRestaurantSlug);
+      setActiveTab("enhanced");
+    } catch (err) {
+      setStatus("Enhance failed");
+      setError(err instanceof Error ? err.message : "Enhance all failed. Backend Phase B endpoint may not be installed yet.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
   const emptyLibraryText = activeRestaurantSlug
-    ? "No saved images found yet. Upload files, approve them, or add images to this restaurant library."
+    ? "No saved originals found yet. Upload files and approve them into this restaurant library."
     : "Select or create a restaurant to begin.";
 
   return (
@@ -378,7 +509,7 @@ export default function Home() {
                 <Kicker>Restaurant setup</Kicker>
                 <h2 style={sectionTitle}>Choose library</h2>
               </div>
-              <StatusPill text={status} tone={status.includes("failed") ? "bad" : status === "Approved" ? "good" : "neutral"} />
+              <StatusPill text={status} tone={status.toLowerCase().includes("failed") ? "bad" : status === "Approved" || status === "Enhanced" || status === "Deleted" ? "good" : "neutral"} />
             </div>
 
             <div style={{ marginTop: 18 }}>
@@ -391,7 +522,7 @@ export default function Home() {
                 onChange={(v) => {
                   setMode(v as RestaurantMode);
                   clearRestaurantScopedState();
-                  setActiveTab("menu");
+                  setActiveTab("originals");
                 }}
               />
             </div>
@@ -428,8 +559,14 @@ export default function Home() {
                     </option>
                   ))}
                 </select>
-                <HelpText>Selecting a restaurant loads saved originals, approved images, enhanced outputs, and headers from the backend library.</HelpText>
+                <HelpText>Selecting a restaurant loads originals, enhanced outputs, and headers from the backend library.</HelpText>
               </div>
+            )}
+
+            {mode === "existing" && selectedRestaurant && (
+              <button onClick={deleteRestaurant} disabled={loading} style={{ ...dangerButton(loading), width: "100%", marginTop: 12 }}>
+                Delete restaurant
+              </button>
             )}
 
             <Divider />
@@ -440,19 +577,19 @@ export default function Home() {
                 <SegmentedControl
                   value={uploadType}
                   options={[
-                    { value: "menu", label: "Menu images" },
+                    { value: "menu", label: "Originals" },
                     { value: "header", label: "Headers" },
                   ]}
                   onChange={(v) => {
                     setUploadType(v as UploadType);
-                    setActiveTab(v === "header" ? "headers" : "menu");
+                    setActiveTab(v === "header" ? "headers" : "originals");
                   }}
                 />
               </div>
             </div>
 
             <div style={{ marginTop: 18 }}>
-              <Label>{uploadType === "header" ? "Upload header/banner files" : "Upload menu image files"}</Label>
+              <Label>{uploadType === "header" ? "Upload header/banner files" : "Upload original food images"}</Label>
               <input
                 id="file"
                 type="file"
@@ -462,7 +599,7 @@ export default function Home() {
                 style={{ ...inputStyle, padding: 12, background: "#f8fafc" }}
               />
               <HelpText>
-                Rename files locally first. Uploaded filenames become final approved names.
+                Rename files locally first. Uploaded filenames become source names for Phase B.
               </HelpText>
             </div>
 
@@ -490,6 +627,10 @@ export default function Home() {
               </button>
             </div>
 
+            <button onClick={enhanceAll} disabled={loading || !activeRestaurantSlug || originalImages.length === 0} style={{ ...purpleButton(loading || !activeRestaurantSlug || originalImages.length === 0), width: "100%", marginTop: 10 }}>
+              Phase B: Enhance all originals
+            </button>
+
             <button onClick={resetAll} disabled={loading} style={{ ...ghostButton, width: "100%", marginTop: 10 }}>
               Reset workspace
             </button>
@@ -514,51 +655,46 @@ export default function Home() {
                 </div>
 
                 <div style={{ display: "flex", gap: 10, flexWrap: "wrap", justifyContent: "flex-end" }}>
-                  <Metric label="Menu" value={String(menuImages.length)} />
+                  <Metric label="Originals" value={String(originalImages.length)} />
+                  <Metric label="Enhanced" value={String(enhancedImages.length)} />
                   <Metric label="Headers" value={String(headerImages.length)} />
-                  <Metric label="Job" value={lastJobId || "-"} />
                 </div>
               </div>
 
               <Tabs active={activeTab} setActive={setActiveTab} />
 
-              {activeTab === "menu" && (
-                <ImageGrid
-                  title="Approved menu images"
-                  subtitle="Final menu source images. Uploaded filenames are preserved and used for outputs."
-                  images={menuImages}
-                  emptyText={emptyLibraryText}
-                  actionLabel="Delete"
-                />
-              )}
-
               {activeTab === "originals" && (
                 <ImageGrid
-                  title="Original uploads"
-                  subtitle="Untouched originals for audit, reprocessing, and fallback."
+                  title="Originals"
+                  subtitle="Source food images. Delete an original, or enhance a single image into the Enhanced folder."
                   images={originalImages}
                   emptyText={emptyLibraryText}
-                  actionLabel="Archive"
+                  primaryActionLabel="Enhance"
+                  secondaryActionLabel="Delete"
+                  onPrimary={(img) => enhanceImage(img.filename)}
+                  onSecondary={(img) => deleteImage("originals", img.filename)}
                 />
               )}
 
               {activeTab === "enhanced" && (
                 <ImageGrid
-                  title="Enhanced outputs"
-                  subtitle="Phase B processed menu images will appear here."
+                  title="Enhanced"
+                  subtitle="Phase B outputs. These are the polished delivery-platform-ready images."
                   images={enhancedImages}
-                  emptyText="No enhanced outputs yet. Phase B will generate these."
-                  actionLabel="View"
+                  emptyText="No enhanced outputs yet. Use Enhance on one original or Phase B: Enhance all."
+                  secondaryActionLabel="Delete"
+                  onSecondary={(img) => deleteImage("enhanced", img.filename)}
                 />
               )}
 
               {activeTab === "headers" && (
                 <ImageGrid
-                  title="Header originals"
+                  title="Headers"
                   subtitle="Restaurant hero images, banners, storefront shots, and branding assets."
                   images={headerImages}
                   emptyText="Upload header/banner files to start building this library."
-                  actionLabel="Delete"
+                  secondaryActionLabel="Delete"
+                  onSecondary={(img) => deleteImage("headers", img.filename)}
                   wide
                 />
               )}
@@ -569,7 +705,8 @@ export default function Home() {
                   subtitle="Enhanced or generated restaurant header images will appear here."
                   images={headerOutputImages}
                   emptyText="No header outputs yet."
-                  actionLabel="View"
+                  secondaryActionLabel="Delete"
+                  onSecondary={(img) => deleteImage("outputs", img.filename)}
                   wide
                 />
               )}
@@ -581,14 +718,14 @@ export default function Home() {
                   <Kicker>Workflow</Kicker>
                   <h2 style={sectionTitle}>Production path</h2>
                 </div>
-                <StatusPill text="Phase B pending" tone="neutral" />
+                <StatusPill text="Phase B ready" tone="neutral" />
               </div>
 
               <div style={workflowGrid}>
-                <WorkflowStep number="01" title="Create / select restaurant" text="Switching restaurants clears previews so libraries do not mix." />
-                <WorkflowStep number="02" title="Upload named files" text="Menu and header files are held in separate tab states." />
-                <WorkflowStep number="03" title="Approve latest batch" text="Approved files become the source of truth for Phase B." />
-                <WorkflowStep number="04" title="Enhance outputs" text="Next stage creates polished menu and header assets." />
+                <WorkflowStep number="01" title="Create / select restaurant" text="Each restaurant has its own clean image library." />
+                <WorkflowStep number="02" title="Upload originals" text="Originals are the source of truth for Phase B." />
+                <WorkflowStep number="03" title="Enhance one or all" text="Enhance individual images or run the full batch." />
+                <WorkflowStep number="04" title="Export outputs" text="Enhanced images are stored separately for final delivery." />
               </div>
             </Panel>
           </div>
@@ -633,7 +770,7 @@ function Hero() {
             Restaurant Image Library
           </h1>
           <p style={{ margin: 0, color: "#dbeafe", fontSize: 17, maxWidth: 720 }}>
-            Organize originals, approved menu images, headers, and enhanced outputs in one clean restaurant workspace.
+            Manage originals, enhanced outputs, headers, and final delivery-ready restaurant assets.
           </p>
         </div>
 
@@ -648,8 +785,8 @@ function Hero() {
           }}
         >
           <div style={{ fontSize: 13, color: "#bfdbfe", fontWeight: 800 }}>Current mode</div>
-          <div style={{ marginTop: 8, fontSize: 24, fontWeight: 950 }}>Phase A</div>
-          <div style={{ marginTop: 4, color: "#dbeafe", fontSize: 13 }}>Upload → Approve → Enhance</div>
+          <div style={{ marginTop: 8, fontSize: 24, fontWeight: 950 }}>Phase B Ready</div>
+          <div style={{ marginTop: 4, color: "#dbeafe", fontSize: 13 }}>Originals → Enhanced → Export</div>
         </div>
       </div>
     </div>
@@ -727,7 +864,6 @@ function SegmentedControl({
 
 function Tabs({ active, setActive }: { active: ActiveTab; setActive: (tab: ActiveTab) => void }) {
   const tabs: { id: ActiveTab; label: string }[] = [
-    { id: "menu", label: "Menu Images" },
     { id: "originals", label: "Originals" },
     { id: "enhanced", label: "Enhanced" },
     { id: "headers", label: "Headers" },
@@ -765,14 +901,20 @@ function ImageGrid({
   subtitle,
   images,
   emptyText,
-  actionLabel,
+  primaryActionLabel,
+  secondaryActionLabel,
+  onPrimary,
+  onSecondary,
   wide = false,
 }: {
   title: string;
   subtitle: string;
   images: LibraryImage[];
   emptyText: string;
-  actionLabel: string;
+  primaryActionLabel?: string;
+  secondaryActionLabel?: string;
+  onPrimary?: (img: LibraryImage) => void;
+  onSecondary?: (img: LibraryImage) => void;
   wide?: boolean;
 }) {
   return (
@@ -813,7 +955,7 @@ function ImageGrid({
         >
           {images.map((img) => (
             <div
-              key={img.filename}
+              key={`${img.folder || "image"}-${img.filename}`}
               style={{
                 background: "white",
                 border: "1px solid #e2e8f0",
@@ -859,22 +1001,18 @@ function ImageGrid({
                 {img.filename}
               </div>
 
-              <button
-                type="button"
-                style={{
-                  marginTop: 10,
-                  width: "100%",
-                  border: "1px solid #e2e8f0",
-                  background: "#f8fafc",
-                  borderRadius: 12,
-                  padding: "9px 10px",
-                  fontWeight: 900,
-                  color: "#475569",
-                  cursor: "pointer",
-                }}
-              >
-                {actionLabel}
-              </button>
+              <div style={{ display: "grid", gridTemplateColumns: primaryActionLabel ? "1fr 1fr" : "1fr", gap: 8, marginTop: 10 }}>
+                {primaryActionLabel && onPrimary && (
+                  <button type="button" onClick={() => onPrimary(img)} style={smallPrimaryButton}>
+                    {primaryActionLabel}
+                  </button>
+                )}
+                {secondaryActionLabel && onSecondary && (
+                  <button type="button" onClick={() => onSecondary(img)} style={smallDangerButton}>
+                    {secondaryActionLabel}
+                  </button>
+                )}
+              </div>
             </div>
           ))}
         </div>
@@ -990,6 +1128,19 @@ function primaryButton(disabled: boolean): React.CSSProperties {
   };
 }
 
+function purpleButton(disabled: boolean): React.CSSProperties {
+  return {
+    border: 0,
+    borderRadius: 14,
+    padding: "13px 16px",
+    background: disabled ? "#94a3b8" : "linear-gradient(135deg, #4f46e5, #7c3aed)",
+    color: "white",
+    fontWeight: 950,
+    cursor: disabled ? "not-allowed" : "pointer",
+    boxShadow: disabled ? "none" : "0 12px 24px rgba(79,70,229,0.22)",
+  };
+}
+
 function successButton(disabled: boolean): React.CSSProperties {
   return {
     border: 0,
@@ -1002,6 +1153,39 @@ function successButton(disabled: boolean): React.CSSProperties {
     boxShadow: disabled ? "none" : "0 12px 24px rgba(22,163,74,0.20)",
   };
 }
+
+function dangerButton(disabled: boolean): React.CSSProperties {
+  return {
+    border: 0,
+    borderRadius: 14,
+    padding: "12px 16px",
+    background: disabled ? "#94a3b8" : "linear-gradient(135deg, #dc2626, #991b1b)",
+    color: "white",
+    fontWeight: 950,
+    cursor: disabled ? "not-allowed" : "pointer",
+    boxShadow: disabled ? "none" : "0 12px 24px rgba(220,38,38,0.18)",
+  };
+}
+
+const smallPrimaryButton: React.CSSProperties = {
+  border: 0,
+  background: "#eef2ff",
+  color: "#3730a3",
+  borderRadius: 12,
+  padding: "9px 10px",
+  fontWeight: 900,
+  cursor: "pointer",
+};
+
+const smallDangerButton: React.CSSProperties = {
+  border: "1px solid #fecaca",
+  background: "#fef2f2",
+  color: "#991b1b",
+  borderRadius: 12,
+  padding: "9px 10px",
+  fontWeight: 900,
+  cursor: "pointer",
+};
 
 const ghostButton: React.CSSProperties = {
   border: "1px solid #cbd5e1",
