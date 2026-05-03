@@ -380,7 +380,7 @@ export default function Home() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ images }),
+        body: JSON.stringify({ images, upload_type: uploadType }),
       });
 
       const text = await res.text();
@@ -397,11 +397,19 @@ export default function Home() {
       }
 
       setStatus("Approved");
-      setMessage(`${data.approved_count || images.length} file(s) approved.`);
+      setMessage(
+        uploadType === "header"
+          ? `${data.approved_count || images.length} header file(s) approved.`
+          : `${data.approved_count || images.length} original file(s) approved.`
+      );
+      setLastJobId("");
+      setLastUploadedFiles([]);
+      resetUploadOnly();
 
       if (activeRestaurantSlug) {
         await loadRestaurants();
         await loadRestaurantImages(activeRestaurantSlug);
+        setActiveTab(uploadType === "header" ? "headers" : "originals");
       }
     } catch (err) {
       setStatus("Approval failed");
@@ -871,6 +879,19 @@ export default function Home() {
     }
   }
 
+  function handleTabChange(tab: ActiveTab) {
+    setActiveTab(tab);
+    setSelectedImageKeys(new Set());
+
+    // Keep the left upload mode aligned with the right library tab.
+    // This prevents a header upload being accidentally approved as a menu/original image.
+    if (tab === "headers" || tab === "headerEnhanced") {
+      setUploadType("header");
+    } else if (tab === "originals" || tab === "compare" || tab === "enhanced") {
+      setUploadType("menu");
+    }
+  }
+
   const emptyLibraryText = activeRestaurantSlug
     ? "No saved images found yet. Upload files and approve them to build this restaurant library."
     : "Select or create a restaurant to begin.";
@@ -976,7 +997,7 @@ export default function Home() {
                 <Kicker>Restaurant setup</Kicker>
                 <h2 style={sectionTitle}>Choose library</h2>
               </div>
-              <StatusPill text={status} tone={status.toLowerCase().includes("failed") ? "bad" : status.includes("complete") || status === "Approved" || status === "Enhanced" ? "good" : "neutral"} />
+              <StatusPill text={status} tone={status.toLowerCase().includes("failed") ? "bad" : status.includes("complete") || status === "Approved" || status === "Enhanced" || status === "Uploaded" ? "good" : "neutral"} />
             </div>
 
             <div style={{ marginTop: 18 }}>
@@ -1047,8 +1068,15 @@ export default function Home() {
                     { value: "header", label: "Headers" },
                   ]}
                   onChange={(v) => {
-                    setUploadType(v as UploadType);
-                    setActiveTab(v === "header" ? "headers" : "originals");
+                    const nextUploadType = v as UploadType;
+                    setUploadType(nextUploadType);
+                    setActiveTab(nextUploadType === "header" ? "headers" : "originals");
+                    setSelectedImageKeys(new Set());
+                    setLastJobId("");
+                    setLastUploadedFiles([]);
+                    setMessage("");
+                    setError("");
+                    resetUploadOnly();
                   }}
                 />
               </div>
@@ -1128,7 +1156,7 @@ export default function Home() {
               </div>
 
               <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "center", marginTop: 20, flexWrap: "wrap" }}>
-                <Tabs active={activeTab} setActive={setActiveTab} />
+                <Tabs active={activeTab} setActive={handleTabChange} />
                 <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
                   <button onClick={downloadAllRestaurantFiles} disabled={!activeRestaurantSlug} style={miniButton(!activeRestaurantSlug)}>
                     Download all restaurant files
