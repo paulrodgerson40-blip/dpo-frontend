@@ -35,7 +35,7 @@ type ManualJobResponse = {
 };
 
 const IMAGE_FOLDERS: Record<ActiveTab, string> = {
-  originals: "originals",
+  originals: "originals_approved",
   enhanced: "enhanced",
   headers: "headers",
   headerOutputs: "outputs",
@@ -62,6 +62,11 @@ function slugifyRestaurant(name: string) {
 
 function manualJobImageUrl(jobId: string, filename: string) {
   return `${BACKEND_URL}/api/dpo/manual-jobs/${jobId}/files/${encodeURIComponent(filename)}`;
+}
+
+
+function downloadFileUrl(slug: string, folder: string, filename: string) {
+  return `/api/dpo/restaurants/${encodeURIComponent(slug)}/download-file/${encodeURIComponent(folder)}/${encodeURIComponent(filename)}`;
 }
 
 function fullImageUrl(url?: string) {
@@ -637,13 +642,14 @@ export default function Home() {
 
               {activeTab === "originals" && (
                 <ImageGrid
-                  title="Originals"
+                  title="Originals (Approved)"
                   subtitle="Source food images. Click to preview, download individually, delete, or enhance one image."
                   images={originalImages}
                   emptyText={emptyLibraryText}
-                  folder="originals"
+                  folder="originals_approved"
+                  restaurantSlug={activeRestaurantSlug}
                   onPreview={setPreviewImage}
-                  onDelete={(img) => deleteImage(img, "originals")}
+                  onDelete={(img) => deleteImage(img, "originals_approved")}
                   onEnhance={enhanceImage}
                   showEnhance
                 />
@@ -656,6 +662,7 @@ export default function Home() {
                   images={enhancedImages}
                   emptyText="No enhanced outputs yet. Enhance one original or run Phase B for all."
                   folder="enhanced"
+                  restaurantSlug={activeRestaurantSlug}
                   onPreview={setPreviewImage}
                   onDelete={(img) => deleteImage(img, "enhanced")}
                 />
@@ -668,6 +675,7 @@ export default function Home() {
                   images={headerImages}
                   emptyText="Upload header/banner files to start building this library."
                   folder="headers"
+                  restaurantSlug={activeRestaurantSlug}
                   onPreview={setPreviewImage}
                   onDelete={(img) => deleteImage(img, "headers")}
                   wide
@@ -681,6 +689,7 @@ export default function Home() {
                   images={headerOutputImages}
                   emptyText="No header outputs yet."
                   folder="outputs"
+                  restaurantSlug={activeRestaurantSlug}
                   onPreview={setPreviewImage}
                   onDelete={(img) => deleteImage(img, "headerOutputs")}
                   wide
@@ -783,7 +792,7 @@ function Tabs({ active, setActive }: { active: ActiveTab; setActive: (tab: Activ
   );
 }
 
-function ImageGrid({ title, subtitle, images, emptyText, folder, onPreview, onDelete, onEnhance, showEnhance = false, wide = false }: { title: string; subtitle: string; images: LibraryImage[]; emptyText: string; folder: string; onPreview: (image: LibraryImage) => void; onDelete: (image: LibraryImage) => void; onEnhance?: (image: LibraryImage) => void; showEnhance?: boolean; wide?: boolean }) {
+function ImageGrid({ title, subtitle, images, emptyText, folder, restaurantSlug, onPreview, onDelete, onEnhance, showEnhance = false, wide = false }: { title: string; subtitle: string; images: LibraryImage[]; emptyText: string; folder: string; restaurantSlug: string; onPreview: (image: LibraryImage) => void; onDelete: (image: LibraryImage) => void; onEnhance?: (image: LibraryImage) => void; showEnhance?: boolean; wide?: boolean }) {
   return (
     <div style={{ marginTop: 22 }}>
       <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "end" }}>
@@ -810,13 +819,13 @@ function ImageGrid({ title, subtitle, images, emptyText, folder, onPreview, onDe
                 {showEnhance && onEnhance ? (
                   <button type="button" onClick={() => onEnhance(img)} style={smallActionButton("primary")}>Enhance</button>
                 ) : (
-                  <a href={img.url} download={img.filename} style={{ ...smallActionButton("primary"), textDecoration: "none", textAlign: "center" }}>Download</a>
+                  <a href={downloadFileUrl(restaurantSlug, folder, img.filename)} download={img.filename} style={{ ...smallActionButton("primary"), textDecoration: "none", textAlign: "center" }}>Download</a>
                 )}
                 <button type="button" onClick={() => onDelete(img)} style={smallActionButton("danger")}>Delete</button>
               </div>
 
               {showEnhance && (
-                <a href={img.url} download={img.filename} style={{ ...smallActionButton("neutral"), marginTop: 8, textDecoration: "none", textAlign: "center" }}>Download original</a>
+                <a href={downloadFileUrl(restaurantSlug, folder, img.filename)} download={img.filename} style={{ ...smallActionButton("neutral"), marginTop: 8, textDecoration: "none", textAlign: "center" }}>Download</a>
               )}
             </div>
           ))}
@@ -833,7 +842,6 @@ function ImagePreviewModal({ image, onClose }: { image: LibraryImage; onClose: (
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 14, marginBottom: 12 }}>
           <div style={{ fontWeight: 950 }}>{image.filename}</div>
           <div style={{ display: "flex", gap: 8 }}>
-            <a href={image.url} download={image.filename} style={{ ...smallActionButton("primary"), textDecoration: "none" }}>Download</a>
             <button onClick={onClose} style={smallActionButton("neutral")}>Close</button>
           </div>
         </div>
