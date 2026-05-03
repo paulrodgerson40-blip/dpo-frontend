@@ -371,6 +371,7 @@ export default function Home() {
         return {
           original_filename: filename,
           approved_name: filename,
+          upload_type: uploadType,
         };
       });
 
