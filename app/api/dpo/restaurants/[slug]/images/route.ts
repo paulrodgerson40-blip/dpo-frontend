@@ -4,18 +4,23 @@ const BACKEND = "https://170.64.209.149.sslip.io";
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { slug: string } }
+  context: { params: Promise<{ slug: string }> }
 ) {
   try {
+    const { slug } = await context.params;
+
     const r = await fetch(
-      `${BACKEND}/api/dpo/restaurants/${params.slug}/images`,
+      `${BACKEND}/api/dpo/restaurants/${encodeURIComponent(slug)}/images`,
       { cache: "no-store" }
     );
 
     const data = await r.json();
 
-    return NextResponse.json(data);
+    return NextResponse.json(data, { status: r.status });
   } catch (e) {
-    return NextResponse.json({ error: "failed" }, { status: 500 });
+    return NextResponse.json(
+      { error: "failed", detail: String(e) },
+      { status: 500 }
+    );
   }
 }
