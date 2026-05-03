@@ -69,7 +69,7 @@ export default function Home() {
           }}
         >
           <a
-            href="https://app.deliveryignite.com/app"
+            href="mailto:hello@deliveryignite.com?subject=Delivery%20Ignite%20Enquiry"
             style={{
               textDecoration: "none",
               background: "white",
@@ -80,11 +80,11 @@ export default function Home() {
               boxShadow: "0 10px 30px rgba(0,0,0,0.18)",
             }}
           >
-            Launch Image Library →
+            Get Started →
           </a>
 
           <a
-            href="mailto:hello@deliveryignite.com"
+            href="mailto:hello@deliveryignite.com?subject=Delivery%20Ignite%20Contact"
             style={{
               textDecoration: "none",
               color: "white",
@@ -109,9 +109,9 @@ export default function Home() {
         }}
       >
         {[
-          ["01", "Upload", "Add your existing restaurant food photos."],
-          ["02", "Enhance", "Create cleaner, premium menu-ready images."],
-          ["03", "Compare", "Review original vs enhanced before using."],
+          ["01", "Upload", "Send us your existing restaurant food photos."],
+          ["02", "Enhance", "We create cleaner, premium menu-ready images."],
+          ["03", "Compare", "Review original vs enhanced versions."],
           ["04", "Publish", "Use better images across delivery platforms."],
         ].map(([num, title, text]) => (
           <div
