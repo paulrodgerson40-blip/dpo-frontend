@@ -798,7 +798,7 @@ export default function Home() {
 
       for (const img of selectedImages) {
         const res = await fetch(
-          `/api/dpo/restaurants/${encodeURIComponent(activeRestaurantSlug)}/images/${encodeURIComponent(activeBatch.folder)}/${encodeURIComponent(img.filename)}`,
+          `${BACKEND_URL}/api/dpo/restaurants/${encodeURIComponent(activeRestaurantSlug)}/images/${encodeURIComponent(activeBatch.folder)}/${encodeURIComponent(img.filename)}`,
           { method: "DELETE" }
         );
 
@@ -874,6 +874,69 @@ export default function Home() {
     ? "No saved images found yet. Upload files and approve them to build this restaurant library."
     : "Select or create a restaurant to begin.";
 
+  const workflowState = useMemo(() => {
+    if (!activeRestaurantSlug) {
+      return {
+        title: "Setup",
+        subtitle: "Select or create restaurant",
+        badge: "Setup mode",
+        tone: "neutral" as const,
+      };
+    }
+
+    if (originalImages.length === 0 && headerImages.length === 0) {
+      return {
+        title: "Setup",
+        subtitle: "Upload originals or headers",
+        badge: "Setup mode",
+        tone: "neutral" as const,
+      };
+    }
+
+    if (originalImages.length > 0 && enhancedImages.length === 0) {
+      return {
+        title: "Phase A",
+        subtitle: "Originals ready → enhance next",
+        badge: "Phase A active",
+        tone: "neutral" as const,
+      };
+    }
+
+    if (unmatchedOriginalImages.length > 0) {
+      return {
+        title: "Phase B Partial",
+        subtitle: `${matchedOriginalImages.length} matched / ${unmatchedOriginalImages.length} missing`,
+        badge: "Phase B incomplete",
+        tone: "bad" as const,
+      };
+    }
+
+    if (originalImages.length > 0 && enhancedImages.length > 0) {
+      return {
+        title: "Phase B Complete",
+        subtitle: "Original → Enhanced matched",
+        badge: "Phase B complete",
+        tone: "good" as const,
+      };
+    }
+
+    if (headerImages.length > 0 && headerEnhancedImages.length === 0) {
+      return {
+        title: "Header Phase A",
+        subtitle: "Headers ready → enhance next",
+        badge: "Header setup",
+        tone: "neutral" as const,
+      };
+    }
+
+    return {
+      title: "Ready",
+      subtitle: "Restaurant library loaded",
+      badge: "Ready",
+      tone: "good" as const,
+    };
+  }, [activeRestaurantSlug, originalImages.length, enhancedImages.length, unmatchedOriginalImages.length, matchedOriginalImages.length, headerImages.length, headerEnhancedImages.length]);
+
   return (
     <main
       style={{
@@ -896,7 +959,7 @@ export default function Home() {
       )}
 
       <section style={{ maxWidth: 1220, margin: "0 auto" }}>
-        <Hero />
+        <Hero modeTitle={workflowState.title} modeSubtitle={workflowState.subtitle} />
 
         <div
           style={{
@@ -1186,7 +1249,7 @@ export default function Home() {
                   <Kicker>Workflow</Kicker>
                   <h2 style={sectionTitle}>Production path</h2>
                 </div>
-                <StatusPill text="Phase B active" tone="good" />
+                <StatusPill text={workflowState.badge} tone={workflowState.tone} />
               </div>
 
               <div style={workflowGrid}>
@@ -1204,7 +1267,7 @@ export default function Home() {
   );
 }
 
-function Hero() {
+function Hero({ modeTitle, modeSubtitle }: { modeTitle: string; modeSubtitle: string }) {
   return (
     <div
       style={{
@@ -1254,8 +1317,8 @@ function Hero() {
           }}
         >
           <div style={{ fontSize: 13, color: "#bfdbfe", fontWeight: 800 }}>Current mode</div>
-          <div style={{ marginTop: 8, fontSize: 24, fontWeight: 950 }}>Phase B</div>
-          <div style={{ marginTop: 4, color: "#dbeafe", fontSize: 13 }}>Original → Enhanced</div>
+          <div style={{ marginTop: 8, fontSize: 24, fontWeight: 950 }}>{modeTitle}</div>
+          <div style={{ marginTop: 4, color: "#dbeafe", fontSize: 13 }}>{modeSubtitle}</div>
         </div>
       </div>
     </div>
