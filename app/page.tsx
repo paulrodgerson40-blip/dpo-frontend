@@ -21,6 +21,7 @@ type Restaurant = {
   slug: string;
   name: string;
   originals_count?: number;
+  approved_count?: number;
   enhanced_count?: number;
   headers_count?: number;
   outputs_count?: number;
@@ -218,6 +219,14 @@ export default function Home() {
     enhancedImages.forEach((img) => map.set(img.filename, img));
     return map;
   }, [enhancedImages]);
+
+  const matchedOriginalImages = useMemo(() => {
+    return originalImages.filter((img) => enhancedByFilename.has(img.filename));
+  }, [originalImages, enhancedByFilename]);
+
+  const unmatchedOriginalImages = useMemo(() => {
+    return originalImages.filter((img) => !enhancedByFilename.has(img.filename));
+  }, [originalImages, enhancedByFilename]);
 
   const headerEnhancedByFilename = useMemo(() => {
     const map = new Map<string, LibraryImage>();
@@ -947,11 +956,16 @@ export default function Home() {
                   style={inputStyle}
                 >
                   <option value="">{restaurantsLoading ? "Loading restaurants..." : "Choose saved restaurant..."}</option>
-                  {restaurants.map((r) => (
-                    <option key={r.slug} value={r.slug}>
-                      {r.name}
-                    </option>
-                  ))}
+                  {restaurants.map((r) => {
+                    const originalCount = r.originals_count ?? r.approved_count ?? 0;
+                    const enhancedCount = r.enhanced_count ?? 0;
+                    const missingCount = Math.max(originalCount - enhancedCount, 0);
+                    return (
+                      <option key={r.slug} value={r.slug}>
+                        {missingCount > 0 ? `⚠ ${r.name} — ${missingCount} missing enhanced` : `✅ ${r.name}`}
+                      </option>
+                    );
+                  })}
                 </select>
                 <HelpText>Selecting a restaurant loads its Original, Enhanced, Header and Header Enhanced libraries.</HelpText>
               </div>
@@ -1044,6 +1058,7 @@ export default function Home() {
                 <div style={{ display: "flex", gap: 10, flexWrap: "wrap", justifyContent: "flex-end" }}>
                   <Metric label="Original" value={String(originalImages.length)} />
                   <Metric label="Enhanced" value={String(enhancedImages.length)} />
+                  <Metric label="Missing" value={String(unmatchedOriginalImages.length)} tone={unmatchedOriginalImages.length > 0 ? "warn" : "good"} />
                   <Metric label="Headers" value={String(headerImages.length)} />
                 </div>
               </div>
@@ -1705,41 +1720,86 @@ function CompareGrid({
   emptyText: string;
   onPreview: (img: PreviewImage) => void;
 }) {
+  const matched = originals.filter((orig) => enhancedByFilename.has(orig.filename));
+  const unmatched = originals.filter((orig) => !enhancedByFilename.has(orig.filename));
+
   return (
     <div style={{ marginTop: 22 }}>
       <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "end" }}>
         <div>
           <h3 style={{ margin: 0, fontSize: 20 }}>Old Vs New</h3>
           <p style={{ margin: "6px 0 0", color: "#64748b", lineHeight: 1.45 }}>
-            Side-by-side comparison of Original and Enhanced images using matching filenames.
+            Store-scoped comparison only. A pair appears only when the original and enhanced filenames match inside this restaurant folder.
           </p>
         </div>
-        <div style={{ color: "#64748b", fontWeight: 900 }}>{originals.length} pair(s)</div>
+        <div style={{ color: "#64748b", fontWeight: 900 }}>{matched.length} matched pair(s)</div>
       </div>
 
       {originals.length === 0 ? (
         <EmptyBox>{emptyText}</EmptyBox>
       ) : (
-        <div style={{ display: "grid", gap: 18, marginTop: 16 }}>
-          {originals.map((orig) => {
-            const enhanced = enhancedByFilename.get(orig.filename);
-            const origUrl = fullImageUrl(orig.url);
-            const enhUrl = fullImageUrl(enhanced?.url);
+        <>
+          <div style={compareStatusGrid}>
+            <CompareStatusBadge label="Matched pairs" value={matched.length} tone="good" />
+            <CompareStatusBadge label="Missing enhanced" value={unmatched.length} tone={unmatched.length > 0 ? "warn" : "good"} />
+            <CompareStatusBadge label="Total originals" value={originals.length} tone="neutral" />
+          </div>
 
-            return (
-              <div
-                key={`compare-${orig.filename}`}
-                style={{
-                  background: "white",
-                  border: "1px solid #e2e8f0",
-                  borderRadius: 22,
-                  padding: 14,
-                  boxShadow: "0 10px 24px rgba(15,23,42,0.06)",
-                }}
-              >
-                <div style={{ fontWeight: 950, marginBottom: 12 }}>{orig.filename}</div>
-                {enhanced ? (
-                  <div>
+          {unmatched.length > 0 && (
+            <div style={missingEnhancedBox}>
+              <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
+                <div>
+                  <div style={{ fontWeight: 950, color: "#92400e" }}>Unmatched originals</div>
+                  <div style={{ marginTop: 4, color: "#78350f", fontSize: 13 }}>
+                    These files exist in Original but do not yet have matching Enhanced outputs for this restaurant.
+                  </div>
+                </div>
+                <div style={{ ...smallWarnPill }}>{unmatched.length} missing</div>
+              </div>
+              <div style={unmatchedGrid}>
+                {unmatched.map((orig) => {
+                  const url = fullImageUrl(orig.url);
+                  return (
+                    <button
+                      type="button"
+                      key={`missing-${orig.filename}`}
+                      onClick={() => onPreview({ title: "Missing enhanced", url, filename: orig.filename })}
+                      style={unmatchedItem}
+                      title={orig.filename}
+                    >
+                      <span style={unmatchedThumbWrap}>
+                        {url ? <img src={url} alt={orig.filename} style={unmatchedThumb} /> : null}
+                      </span>
+                      <span style={unmatchedName}>{orig.filename}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {matched.length === 0 ? (
+            <EmptyBox>No matched Old Vs New pairs yet. Enhance originals first, or make sure enhanced filenames match the originals.</EmptyBox>
+          ) : (
+            <div style={{ display: "grid", gap: 18, marginTop: 16 }}>
+              {matched.map((orig) => {
+                const enhanced = enhancedByFilename.get(orig.filename)!;
+
+                return (
+                  <div
+                    key={`compare-${orig.filename}`}
+                    style={{
+                      background: "white",
+                      border: "1px solid #e2e8f0",
+                      borderRadius: 22,
+                      padding: 14,
+                      boxShadow: "0 10px 24px rgba(15,23,42,0.06)",
+                    }}
+                  >
+                    <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "center", marginBottom: 12 }}>
+                      <div style={{ fontWeight: 950 }}>{orig.filename}</div>
+                      <div style={matchedPill}>Matched</div>
+                    </div>
                     <CompareImage
                       label="Old | New"
                       url={`${BACKEND_URL}/api/dpo/restaurants/${encodeURIComponent(restaurantSlug)}/compare/${encodeURIComponent(orig.filename)}?v=${orig.modified || ""}-${enhanced.modified || ""}`}
@@ -1754,15 +1814,11 @@ function CompareGrid({
                       Download comparison
                     </a>
                   </div>
-                ) : (
-                  <div style={{ border: "1px dashed #cbd5e1", borderRadius: 18, background: "#f8fafc", display: "grid", placeItems: "center", minHeight: 230, color: "#64748b", fontWeight: 900 }}>
-                    Not enhanced yet
-                  </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
+                );
+              })}
+            </div>
+          )}
+        </>
       )}
     </div>
   );
@@ -1811,11 +1867,18 @@ function EmptyBox({ children }: { children: React.ReactNode }) {
   );
 }
 
-function Metric({ label, value }: { label: string; value: string }) {
+function Metric({ label, value, tone = "neutral" }: { label: string; value: string; tone?: "neutral" | "good" | "warn" }) {
+  const toneStyle =
+    tone === "good"
+      ? { border: "#bbf7d0", bg: "#f0fdf4", value: "#166534" }
+      : tone === "warn"
+        ? { border: "#fed7aa", bg: "#fff7ed", value: "#c2410c" }
+        : { border: "#e2e8f0", bg: "#f8fafc", value: "#0f172a" };
+
   return (
-    <div style={{ background: "#f8fafc", border: "1px solid #e2e8f0", borderRadius: 16, padding: "10px 12px", minWidth: 92 }}>
+    <div style={{ background: toneStyle.bg, border: `1px solid ${toneStyle.border}`, borderRadius: 16, padding: "10px 12px", minWidth: 92 }}>
       <div style={{ fontSize: 11, color: "#64748b", fontWeight: 900, textTransform: "uppercase" }}>{label}</div>
-      <div style={{ fontSize: 16, fontWeight: 950, marginTop: 3 }}>{value}</div>
+      <div style={{ fontSize: 16, fontWeight: 950, marginTop: 3, color: toneStyle.value }}>{value}</div>
     </div>
   );
 }
@@ -2004,6 +2067,101 @@ const cardButtonDanger: React.CSSProperties = {
   fontWeight: 900,
   color: "#991b1b",
   cursor: "pointer",
+};
+
+const compareStatusGrid: React.CSSProperties = {
+  marginTop: 16,
+  display: "grid",
+  gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))",
+  gap: 10,
+};
+
+function CompareStatusBadge({ label, value, tone }: { label: string; value: number; tone: "good" | "warn" | "neutral" }) {
+  const style =
+    tone === "good"
+      ? { bg: "#ecfdf5", border: "#bbf7d0", label: "#166534", value: "#166534" }
+      : tone === "warn"
+        ? { bg: "#fff7ed", border: "#fed7aa", label: "#92400e", value: "#c2410c" }
+        : { bg: "#f8fafc", border: "#e2e8f0", label: "#64748b", value: "#0f172a" };
+
+  return (
+    <div style={{ background: style.bg, border: `1px solid ${style.border}`, borderRadius: 16, padding: "12px 14px" }}>
+      <div style={{ fontSize: 11, color: style.label, fontWeight: 950, textTransform: "uppercase", letterSpacing: 0.4 }}>{label}</div>
+      <div style={{ marginTop: 4, fontSize: 22, fontWeight: 950, color: style.value }}>{value}</div>
+    </div>
+  );
+}
+
+const missingEnhancedBox: React.CSSProperties = {
+  marginTop: 16,
+  border: "1px solid #fed7aa",
+  background: "#fff7ed",
+  borderRadius: 20,
+  padding: 14,
+};
+
+const smallWarnPill: React.CSSProperties = {
+  border: "1px solid #fdba74",
+  background: "#ffedd5",
+  color: "#9a3412",
+  borderRadius: 999,
+  padding: "7px 10px",
+  fontWeight: 950,
+  fontSize: 12,
+};
+
+const unmatchedGrid: React.CSSProperties = {
+  display: "grid",
+  gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))",
+  gap: 10,
+  marginTop: 12,
+};
+
+const unmatchedItem: React.CSSProperties = {
+  border: "1px solid #fed7aa",
+  background: "white",
+  borderRadius: 14,
+  padding: 8,
+  display: "flex",
+  alignItems: "center",
+  gap: 8,
+  cursor: "zoom-in",
+  textAlign: "left",
+};
+
+const unmatchedThumbWrap: React.CSSProperties = {
+  width: 46,
+  height: 46,
+  borderRadius: 10,
+  overflow: "hidden",
+  background: "#f8fafc",
+  flex: "0 0 auto",
+};
+
+const unmatchedThumb: React.CSSProperties = {
+  width: "100%",
+  height: "100%",
+  objectFit: "cover",
+  display: "block",
+};
+
+const unmatchedName: React.CSSProperties = {
+  minWidth: 0,
+  overflow: "hidden",
+  textOverflow: "ellipsis",
+  whiteSpace: "nowrap",
+  fontWeight: 900,
+  color: "#7c2d12",
+  fontSize: 12.5,
+};
+
+const matchedPill: React.CSSProperties = {
+  background: "#dcfce7",
+  color: "#166534",
+  borderRadius: 999,
+  padding: "6px 9px",
+  fontWeight: 950,
+  fontSize: 11,
 };
 
 const workflowGrid: React.CSSProperties = {
