@@ -128,7 +128,7 @@ export default function Home() {
         ...img,
         filename,
         name: filename,
-        url: rawUrl && rawUrl.startsWith("http") ? rawUrl : rawUrl ? `${BACKEND_URL}${rawUrl}` : undefined,
+        url: rawUrl && rawUrl.startsWith("http") ? rawUrl : rawUrl ? `${BACKEND_URL}${rawUrl}?t=${img.modified || Date.now()}` : undefined,
       };
     });
   }
