@@ -5,7 +5,12 @@ import { useEffect, useMemo, useState } from "react";
 const BACKEND_URL = "https://170.64.209.149.sslip.io";
 
 type RestaurantMode = "new" | "existing";
-type ActiveTab = "originals" | "enhanced" | "headers" | "headerOutputs";
+type ActiveTab =
+  | "originals"
+  | "originals_approved"
+  | "enhanced"
+  | "headers"
+  | "headerOutputs";
 type UploadType = "original" | "header";
 
 type LibraryImage = {
