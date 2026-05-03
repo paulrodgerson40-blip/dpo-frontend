@@ -87,6 +87,10 @@ function fullImageUrl(url?: string) {
   return `${BACKEND_URL}${url}`;
 }
 
+function imageSelectKey(folder: string, filename: string) {
+  return `${folder}::${filename}`;
+}
+
 export default function Home() {
   const [mode, setMode] = useState<RestaurantMode>("new");
   const [restaurantName, setRestaurantName] = useState("");
@@ -113,6 +117,7 @@ export default function Home() {
   const [previewImage, setPreviewImage] = useState<PreviewImage | null>(null);
   const [workingLabel, setWorkingLabel] = useState("");
   const [progress, setProgress] = useState(0);
+  const [selectedImageKeys, setSelectedImageKeys] = useState<Set<string>>(new Set());
 
   function normaliseLibraryImages(images: any[] | undefined): LibraryImage[] {
     return (images || []).map((img) => {
@@ -158,6 +163,7 @@ export default function Home() {
       setEnhancedImages(normaliseLibraryImages(folders.enhanced));
       setHeaderImages(normaliseLibraryImages(folders.headers));
       setHeaderEnhancedImages(normaliseLibraryImages(folders.header_enhanced || folders.outputs));
+      setSelectedImageKeys(new Set());
 
       setStatus("Library loaded");
     } catch {
@@ -165,6 +171,7 @@ export default function Home() {
       setEnhancedImages([]);
       setHeaderImages([]);
       setHeaderEnhancedImages([]);
+      setSelectedImageKeys(new Set());
       setStatus("Ready");
       setError("Could not load saved images for this restaurant.");
     }
@@ -229,6 +236,7 @@ export default function Home() {
     setEnhancedImages([]);
     setHeaderImages([]);
     setHeaderEnhancedImages([]);
+    setSelectedImageKeys(new Set());
 
     const input = document.getElementById("file") as HTMLInputElement | null;
     if (input) input.value = "";
@@ -644,6 +652,137 @@ export default function Home() {
     a.remove();
   }
 
+  const activeBatch = useMemo(() => {
+    if (activeTab === "headers") {
+      return { images: headerImages, folder: "headers", canEnhance: true, enhanceKind: "header" as const };
+    }
+    if (activeTab === "enhanced") {
+      return { images: enhancedImages, folder: "enhanced", canEnhance: false, enhanceKind: "none" as const };
+    }
+    if (activeTab === "headerEnhanced") {
+      return { images: headerEnhancedImages, folder: "header_enhanced", canEnhance: false, enhanceKind: "none" as const };
+    }
+    return { images: originalImages, folder: "originals_approved", canEnhance: activeTab === "originals", enhanceKind: "menu" as const };
+  }, [activeTab, originalImages, enhancedImages, headerImages, headerEnhancedImages]);
+
+  const selectedImages = useMemo(() => {
+    return activeBatch.images.filter((img) => selectedImageKeys.has(imageSelectKey(activeBatch.folder, img.filename)));
+  }, [activeBatch, selectedImageKeys]);
+
+  function toggleImageSelected(folder: string, filename: string) {
+    const key = imageSelectKey(folder, filename);
+    setSelectedImageKeys((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
+      return next;
+    });
+  }
+
+  function selectAllVisible() {
+    setSelectedImageKeys((prev) => {
+      const next = new Set(prev);
+      activeBatch.images.forEach((img) => next.add(imageSelectKey(activeBatch.folder, img.filename)));
+      return next;
+    });
+  }
+
+  function clearSelectedImages() {
+    setSelectedImageKeys((prev) => {
+      const next = new Set(prev);
+      activeBatch.images.forEach((img) => next.delete(imageSelectKey(activeBatch.folder, img.filename)));
+      return next;
+    });
+  }
+
+  async function deleteSelectedImages() {
+    if (!activeRestaurantSlug || selectedImages.length === 0) return;
+
+    const check = window.prompt(`Delete ${selectedImages.length} selected image(s)?\n\nType DELETE to confirm.`);
+    if (check !== "DELETE") return;
+
+    setLoading(true);
+    setError("");
+    setMessage("");
+    setStatus("Deleting selected images...");
+
+    try {
+      let deleted = 0;
+
+      for (const img of selectedImages) {
+        const res = await fetch(
+          `/api/dpo/restaurants/${encodeURIComponent(activeRestaurantSlug)}/images/${encodeURIComponent(activeBatch.folder)}/${encodeURIComponent(img.filename)}`,
+          { method: "DELETE" }
+        );
+
+        const data = await res.json();
+
+        if (!res.ok || data.ok === false) {
+          throw new Error(data.detail || data.error || `Delete failed for ${img.filename}`);
+        }
+
+        deleted += 1;
+      }
+
+      setSelectedImageKeys(new Set());
+      await loadRestaurantImages(activeRestaurantSlug);
+      setStatus("Deleted");
+      setMessage(`Deleted ${deleted} selected image(s).`);
+    } catch (err) {
+      setStatus("Delete failed");
+      setError(err instanceof Error ? err.message : "Delete selected failed");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function enhanceSelectedImages() {
+    if (!activeRestaurantSlug || selectedImages.length === 0 || !activeBatch.canEnhance) return;
+
+    const check = window.prompt(`Enhance ${selectedImages.length} selected image(s)?\n\nType ENHANCE to confirm.`);
+    if (check !== "ENHANCE") return;
+
+    setLoading(true);
+    setWorkingLabel(`Enhancing ${selectedImages.length} selected image(s)...`);
+    setError("");
+    setMessage("");
+    setStatus("Enhancing selected images...");
+
+    try {
+      let enhanced = 0;
+
+      for (const img of selectedImages) {
+        const endpoint = activeBatch.enhanceKind === "header"
+          ? `/api/dpo/restaurants/${encodeURIComponent(activeRestaurantSlug)}/headers/${encodeURIComponent(img.filename)}/enhance`
+          : `/api/dpo/restaurants/${encodeURIComponent(activeRestaurantSlug)}/images/${encodeURIComponent(img.filename)}/enhance`;
+
+        const res = await fetch(endpoint, { method: "POST" });
+        const data = await res.json();
+
+        if (!res.ok || data.ok === false) {
+          throw new Error(data.detail || data.error || `Enhance failed for ${img.filename}`);
+        }
+
+        enhanced += 1;
+        setProgress(Math.min(98, Math.round((enhanced / selectedImages.length) * 100)));
+      }
+
+      setSelectedImageKeys(new Set());
+      setProgress(100);
+      await loadRestaurantImages(activeRestaurantSlug);
+      setActiveTab(activeBatch.enhanceKind === "header" ? "headerEnhanced" : "enhanced");
+      setStatus("Enhanced");
+      setMessage(`Enhanced ${enhanced} selected image(s).`);
+    } catch (err) {
+      setStatus("Enhance failed");
+      setError(err instanceof Error ? err.message : "Enhance selected failed");
+    } finally {
+      setLoading(false);
+      setWorkingLabel("");
+      setProgress(0);
+    }
+  }
+
   const emptyLibraryText = activeRestaurantSlug
     ? "No saved images found yet. Upload files and approve them to build this restaurant library."
     : "Select or create a restaurant to begin.";
@@ -765,12 +904,11 @@ export default function Home() {
                 id="file"
                 type="file"
                 multiple
-                accept=".png,.jpg,.jpeg,.webp,.zip"
                 onChange={handleFiles}
                 style={{ ...inputStyle, padding: 12, background: "#f8fafc" }}
               />
               <HelpText>
-                Rename files locally first. Duplicate filenames are blocked until the existing file is deleted.
+                Upload anything for now. Files are accepted as-is and the backend auto-renames them to avoid duplicate filename conflicts.
               </HelpText>
             </div>
 
@@ -778,8 +916,8 @@ export default function Home() {
               <div style={selectedFilesBox}>
                 <div style={{ fontWeight: 900 }}>{files.length} file(s) selected</div>
                 <div style={{ marginTop: 8, display: "grid", gap: 6 }}>
-                  {files.slice(0, 6).map((f) => (
-                    <div key={f.name} style={fileChip}>
+                  {files.slice(0, 6).map((f, idx) => (
+                    <div key={`${f.name}-${f.size}-${f.lastModified}-${idx}`} style={fileChip}>
                       {f.name}
                     </div>
                   ))}
@@ -847,6 +985,20 @@ export default function Home() {
                 </div>
               </div>
 
+              {activeTab !== "compare" && activeBatch.images.length > 0 && (
+                <BatchActionBar
+                  selectedCount={selectedImages.length}
+                  totalCount={activeBatch.images.length}
+                  canEnhance={activeBatch.canEnhance}
+                  enhanceLabel={activeBatch.enhanceKind === "header" ? "Enhance Selected Headers" : "Enhance Selected"}
+                  disabled={loading || !activeRestaurantSlug}
+                  onSelectAll={selectAllVisible}
+                  onClear={clearSelectedImages}
+                  onDelete={deleteSelectedImages}
+                  onEnhance={enhanceSelectedImages}
+                />
+              )}
+
               {activeTab === "originals" && (
                 <ImageGrid
                   title="Original"
@@ -861,6 +1013,8 @@ export default function Home() {
                   onEnhance={enhanceImage}
                   showEnhance
                   enhanceLabel="Enhance"
+                  selectedKeys={selectedImageKeys}
+                  onToggleSelected={toggleImageSelected}
                 />
               )}
 
@@ -884,6 +1038,8 @@ export default function Home() {
                   onPreview={setPreviewImage}
                   onDownload={downloadImage}
                   onDelete={(img) => deleteImage(img, "enhanced")}
+                  selectedKeys={selectedImageKeys}
+                  onToggleSelected={toggleImageSelected}
                 />
               )}
 
@@ -901,6 +1057,8 @@ export default function Home() {
                   onEnhance={enhanceHeaderImage}
                   showEnhance
                   enhanceLabel="Enhance header"
+                  selectedKeys={selectedImageKeys}
+                  onToggleSelected={toggleImageSelected}
                   wide
                 />
               )}
@@ -916,6 +1074,8 @@ export default function Home() {
                   onPreview={setPreviewImage}
                   onDownload={downloadImage}
                   onDelete={(img) => deleteImage(img, "header_enhanced")}
+                  selectedKeys={selectedImageKeys}
+                  onToggleSelected={toggleImageSelected}
                   wide
                 />
               )}
@@ -931,7 +1091,7 @@ export default function Home() {
               </div>
 
               <div style={workflowGrid}>
-                <WorkflowStep number="01" title="Original" text="Upload and approve source images. Duplicate filenames are blocked." />
+                <WorkflowStep number="01" title="Original" text="Upload and approve source images. Files are auto-renamed to avoid duplicate conflicts." />
                 <WorkflowStep number="02" title="Old Vs New" text="Compare original and enhanced outputs side-by-side by filename." />
                 <WorkflowStep number="03" title="Enhanced" text="Generate menu-item outputs with the square food-photo prompt." />
                 <WorkflowStep number="04" title="Header" text="Upload banner/header assets separately from menu images." />
@@ -1168,6 +1328,68 @@ function Tabs({ active, setActive }: { active: ActiveTab; setActive: (tab: Activ
   );
 }
 
+function BatchActionBar({
+  selectedCount,
+  totalCount,
+  canEnhance,
+  enhanceLabel,
+  disabled,
+  onSelectAll,
+  onClear,
+  onDelete,
+  onEnhance,
+}: {
+  selectedCount: number;
+  totalCount: number;
+  canEnhance: boolean;
+  enhanceLabel: string;
+  disabled: boolean;
+  onSelectAll: () => void;
+  onClear: () => void;
+  onDelete: () => void;
+  onEnhance: () => void;
+}) {
+  const noSelection = selectedCount === 0;
+
+  return (
+    <div
+      style={{
+        marginTop: 16,
+        border: "1px solid #e2e8f0",
+        borderRadius: 18,
+        padding: 12,
+        background: "#f8fafc",
+        display: "flex",
+        justifyContent: "space-between",
+        gap: 12,
+        alignItems: "center",
+        flexWrap: "wrap",
+      }}
+    >
+      <div style={{ fontWeight: 950, color: selectedCount ? "#3730a3" : "#475569" }}>
+        {selectedCount} selected / {totalCount} visible
+      </div>
+
+      <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+        <button type="button" onClick={onSelectAll} disabled={disabled || totalCount === 0} style={miniButton(disabled || totalCount === 0)}>
+          Select All
+        </button>
+        <button type="button" onClick={onClear} disabled={disabled || noSelection} style={miniButton(disabled || noSelection)}>
+          Clear
+        </button>
+        {canEnhance && (
+          <button type="button" onClick={onEnhance} disabled={disabled || noSelection} style={miniDarkButton(disabled || noSelection)}>
+            {enhanceLabel}
+          </button>
+        )}
+        <button type="button" onClick={onDelete} disabled={disabled || noSelection} style={dangerButton(disabled || noSelection)}>
+          Delete Selected
+        </button>
+      </div>
+    </div>
+  );
+}
+
 function ImageGrid({
   title,
   subtitle,
@@ -1179,6 +1401,8 @@ function ImageGrid({
   onDownload,
   onDelete,
   onEnhance,
+  selectedKeys,
+  onToggleSelected,
   showEnhance = false,
   enhanceLabel = "Enhance",
   wide = false,
@@ -1193,6 +1417,8 @@ function ImageGrid({
   onDownload: (img: LibraryImage, folder: string) => void;
   onDelete: (img: LibraryImage) => void;
   onEnhance?: (img: LibraryImage) => void;
+  selectedKeys?: Set<string>;
+  onToggleSelected?: (folder: string, filename: string) => void;
   showEnhance?: boolean;
   enhanceLabel?: string;
   wide?: boolean;
@@ -1222,17 +1448,48 @@ function ImageGrid({
         >
           {images.map((img) => {
             const url = fullImageUrl(img.url);
+            const selected = selectedKeys?.has(imageSelectKey(folder, img.filename)) || false;
             return (
               <div
-                key={`${folder}-${img.filename}`}
+                key={`${folder}-${img.filename}-${img.url || ""}`}
                 style={{
                   background: "white",
-                  border: "1px solid #e2e8f0",
+                  border: selected ? "2px solid #4f46e5" : "1px solid #e2e8f0",
                   borderRadius: 20,
-                  padding: 12,
-                  boxShadow: "0 10px 24px rgba(15,23,42,0.06)",
+                  padding: selected ? 11 : 12,
+                  boxShadow: selected ? "0 14px 30px rgba(79,70,229,0.18)" : "0 10px 24px rgba(15,23,42,0.06)",
+                  position: "relative",
                 }}
               >
+                {onToggleSelected && (
+                  <label
+                    style={{
+                      position: "absolute",
+                      top: 20,
+                      right: 20,
+                      zIndex: 3,
+                      width: 30,
+                      height: 30,
+                      display: "grid",
+                      placeItems: "center",
+                      borderRadius: 10,
+                      background: selected ? "#4f46e5" : "rgba(255,255,255,0.92)",
+                      border: selected ? "1px solid #4f46e5" : "1px solid #cbd5e1",
+                      boxShadow: "0 8px 18px rgba(15,23,42,0.18)",
+                      cursor: "pointer",
+                    }}
+                    title={selected ? "Selected" : "Select image"}
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={selected}
+                      onChange={() => onToggleSelected(folder, img.filename)}
+                      style={{ width: 16, height: 16, accentColor: "#4f46e5", cursor: "pointer" }}
+                    />
+                  </label>
+                )}
+
                 <button
                   type="button"
                   onClick={() => onPreview({ title, url, filename: img.filename })}
