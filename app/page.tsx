@@ -317,11 +317,26 @@ export default function Home() {
       }
 
       if (!res.ok) {
-        throw new Error(data.detail || data.error || "Approval failed");
+        const msg = data.detail || data.error || "";
+        if (String(msg).toLowerCase().includes("already")) {
+          setStatus("Approved");
+          setError("");
+          setMessage("Phase A is already approved and locked for this upload.");
+          if (activeRestaurantSlug) {
+            await loadRestaurantImages(activeRestaurantSlug);
+          }
+          return;
+        }
+        throw new Error(msg || "Approval failed");
       }
 
       setStatus("Approved");
+      setError("");
       setMessage(`${data.approved_count || images.length} file(s) approved. Final names come from uploaded filenames.`);
+      if (activeRestaurantSlug) {
+        await loadRestaurantImages(activeRestaurantSlug);
+        await loadRestaurants();
+      }
     } catch (err) {
       setStatus("Approval failed");
       setError(err instanceof Error ? err.message : "Approval failed");
