@@ -397,19 +397,11 @@ export default function Home() {
       }
 
       setStatus("Approved");
-      setMessage(
-        uploadType === "header"
-          ? `${data.approved_count || images.length} header file(s) approved.`
-          : `${data.approved_count || images.length} original file(s) approved.`
-      );
-      setLastJobId("");
-      setLastUploadedFiles([]);
-      resetUploadOnly();
+      setMessage(`${data.approved_count || images.length} file(s) approved.`);
 
       if (activeRestaurantSlug) {
         await loadRestaurants();
         await loadRestaurantImages(activeRestaurantSlug);
-        setActiveTab(uploadType === "header" ? "headers" : "originals");
       }
     } catch (err) {
       setStatus("Approval failed");
@@ -879,19 +871,6 @@ export default function Home() {
     }
   }
 
-  function handleTabChange(tab: ActiveTab) {
-    setActiveTab(tab);
-    setSelectedImageKeys(new Set());
-
-    // Keep the left upload mode aligned with the right library tab.
-    // This prevents a header upload being accidentally approved as a menu/original image.
-    if (tab === "headers" || tab === "headerEnhanced") {
-      setUploadType("header");
-    } else if (tab === "originals" || tab === "compare" || tab === "enhanced") {
-      setUploadType("menu");
-    }
-  }
-
   const emptyLibraryText = activeRestaurantSlug
     ? "No saved images found yet. Upload files and approve them to build this restaurant library."
     : "Select or create a restaurant to begin.";
@@ -997,7 +976,7 @@ export default function Home() {
                 <Kicker>Restaurant setup</Kicker>
                 <h2 style={sectionTitle}>Choose library</h2>
               </div>
-              <StatusPill text={status} tone={status.toLowerCase().includes("failed") ? "bad" : status.includes("complete") || status === "Approved" || status === "Enhanced" || status === "Uploaded" ? "good" : "neutral"} />
+              <StatusPill text={status} tone={status.toLowerCase().includes("failed") ? "bad" : status.includes("complete") || status === "Approved" || status === "Enhanced" ? "good" : "neutral"} />
             </div>
 
             <div style={{ marginTop: 18 }}>
@@ -1068,15 +1047,8 @@ export default function Home() {
                     { value: "header", label: "Headers" },
                   ]}
                   onChange={(v) => {
-                    const nextUploadType = v as UploadType;
-                    setUploadType(nextUploadType);
-                    setActiveTab(nextUploadType === "header" ? "headers" : "originals");
-                    setSelectedImageKeys(new Set());
-                    setLastJobId("");
-                    setLastUploadedFiles([]);
-                    setMessage("");
-                    setError("");
-                    resetUploadOnly();
+                    setUploadType(v as UploadType);
+                    setActiveTab(v === "header" ? "headers" : "originals");
                   }}
                 />
               </div>
@@ -1156,16 +1128,13 @@ export default function Home() {
               </div>
 
               <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "center", marginTop: 20, flexWrap: "wrap" }}>
-                <Tabs active={activeTab} setActive={handleTabChange} />
+                <Tabs active={activeTab} setActive={setActiveTab} />
                 <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
                   <button onClick={downloadAllRestaurantFiles} disabled={!activeRestaurantSlug} style={miniButton(!activeRestaurantSlug)}>
                     Download all restaurant files
                   </button>
                   <button onClick={enhanceAllOriginals} disabled={loading || !activeRestaurantSlug || originalImages.length === 0} style={miniDarkButton(loading || !activeRestaurantSlug || originalImages.length === 0)}>
                     Phase B: Enhance all originals
-                  </button>
-                  <button onClick={enhanceAllHeaders} disabled={loading || !activeRestaurantSlug || headerImages.length === 0} style={miniDarkButton(loading || !activeRestaurantSlug || headerImages.length === 0)}>
-                    Enhance all headers
                   </button>
                 </div>
               </div>
