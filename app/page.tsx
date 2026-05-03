@@ -454,7 +454,7 @@ export default function Home() {
 
     try {
       const res = await fetch(
-        `/api/dpo/restaurants/${encodeURIComponent(activeRestaurantSlug)}/images/${encodeURIComponent(folder)}/${encodeURIComponent(img.filename)}`,
+        `${BACKEND_URL}/api/dpo/restaurants/${encodeURIComponent(activeRestaurantSlug)}/images/${encodeURIComponent(folder)}/${encodeURIComponent(img.filename)}`,
         { method: "DELETE" }
       );
 
@@ -489,7 +489,7 @@ export default function Home() {
 
     try {
       const res = await fetch(
-        `/api/dpo/restaurants/${encodeURIComponent(activeRestaurantSlug)}/images/${encodeURIComponent(img.filename)}/enhance`,
+        `${BACKEND_URL}/api/dpo/restaurants/${encodeURIComponent(activeRestaurantSlug)}/images/${encodeURIComponent(img.filename)}/enhance`,
         { method: "POST" }
       );
 
@@ -527,7 +527,7 @@ export default function Home() {
     setStatus("Phase B running...");
 
     try {
-      const res = await fetch(`/api/dpo/restaurants/${encodeURIComponent(activeRestaurantSlug)}/enhance-all`, {
+      const res = await fetch(`${BACKEND_URL}/api/dpo/restaurants/${encodeURIComponent(activeRestaurantSlug)}/enhance-all`, {
         method: "POST",
       });
 
@@ -566,7 +566,7 @@ export default function Home() {
 
     try {
       const res = await fetch(
-        `/api/dpo/restaurants/${encodeURIComponent(activeRestaurantSlug)}/headers/${encodeURIComponent(img.filename)}/enhance`,
+        `${BACKEND_URL}/api/dpo/restaurants/${encodeURIComponent(activeRestaurantSlug)}/headers/${encodeURIComponent(img.filename)}/enhance`,
         { method: "POST" }
       );
 
@@ -604,7 +604,7 @@ export default function Home() {
     setStatus("Header Phase B running...");
 
     try {
-      const res = await fetch(`/api/dpo/restaurants/${encodeURIComponent(activeRestaurantSlug)}/headers/enhance-all`, {
+      const res = await fetch(`${BACKEND_URL}/api/dpo/restaurants/${encodeURIComponent(activeRestaurantSlug)}/headers/enhance-all`, {
         method: "POST",
       });
 
@@ -632,7 +632,7 @@ export default function Home() {
   function downloadImage(img: LibraryImage, folder: string) {
     if (!activeRestaurantSlug) return;
 
-    const href = `/api/dpo/restaurants/${encodeURIComponent(activeRestaurantSlug)}/download-file/${encodeURIComponent(folder)}/${encodeURIComponent(img.filename)}`;
+    const href = `${BACKEND_URL}/api/dpo/restaurants/${encodeURIComponent(activeRestaurantSlug)}/download-file/${encodeURIComponent(folder)}/${encodeURIComponent(img.filename)}`;
     const a = document.createElement("a");
     a.href = href;
     a.download = img.filename;
@@ -645,11 +645,89 @@ export default function Home() {
     if (!activeRestaurantSlug) return;
 
     const a = document.createElement("a");
-    a.href = `/api/dpo/restaurants/${encodeURIComponent(activeRestaurantSlug)}/download-all`;
+    a.href = `${BACKEND_URL}/api/dpo/restaurants/${encodeURIComponent(activeRestaurantSlug)}/download-all`;
     a.download = `${activeRestaurantSlug}_full_export.zip`;
     document.body.appendChild(a);
     a.click();
     a.remove();
+  }
+
+  async function downloadSelectedFiles() {
+    if (!activeRestaurantSlug || selectedImages.length === 0) return;
+
+    setError("");
+    setMessage("");
+    setStatus("Preparing selected download...");
+
+    try {
+      const res = await fetch(`${BACKEND_URL}/api/dpo/restaurants/${encodeURIComponent(activeRestaurantSlug)}/download-selected`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          folder: activeBatch.folder,
+          filenames: selectedImages.map((img) => img.filename),
+        }),
+      });
+
+      if (!res.ok) {
+        let details = "Download selected failed";
+        try {
+          const data = await res.json();
+          details = data.detail || data.error || details;
+        } catch {}
+        throw new Error(details);
+      }
+
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${activeRestaurantSlug}_${activeBatch.folder}_selected.zip`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+
+      setStatus("Download ready");
+      setMessage(`Downloaded ${selectedImages.length} selected file(s).`);
+    } catch (err) {
+      setStatus("Download failed");
+      setError(err instanceof Error ? err.message : "Download selected failed");
+    }
+  }
+
+  async function renameImage(img: LibraryImage, folder: string, newName: string) {
+    if (!activeRestaurantSlug) return;
+
+    const cleanName = newName.trim();
+    if (!cleanName || cleanName === img.filename) return;
+
+    setLoading(true);
+    setError("");
+    setMessage("");
+    setStatus("Renaming image...");
+
+    try {
+      const res = await fetch(`${BACKEND_URL}/api/dpo/restaurants/${encodeURIComponent(activeRestaurantSlug)}/images/${encodeURIComponent(folder)}/${encodeURIComponent(img.filename)}/rename`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ new_filename: cleanName }),
+      });
+
+      const data = await res.json();
+      if (!res.ok || data.ok === false) {
+        throw new Error(data.detail || data.error || "Rename failed");
+      }
+
+      await loadRestaurantImages(activeRestaurantSlug);
+      setStatus("Renamed");
+      setMessage(`Renamed ${img.filename} to ${data.filename || cleanName}.`);
+    } catch (err) {
+      setStatus("Rename failed");
+      setError(err instanceof Error ? err.message : "Rename failed");
+    } finally {
+      setLoading(false);
+    }
   }
 
   const activeBatch = useMemo(() => {
@@ -753,8 +831,8 @@ export default function Home() {
 
       for (const img of selectedImages) {
         const endpoint = activeBatch.enhanceKind === "header"
-          ? `/api/dpo/restaurants/${encodeURIComponent(activeRestaurantSlug)}/headers/${encodeURIComponent(img.filename)}/enhance`
-          : `/api/dpo/restaurants/${encodeURIComponent(activeRestaurantSlug)}/images/${encodeURIComponent(img.filename)}/enhance`;
+          ? `${BACKEND_URL}/api/dpo/restaurants/${encodeURIComponent(activeRestaurantSlug)}/headers/${encodeURIComponent(img.filename)}/enhance`
+          : `${BACKEND_URL}/api/dpo/restaurants/${encodeURIComponent(activeRestaurantSlug)}/images/${encodeURIComponent(img.filename)}/enhance`;
 
         const res = await fetch(endpoint, { method: "POST" });
         const data = await res.json();
@@ -996,6 +1074,7 @@ export default function Home() {
                   onClear={clearSelectedImages}
                   onDelete={deleteSelectedImages}
                   onEnhance={enhanceSelectedImages}
+                  onDownloadSelected={downloadSelectedFiles}
                 />
               )}
 
@@ -1015,6 +1094,7 @@ export default function Home() {
                   enhanceLabel="Enhance"
                   selectedKeys={selectedImageKeys}
                   onToggleSelected={toggleImageSelected}
+                  onRename={renameImage}
                 />
               )}
 
@@ -1022,6 +1102,7 @@ export default function Home() {
                 <CompareGrid
                   originals={originalImages}
                   enhancedByFilename={enhancedByFilename}
+                  restaurantSlug={activeRestaurantSlug}
                   emptyText={emptyLibraryText}
                   onPreview={setPreviewImage}
                 />
@@ -1040,6 +1121,7 @@ export default function Home() {
                   onDelete={(img) => deleteImage(img, "enhanced")}
                   selectedKeys={selectedImageKeys}
                   onToggleSelected={toggleImageSelected}
+                  onRename={renameImage}
                 />
               )}
 
@@ -1059,6 +1141,7 @@ export default function Home() {
                   enhanceLabel="Enhance header"
                   selectedKeys={selectedImageKeys}
                   onToggleSelected={toggleImageSelected}
+                  onRename={renameImage}
                   wide
                 />
               )}
@@ -1076,6 +1159,7 @@ export default function Home() {
                   onDelete={(img) => deleteImage(img, "header_enhanced")}
                   selectedKeys={selectedImageKeys}
                   onToggleSelected={toggleImageSelected}
+                  onRename={renameImage}
                   wide
                 />
               )}
@@ -1338,6 +1422,7 @@ function BatchActionBar({
   onClear,
   onDelete,
   onEnhance,
+  onDownloadSelected,
 }: {
   selectedCount: number;
   totalCount: number;
@@ -1348,6 +1433,7 @@ function BatchActionBar({
   onClear: () => void;
   onDelete: () => void;
   onEnhance: () => void;
+  onDownloadSelected: () => void;
 }) {
   const noSelection = selectedCount === 0;
 
@@ -1377,6 +1463,9 @@ function BatchActionBar({
         <button type="button" onClick={onClear} disabled={disabled || noSelection} style={miniButton(disabled || noSelection)}>
           Clear
         </button>
+        <button type="button" onClick={onDownloadSelected} disabled={disabled || noSelection} style={miniButton(disabled || noSelection)}>
+          Download Selected
+        </button>
         {canEnhance && (
           <button type="button" onClick={onEnhance} disabled={disabled || noSelection} style={miniDarkButton(disabled || noSelection)}>
             {enhanceLabel}
@@ -1403,6 +1492,7 @@ function ImageGrid({
   onEnhance,
   selectedKeys,
   onToggleSelected,
+  onRename,
   showEnhance = false,
   enhanceLabel = "Enhance",
   wide = false,
@@ -1419,10 +1509,27 @@ function ImageGrid({
   onEnhance?: (img: LibraryImage) => void;
   selectedKeys?: Set<string>;
   onToggleSelected?: (folder: string, filename: string) => void;
+  onRename?: (img: LibraryImage, folder: string, newName: string) => void;
   showEnhance?: boolean;
   enhanceLabel?: string;
   wide?: boolean;
 }) {
+  const [editingName, setEditingName] = useState<string | null>(null);
+  const [draftName, setDraftName] = useState("");
+
+  function startRename(img: LibraryImage) {
+    setEditingName(img.filename);
+    setDraftName(img.filename);
+  }
+
+  function finishRename(img: LibraryImage) {
+    const nextName = draftName.trim();
+    setEditingName(null);
+    if (nextName && nextName !== img.filename && onRename) {
+      onRename(img, folder, nextName);
+    }
+  }
+
   return (
     <div style={{ marginTop: 22 }}>
       <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "end" }}>
@@ -1518,19 +1625,42 @@ function ImageGrid({
                   ) : null}
                 </button>
 
-                <div
-                  style={{
-                    marginTop: 10,
-                    fontWeight: 950,
-                    fontSize: 13,
-                    whiteSpace: "nowrap",
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                  }}
-                  title={img.filename}
-                >
-                  {img.filename}
-                </div>
+                {editingName === img.filename ? (
+                  <input
+                    value={draftName}
+                    autoFocus
+                    onChange={(e) => setDraftName(e.target.value)}
+                    onBlur={() => finishRename(img)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") finishRename(img);
+                      if (e.key === "Escape") setEditingName(null);
+                    }}
+                    style={{ ...inputStyle, marginTop: 10, padding: "8px 10px", fontSize: 13, fontWeight: 900 }}
+                  />
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => startRename(img)}
+                    style={{
+                      marginTop: 10,
+                      width: "100%",
+                      border: 0,
+                      background: "transparent",
+                      padding: 0,
+                      textAlign: "left",
+                      fontWeight: 950,
+                      fontSize: 13,
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      cursor: onRename ? "text" : "default",
+                      color: "#0f172a",
+                    }}
+                    title="Click to rename"
+                  >
+                    {img.filename}
+                  </button>
+                )}
 
                 <div style={{ display: "grid", gridTemplateColumns: showEnhance ? "1fr 1fr" : "1fr", gap: 8, marginTop: 10 }}>
                   <button type="button" onClick={() => onDownload(img, folder)} style={cardButton}>
@@ -1565,11 +1695,13 @@ function ImageGrid({
 function CompareGrid({
   originals,
   enhancedByFilename,
+  restaurantSlug,
   emptyText,
   onPreview,
 }: {
   originals: LibraryImage[];
   enhancedByFilename: Map<string, LibraryImage>;
+  restaurantSlug: string;
   emptyText: string;
   onPreview: (img: PreviewImage) => void;
 }) {
@@ -1606,16 +1738,27 @@ function CompareGrid({
                 }}
               >
                 <div style={{ fontWeight: 950, marginBottom: 12 }}>{orig.filename}</div>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
-                  <CompareImage label="Original" url={origUrl} filename={orig.filename} onPreview={onPreview} />
-                  {enhanced ? (
-                    <CompareImage label="Enhanced" url={enhUrl} filename={enhanced.filename} onPreview={onPreview} />
-                  ) : (
-                    <div style={{ border: "1px dashed #cbd5e1", borderRadius: 18, background: "#f8fafc", display: "grid", placeItems: "center", minHeight: 230, color: "#64748b", fontWeight: 900 }}>
-                      Not enhanced yet
-                    </div>
-                  )}
-                </div>
+                {enhanced ? (
+                  <div>
+                    <CompareImage
+                      label="Old | New"
+                      url={`${BACKEND_URL}/api/dpo/restaurants/${encodeURIComponent(restaurantSlug)}/compare/${encodeURIComponent(orig.filename)}?v=${orig.modified || ""}-${enhanced.modified || ""}`}
+                      filename={orig.filename}
+                      onPreview={onPreview}
+                    />
+                    <a
+                      href={`${BACKEND_URL}/api/dpo/restaurants/${encodeURIComponent(restaurantSlug)}/compare/${encodeURIComponent(orig.filename)}`}
+                      download={`compare_${orig.filename}`}
+                      style={{ ...cardButton, display: "block", marginTop: 10, textAlign: "center", textDecoration: "none" }}
+                    >
+                      Download comparison
+                    </a>
+                  </div>
+                ) : (
+                  <div style={{ border: "1px dashed #cbd5e1", borderRadius: 18, background: "#f8fafc", display: "grid", placeItems: "center", minHeight: 230, color: "#64748b", fontWeight: 900 }}>
+                    Not enhanced yet
+                  </div>
+                )}
               </div>
             );
           })}
