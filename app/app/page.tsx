@@ -178,6 +178,20 @@ export default function Home() {
     }
   }
 
+  async function refreshRestaurantLibrary(slug: string, delayed = true) {
+    if (!slug) return;
+
+    await loadRestaurants();
+    await loadRestaurantImages(slug);
+
+    if (delayed) {
+      window.setTimeout(async () => {
+        await loadRestaurants();
+        await loadRestaurantImages(slug);
+      }, 800);
+    }
+  }
+
   useEffect(() => {
     loadRestaurants();
   }, []);
@@ -418,7 +432,7 @@ export default function Home() {
     }
 
     const check = window.prompt(
-      `Delete restaurant "${activeRestaurantName}" and archive all its files?\n\nType DELETE to confirm.`
+      `Delete restaurant "${activeRestaurantName}" and permanently remove its files?\n\nType DELETE to confirm.`
     );
 
     if (check !== "DELETE") return;
@@ -442,7 +456,7 @@ export default function Home() {
       resetAll();
       await loadRestaurants();
       setStatus("Deleted");
-      setMessage("Restaurant archived successfully.");
+      setMessage("Restaurant deleted successfully.");
     } catch (err) {
       setStatus("Delete failed");
       setError(err instanceof Error ? err.message : "Delete failed");
@@ -510,7 +524,7 @@ export default function Home() {
       }
 
       setProgress(100);
-      await loadRestaurantImages(activeRestaurantSlug);
+      await refreshRestaurantLibrary(activeRestaurantSlug);
       setActiveTab("enhanced");
       setStatus("Enhanced");
       setMessage(`${img.filename} enhanced successfully.`);
@@ -548,7 +562,7 @@ export default function Home() {
       }
 
       setProgress(100);
-      await loadRestaurantImages(activeRestaurantSlug);
+      await refreshRestaurantLibrary(activeRestaurantSlug);
       setActiveTab("enhanced");
       setStatus("Phase B complete");
       setMessage(`Enhanced ${data.count || data.processed?.length || 0} original image(s).`);
@@ -587,7 +601,7 @@ export default function Home() {
       }
 
       setProgress(100);
-      await loadRestaurantImages(activeRestaurantSlug);
+      await refreshRestaurantLibrary(activeRestaurantSlug);
       setActiveTab("headerEnhanced");
       setStatus("Header enhanced");
       setMessage(`${img.filename} enhanced as a 16:9 header.`);
@@ -625,7 +639,7 @@ export default function Home() {
       }
 
       setProgress(100);
-      await loadRestaurantImages(activeRestaurantSlug);
+      await refreshRestaurantLibrary(activeRestaurantSlug);
       setActiveTab("headerEnhanced");
       setStatus("Header Phase B complete");
       setMessage(`Enhanced ${data.count || data.processed?.length || 0} header image(s).`);
@@ -857,7 +871,7 @@ export default function Home() {
 
       setSelectedImageKeys(new Set());
       setProgress(100);
-      await loadRestaurantImages(activeRestaurantSlug);
+      await refreshRestaurantLibrary(activeRestaurantSlug);
       setActiveTab(activeBatch.enhanceKind === "header" ? "headerEnhanced" : "enhanced");
       setStatus("Enhanced");
       setMessage(`Enhanced ${enhanced} selected image(s).`);
