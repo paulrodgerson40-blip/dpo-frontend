@@ -45,7 +45,7 @@ type PreviewImage = {
 
 const TAB_LABELS: Record<ActiveTab, string> = {
   originals: "Original",
-  compare: "Old Vs New",
+  compare: "Comparison",
   enhanced: "Enhanced",
   headers: "Header",
   headerEnhanced: "Header Enhanced",
@@ -1178,6 +1178,8 @@ export default function Home() {
                 <CompareGrid
                   originals={originalImages}
                   enhancedByFilename={enhancedByFilename}
+                  headers={headerImages}
+                  headerEnhanced={headerEnhancedImages}
                   restaurantSlug={activeRestaurantSlug}
                   emptyText={emptyLibraryText}
                   onPreview={setPreviewImage}
@@ -1252,7 +1254,7 @@ export default function Home() {
 
               <div style={workflowGrid}>
                 <WorkflowStep number="01" title="Original" text="Upload and approve source images. Files are auto-renamed to avoid duplicate conflicts." />
-                <WorkflowStep number="02" title="Old Vs New" text="Compare original and enhanced outputs side-by-side by filename." />
+                <WorkflowStep number="02" title="Comparison" text="Review header and menu images side-by-side before publishing." />
                 <WorkflowStep number="03" title="Enhanced" text="Generate menu-item outputs with the square food-photo prompt." />
                 <WorkflowStep number="04" title="Header" text="Upload banner/header assets separately from menu images." />
                 <WorkflowStep number="05" title="Header Enhanced" text="Generate 16:9 hero banners using the dedicated header prompt." />
@@ -1456,10 +1458,10 @@ function SegmentedControl({
 function Tabs({ active, setActive }: { active: ActiveTab; setActive: (tab: ActiveTab) => void }) {
   const tabs: { id: ActiveTab; label: string }[] = [
     { id: "originals", label: "Original" },
-    { id: "compare", label: "Old Vs New" },
     { id: "enhanced", label: "Enhanced" },
     { id: "headers", label: "Header" },
     { id: "headerEnhanced", label: "Header Enhanced" },
+    { id: "compare", label: "Comparison" },
   ];
 
   return (
@@ -1771,116 +1773,198 @@ function ImageGrid({
 function CompareGrid({
   originals,
   enhancedByFilename,
+  headers,
+  headerEnhanced,
   restaurantSlug,
   emptyText,
   onPreview,
 }: {
   originals: LibraryImage[];
   enhancedByFilename: Map<string, LibraryImage>;
+  headers: LibraryImage[];
+  headerEnhanced: LibraryImage[];
   restaurantSlug: string;
   emptyText: string;
   onPreview: (img: PreviewImage) => void;
 }) {
   const matched = originals.filter((orig) => enhancedByFilename.has(orig.filename));
   const unmatched = originals.filter((orig) => !enhancedByFilename.has(orig.filename));
+  const headerOriginal = headers[0];
+  const headerFinal = headerEnhanced[0];
+  const hasAnyComparisonAssets = Boolean(headerOriginal || headerFinal || originals.length || headerEnhanced.length || matched.length);
 
   return (
     <div style={{ marginTop: 22 }}>
       <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "end" }}>
         <div>
-          <h3 style={{ margin: 0, fontSize: 20 }}>Old Vs New</h3>
+          <h3 style={{ margin: 0, fontSize: 20 }}>Comparison</h3>
           <p style={{ margin: "6px 0 0", color: "#64748b", lineHeight: 1.45 }}>
-            Store-scoped comparison only. A pair appears only when the original and enhanced filenames match inside this restaurant folder.
+            Review the enhanced header first, then compare menu images below. Only matched menu filenames appear as comparison pairs.
           </p>
         </div>
-        <div style={{ color: "#64748b", fontWeight: 900 }}>{matched.length} matched pair(s)</div>
+        <div style={{ color: "#64748b", fontWeight: 900 }}>{matched.length} menu pair(s)</div>
       </div>
 
-      {originals.length === 0 ? (
+      {!hasAnyComparisonAssets ? (
         <EmptyBox>{emptyText}</EmptyBox>
       ) : (
         <>
           <div style={compareStatusGrid}>
-            <CompareStatusBadge label="Matched pairs" value={matched.length} tone="good" />
-            <CompareStatusBadge label="Missing enhanced" value={unmatched.length} tone={unmatched.length > 0 ? "warn" : "good"} />
-            <CompareStatusBadge label="Total originals" value={originals.length} tone="neutral" />
+            <CompareStatusBadge label="Header original" value={headerOriginal ? 1 : 0} tone={headerOriginal ? "good" : "neutral"} />
+            <CompareStatusBadge label="Header enhanced" value={headerFinal ? 1 : 0} tone={headerFinal ? "good" : "warn"} />
+            <CompareStatusBadge label="Menu pairs" value={matched.length} tone={matched.length > 0 ? "good" : "neutral"} />
+            <CompareStatusBadge label="Missing menu enhanced" value={unmatched.length} tone={unmatched.length > 0 ? "warn" : "good"} />
           </div>
 
-          {unmatched.length > 0 && (
-            <div style={missingEnhancedBox}>
-              <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
-                <div>
-                  <div style={{ fontWeight: 950, color: "#92400e" }}>Unmatched originals</div>
-                  <div style={{ marginTop: 4, color: "#78350f", fontSize: 13 }}>
-                    These files exist in Original but do not yet have matching Enhanced outputs for this restaurant.
-                  </div>
+          <div style={comparisonSectionBox}>
+            <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "center", marginBottom: 14, flexWrap: "wrap" }}>
+              <div>
+                <div style={{ fontWeight: 950, fontSize: 18 }}>Header Comparison</div>
+                <div style={{ marginTop: 4, color: "#64748b", fontSize: 13 }}>
+                  This is the primary delivery-platform hero image. Original on the left, enhanced on the right.
                 </div>
-                <div style={{ ...smallWarnPill }}>{unmatched.length} missing</div>
               </div>
-              <div style={unmatchedGrid}>
-                {unmatched.map((orig) => {
-                  const url = fullImageUrl(orig.url);
+              <div style={matchedPill}>Top priority</div>
+            </div>
+
+            {headerOriginal || headerFinal ? (
+              <div style={headerComparisonGrid}>
+                <SideBySideImage
+                  label="Original header"
+                  image={headerOriginal}
+                  emptyText="No original header uploaded yet."
+                  title="Original Header"
+                  onPreview={onPreview}
+                  wide
+                />
+                <SideBySideImage
+                  label="Enhanced header"
+                  image={headerFinal}
+                  emptyText="No enhanced header generated yet."
+                  title="Enhanced Header"
+                  onPreview={onPreview}
+                  wide
+                />
+              </div>
+            ) : (
+              <EmptyBox>No header uploaded yet. Upload and enhance a header to create the first comparison.</EmptyBox>
+            )}
+          </div>
+
+          <div style={{ ...comparisonSectionBox, marginTop: 18 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "center", marginBottom: 14, flexWrap: "wrap" }}>
+              <div>
+                <div style={{ fontWeight: 950, fontSize: 18 }}>Menu Image Comparison</div>
+                <div style={{ marginTop: 4, color: "#64748b", fontSize: 13 }}>
+                  Original menu items compared against their enhanced outputs, matched by filename.
+                </div>
+              </div>
+              <div style={matchedPill}>{matched.length} matched</div>
+            </div>
+
+            {unmatched.length > 0 && (
+              <div style={{ ...missingEnhancedBox, marginTop: 0, marginBottom: 16 }}>
+                <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
+                  <div>
+                    <div style={{ fontWeight: 950, color: "#92400e" }}>Unmatched menu originals</div>
+                    <div style={{ marginTop: 4, color: "#78350f", fontSize: 13 }}>
+                      These original menu images do not yet have matching enhanced outputs.
+                    </div>
+                  </div>
+                  <div style={{ ...smallWarnPill }}>{unmatched.length} missing</div>
+                </div>
+              </div>
+            )}
+
+            {matched.length === 0 ? (
+              <EmptyBox>No matched menu comparisons yet. Enhance originals first, or make sure enhanced filenames match the originals.</EmptyBox>
+            ) : (
+              <div style={{ display: "grid", gap: 18 }}>
+                {matched.map((orig) => {
+                  const enhanced = enhancedByFilename.get(orig.filename)!;
                   return (
-                    <button
-                      type="button"
-                      key={`missing-${orig.filename}`}
-                      onClick={() => onPreview({ title: "Missing enhanced", url, filename: orig.filename })}
-                      style={unmatchedItem}
-                      title={orig.filename}
+                    <div
+                      key={`compare-${orig.filename}`}
+                      style={{
+                        background: "white",
+                        border: "1px solid #e2e8f0",
+                        borderRadius: 22,
+                        padding: 14,
+                        boxShadow: "0 10px 24px rgba(15,23,42,0.06)",
+                      }}
                     >
-                      <span style={unmatchedThumbWrap}>
-                        {url ? <img src={url} alt={orig.filename} style={unmatchedThumb} /> : null}
-                      </span>
-                      <span style={unmatchedName}>{orig.filename}</span>
-                    </button>
+                      <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "center", marginBottom: 12 }}>
+                        <div style={{ fontWeight: 950 }}>{orig.filename}</div>
+                        <div style={matchedPill}>Matched</div>
+                      </div>
+                      <CompareImage
+                        label="Original | Enhanced"
+                        url={`${BACKEND_URL}/api/dpo/restaurants/${encodeURIComponent(restaurantSlug)}/compare/${encodeURIComponent(orig.filename)}?v=${orig.modified || ""}-${enhanced.modified || ""}`}
+                        filename={orig.filename}
+                        onPreview={onPreview}
+                      />
+                      <a
+                        href={`${BACKEND_URL}/api/dpo/restaurants/${encodeURIComponent(restaurantSlug)}/compare/${encodeURIComponent(orig.filename)}`}
+                        download={`compare_${orig.filename}`}
+                        style={{ ...cardButton, display: "block", marginTop: 10, textAlign: "center", textDecoration: "none" }}
+                      >
+                        Download comparison
+                      </a>
+                    </div>
                   );
                 })}
               </div>
-            </div>
-          )}
-
-          {matched.length === 0 ? (
-            <EmptyBox>No matched Old Vs New pairs yet. Enhance originals first, or make sure enhanced filenames match the originals.</EmptyBox>
-          ) : (
-            <div style={{ display: "grid", gap: 18, marginTop: 16 }}>
-              {matched.map((orig) => {
-                const enhanced = enhancedByFilename.get(orig.filename)!;
-
-                return (
-                  <div
-                    key={`compare-${orig.filename}`}
-                    style={{
-                      background: "white",
-                      border: "1px solid #e2e8f0",
-                      borderRadius: 22,
-                      padding: 14,
-                      boxShadow: "0 10px 24px rgba(15,23,42,0.06)",
-                    }}
-                  >
-                    <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "center", marginBottom: 12 }}>
-                      <div style={{ fontWeight: 950 }}>{orig.filename}</div>
-                      <div style={matchedPill}>Matched</div>
-                    </div>
-                    <CompareImage
-                      label="Old | New"
-                      url={`${BACKEND_URL}/api/dpo/restaurants/${encodeURIComponent(restaurantSlug)}/compare/${encodeURIComponent(orig.filename)}?v=${orig.modified || ""}-${enhanced.modified || ""}`}
-                      filename={orig.filename}
-                      onPreview={onPreview}
-                    />
-                    <a
-                      href={`${BACKEND_URL}/api/dpo/restaurants/${encodeURIComponent(restaurantSlug)}/compare/${encodeURIComponent(orig.filename)}`}
-                      download={`compare_${orig.filename}`}
-                      style={{ ...cardButton, display: "block", marginTop: 10, textAlign: "center", textDecoration: "none" }}
-                    >
-                      Download comparison
-                    </a>
-                  </div>
-                );
-              })}
-            </div>
-          )}
+            )}
+          </div>
         </>
       )}
+    </div>
+  );
+}
+
+function SideBySideImage({
+  label,
+  image,
+  emptyText,
+  title,
+  onPreview,
+  wide = false,
+}: {
+  label: string;
+  image?: LibraryImage;
+  emptyText: string;
+  title: string;
+  onPreview: (img: PreviewImage) => void;
+  wide?: boolean;
+}) {
+  const url = fullImageUrl(image?.url);
+
+  return (
+    <div style={{ background: "white", border: "1px solid #e2e8f0", borderRadius: 20, padding: 12, boxShadow: "0 10px 24px rgba(15,23,42,0.05)" }}>
+      <div style={{ marginBottom: 10, fontWeight: 950, color: "#334155" }}>{label}</div>
+      {image && url ? (
+        <button
+          type="button"
+          onClick={() => onPreview({ title, url, filename: image.filename })}
+          style={{
+            width: "100%",
+            height: wide ? 230 : 180,
+            borderRadius: 16,
+            overflow: "hidden",
+            background: "#f8fafc",
+            border: 0,
+            padding: 0,
+            cursor: "zoom-in",
+          }}
+        >
+          <img src={url} alt={image.filename} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
+        </button>
+      ) : (
+        <div style={{ height: wide ? 230 : 180, border: "1px dashed #cbd5e1", borderRadius: 16, display: "grid", placeItems: "center", color: "#64748b", fontWeight: 850, textAlign: "center", padding: 16 }}>
+          {emptyText}
+        </div>
+      )}
+      {image && <div style={{ marginTop: 10, fontWeight: 850, fontSize: 13, color: "#475569", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{image.filename}</div>}
     </div>
   );
 }
@@ -2128,6 +2212,20 @@ const cardButtonDanger: React.CSSProperties = {
   fontWeight: 900,
   color: "#991b1b",
   cursor: "pointer",
+};
+
+const comparisonSectionBox: React.CSSProperties = {
+  marginTop: 18,
+  border: "1px solid #e2e8f0",
+  borderRadius: 22,
+  padding: 16,
+  background: "#f8fafc",
+};
+
+const headerComparisonGrid: React.CSSProperties = {
+  display: "grid",
+  gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
+  gap: 16,
 };
 
 const compareStatusGrid: React.CSSProperties = {
