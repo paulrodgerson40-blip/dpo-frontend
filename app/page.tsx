@@ -156,15 +156,15 @@ export default function PremiumPricingPage() {
           </p>
         </div>
 
-        <div className="mt-14 grid gap-8 lg:grid-cols-2">
-          <div className="rounded-[36px] border border-neutral-200 bg-white p-6 shadow-sm">
+        <div className="mt-12 grid gap-6 lg:grid-cols-2">
+          <div className="rounded-[36px] border border-neutral-200 bg-white p-5 shadow-sm">
             <div className="mb-4 w-fit rounded-full bg-neutral-100 px-4 py-2 text-sm font-black">Before</div>
-            <div className="relative h-[620px] w-full overflow-hidden rounded-[28px] bg-white">
+            <div className="relative h-[520px] w-full overflow-hidden rounded-[28px] bg-white">
               <Image
                 src="/images/menu-before.png"
                 alt="Full menu before image upgrade"
                 fill
-                className="object-contain"
+                className="object-contain scale-105"
               />
             </div>
             <p className="mt-5 text-sm leading-6 text-neutral-600">
@@ -172,14 +172,14 @@ export default function PremiumPricingPage() {
             </p>
           </div>
 
-          <div className="rounded-[36px] border border-black bg-white p-6 shadow-[0_24px_80px_rgba(0,0,0,0.12)]">
+          <div className="rounded-[36px] border border-black bg-white p-5 shadow-[0_24px_80px_rgba(0,0,0,0.12)]">
             <div className="mb-4 w-fit rounded-full bg-[#06C167] px-4 py-2 text-sm font-black text-black">After</div>
-            <div className="relative h-[620px] w-full overflow-hidden rounded-[28px] bg-white">
+            <div className="relative h-[520px] w-full overflow-hidden rounded-[28px] bg-white">
               <Image
                 src="/images/menu-after.png"
                 alt="Full menu after image upgrade"
                 fill
-                className="object-contain"
+                className="object-contain scale-105"
               />
             </div>
             <p className="mt-5 text-sm leading-6 text-neutral-600">
@@ -211,15 +211,25 @@ export default function PremiumPricingPage() {
           <div className="grid gap-5">
             <div className="rounded-[34px] border border-neutral-200 bg-white p-5 shadow-sm">
               <div className="mb-3 w-fit rounded-full bg-neutral-100 px-3 py-1 text-xs font-black">Before header</div>
-              <div className="flex h-44 items-center justify-center rounded-[24px] bg-neutral-200 text-center font-black text-neutral-500">
-                IMAGE: HEADER BEFORE<br />Current Uber Eats banner
+              <div className="relative h-64 w-full overflow-hidden rounded-[24px] bg-white">
+                <Image
+                  src="/images/header-before.png"
+                  alt="Header before image upgrade"
+                  fill
+                  className="object-cover"
+                />
               </div>
             </div>
 
             <div className="rounded-[34px] border border-black bg-white p-5 shadow-[0_24px_80px_rgba(0,0,0,0.10)]">
               <div className="mb-3 w-fit rounded-full bg-[#06C167] px-3 py-1 text-xs font-black text-black">After header</div>
-              <div className="flex h-44 items-center justify-center rounded-[24px] bg-gradient-to-r from-black via-neutral-900 to-[#06C167]/40 text-center font-black text-white">
-                IMAGE: HEADER AFTER<br />Premium delivery platform banner
+              <div className="relative h-64 w-full overflow-hidden rounded-[24px] bg-black">
+                <Image
+                  src="/images/header-after.png"
+                  alt="Header after image upgrade"
+                  fill
+                  className="object-cover"
+                />
               </div>
             </div>
           </div>
