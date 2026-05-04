@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Image from "next/image";
 
 
 function CheckItem({ children }: { children: React.ReactNode }) {
@@ -96,15 +97,27 @@ export default function PremiumPricingPage() {
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div>
                     <div className="mb-3 w-fit rounded-full bg-white/15 px-3 py-1 text-xs font-bold text-white">Before</div>
-                    <div className="flex h-72 items-center justify-center rounded-[28px] bg-neutral-800 text-center text-sm font-black text-white/50">
-                      IMAGE<br />DISH BEFORE
+                    <div className="relative h-72 w-full overflow-hidden rounded-[28px] bg-neutral-800">
+                      <Image
+                        src="/images/dish-before.png"
+                        alt="Burger before image enhancement"
+                        fill
+                        className="object-cover"
+                        priority
+                      />
                     </div>
                     <p className="mt-4 text-xs leading-5 text-white/50">Flat lighting, inconsistent framing, low appetite appeal.</p>
                   </div>
                   <div>
                     <div className="mb-3 w-fit rounded-full bg-[#06C167] px-3 py-1 text-xs font-black text-black">After</div>
-                    <div className="flex h-72 items-center justify-center rounded-[28px] bg-gradient-to-br from-[#06C167]/25 via-orange-400/45 to-black text-center text-sm font-black text-white">
-                      IMAGE<br />DISH AFTER
+                    <div className="relative h-72 w-full overflow-hidden rounded-[28px] bg-black">
+                      <Image
+                        src="/images/dish-after.png"
+                        alt="Burger after image enhancement"
+                        fill
+                        className="object-cover"
+                        priority
+                      />
                     </div>
                     <p className="mt-4 text-xs leading-5 text-white/70">Premium style, stronger texture, platform-ready presentation.</p>
                   </div>
