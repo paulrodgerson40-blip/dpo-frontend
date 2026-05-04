@@ -294,7 +294,7 @@ export default function PremiumPricingPage() {
                     className="object-cover"
                   />
                 </div>
-                <div className="mt-4 text-sm font-bold">Watermarked</div>
+                <div className="mt-4 text-sm font-bold">Preview</div>
                 <div className="mt-1 text-xs text-white/45">Free preview</div>
               </div>
             </div>
