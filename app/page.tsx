@@ -3,6 +3,42 @@
 import React from "react";
 import Image from "next/image";
 
+function LogoMark({ className = "" }: { className?: string }) {
+  return (
+    <div
+      className={`relative flex items-center justify-center overflow-hidden rounded-xl bg-black text-white ${className}`}
+      aria-hidden="true"
+    >
+      <svg viewBox="0 0 48 48" className="h-full w-full">
+        <rect width="48" height="48" rx="14" fill="#000000" />
+        <path
+          d="M24 10C26.7 18.2 29.8 21.3 38 24C29.8 26.7 26.7 29.8 24 38C21.3 29.8 18.2 26.7 10 24C18.2 21.3 21.3 18.2 24 10Z"
+          fill="white"
+        />
+        <path
+          d="M35 8C36.1 11.2 37.8 12.9 41 14C37.8 15.1 36.1 16.8 35 20C33.9 16.8 32.2 15.1 29 14C32.2 12.9 33.9 11.2 35 8Z"
+          fill="#06C167"
+        />
+      </svg>
+    </div>
+  );
+}
+
+function BrandLockup({ dark = false }: { dark?: boolean }) {
+  return (
+    <div className="flex items-center gap-3">
+      <LogoMark className="h-10 w-10" />
+      <div>
+        <div className={`text-sm font-black tracking-tight ${dark ? "text-white" : "text-black"}`}>
+          Delivery Ignite
+        </div>
+        <div className={`text-xs ${dark ? "text-white/55" : "text-neutral-500"}`}>
+          Restaurant image upgrades
+        </div>
+      </div>
+    </div>
+  );
+}
 
 function CheckItem({ children }: { children: React.ReactNode }) {
   return (
@@ -19,15 +55,7 @@ export default function PremiumPricingPage() {
       {/* HEADER */}
       <header className="sticky top-0 z-50 border-b border-black/5 bg-[#F7F7F4]/90 backdrop-blur-xl">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-4 sm:px-8 lg:px-10">
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-black text-white">
-              ✦
-            </div>
-            <div>
-              <div className="text-sm font-black tracking-tight">Delivery Ignite</div>
-              <div className="text-xs text-neutral-500">Restaurant image upgrades</div>
-            </div>
-          </div>
+          <BrandLockup />
 
           <nav className="hidden items-center gap-8 text-sm font-semibold text-neutral-600 md:flex">
             <a href="#sample" className="hover:text-black">Free sample</a>
@@ -50,6 +78,11 @@ export default function PremiumPricingPage() {
         <div className="absolute right-[-10rem] top-[-12rem] h-[34rem] w-[34rem] rounded-full bg-[#06C167]/12 blur-3xl" />
         <div className="absolute bottom-[-18rem] left-[-14rem] h-[30rem] w-[30rem] rounded-full bg-black/5 blur-3xl" />
 
+        {/* subtle brand watermark */}
+        <div className="pointer-events-none absolute right-[8%] top-24 hidden opacity-[0.035] lg:block">
+          <LogoMark className="h-52 w-52 rounded-[48px]" />
+        </div>
+
         <div className="mx-auto grid max-w-7xl items-center gap-14 px-5 py-16 sm:px-8 lg:grid-cols-[0.95fr_1.05fr] lg:px-10 lg:py-20">
           <div>
             <div className="inline-flex items-center gap-2 rounded-full border border-black/10 bg-white px-4 py-2 text-sm font-bold shadow-sm">
@@ -57,7 +90,14 @@ export default function PremiumPricingPage() {
               Free 3 image preview available
             </div>
 
-            <h1 className="mt-7 max-w-2xl text-5xl font-black leading-[0.9] tracking-[-0.07em] sm:text-6xl lg:text-7xl">
+            <div className="mt-7 flex items-center gap-3">
+              <LogoMark className="h-8 w-8 rounded-lg" />
+              <span className="text-sm font-black tracking-tight text-neutral-700">
+                Delivery Ignite
+              </span>
+            </div>
+
+            <h1 className="mt-5 max-w-2xl text-5xl font-black leading-[0.9] tracking-[-0.07em] sm:text-6xl lg:text-7xl">
               Make your menu look worth ordering.
             </h1>
 
@@ -67,7 +107,7 @@ export default function PremiumPricingPage() {
             </p>
 
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-              <a href="#sample" className="rounded-full bg-[#06C167] px-7 py-4 text-sm font-black text-black shadow-[0_10px_30px_rgba(6,193,103,0.25)] transition hover:bg-[#05ad5c]">
+              <a href="#sample" className="inline-flex items-center justify-center gap-2 rounded-full bg-[#06C167] px-7 py-4 text-sm font-black text-black shadow-[0_10px_30px_rgba(6,193,103,0.25)] transition hover:bg-[#05ad5c]">
                 Get Free Sample →
               </a>
               <a href="#pricing" className="rounded-full border border-black/10 bg-white px-7 py-4 text-sm font-black text-black transition hover:bg-neutral-50">
@@ -93,14 +133,18 @@ export default function PremiumPricingPage() {
 
           <div className="relative">
             <div className="rounded-[34px] border border-black/10 bg-white p-3 shadow-[0_30px_100px_rgba(0,0,0,0.16)]">
-              <div className="rounded-[28px] bg-black p-4">
+              <div className="relative overflow-hidden rounded-[28px] bg-black p-4">
+                <div className="absolute right-4 top-4 z-10 opacity-80">
+                  <LogoMark className="h-8 w-8 rounded-lg" />
+                </div>
+
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div>
                     <div className="mb-2 w-fit rounded-full bg-white/15 px-3 py-1 text-xs font-bold text-white">Before</div>
                     <div className="relative h-56 w-full overflow-hidden rounded-[22px] bg-neutral-800">
                       <Image
                         src="/images/dish-before.png"
-                        alt="Burger before image enhancement"
+                        alt="Garlic bread before image enhancement"
                         fill
                         className="object-cover"
                         priority
@@ -113,11 +157,14 @@ export default function PremiumPricingPage() {
                     <div className="relative h-56 w-full overflow-hidden rounded-[22px] bg-black">
                       <Image
                         src="/images/dish-after.png"
-                        alt="Burger after image enhancement"
+                        alt="Garlic bread after image enhancement"
                         fill
                         className="object-cover"
                         priority
                       />
+                      <div className="absolute bottom-3 right-3 rounded-xl bg-black/65 p-1.5 backdrop-blur">
+                        <LogoMark className="h-5 w-5 rounded-md" />
+                      </div>
                     </div>
                     <p className="mt-3 text-xs leading-5 text-white/70">Premium style, stronger texture, platform-ready presentation.</p>
                   </div>
@@ -125,7 +172,7 @@ export default function PremiumPricingPage() {
               </div>
             </div>
 
-            <div className="absolute -bottom-15 -left-5 hidden rounded-3xl border border-black/10 bg-white p-5 shadow-xl lg:block">
+            <div className="absolute -bottom-9 left-8 hidden rounded-3xl border border-black/10 bg-white p-5 shadow-xl lg:block">
               <div className="flex items-center gap-3">
                 <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#06C167]/15 text-[#06C167]">✓</div>
                 <div>
@@ -181,6 +228,9 @@ export default function PremiumPricingPage() {
                 fill
                 className="object-contain scale-[1.16]"
               />
+              <div className="absolute bottom-4 right-4 rounded-xl bg-white/85 p-2 shadow-sm backdrop-blur">
+                <LogoMark className="h-6 w-6 rounded-lg" />
+              </div>
             </div>
             <p className="mt-4 text-sm leading-6 text-neutral-600">
               Consistent image style, stronger appetite appeal, cleaner presentation, and a more premium store presence.
@@ -230,6 +280,9 @@ export default function PremiumPricingPage() {
                   fill
                   className="object-cover"
                 />
+                <div className="absolute bottom-4 right-4 rounded-xl bg-black/65 p-2 backdrop-blur">
+                  <LogoMark className="h-6 w-6 rounded-lg" />
+                </div>
               </div>
             </div>
           </div>
@@ -241,7 +294,15 @@ export default function PremiumPricingPage() {
 
       {/* FREE SAMPLE SECTION */}
       <section id="sample" className="mx-auto max-w-7xl px-5 py-10 sm:px-8 lg:px-10">
-        <div className="rounded-[34px] bg-black p-7 text-white shadow-[0_24px_80px_rgba(0,0,0,0.14)] sm:p-10">
+        <div className="relative overflow-hidden rounded-[34px] bg-black p-7 text-white shadow-[0_24px_80px_rgba(0,0,0,0.14)] sm:p-10">
+          <div className="absolute right-8 top-8 opacity-70">
+            <LogoMark className="h-10 w-10" />
+          </div>
+
+          <div className="pointer-events-none absolute -right-16 -top-16 opacity-[0.08]">
+            <LogoMark className="h-56 w-56 rounded-[48px]" />
+          </div>
+
           <div className="grid gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
             <div>
               <div className="inline-flex rounded-full bg-white/10 px-4 py-2 text-sm font-bold">Free proof of value</div>
@@ -263,7 +324,7 @@ export default function PremiumPricingPage() {
                 <div className="relative h-44 w-full overflow-hidden rounded-2xl bg-neutral-800">
                   <Image
                     src="/images/sample-original.png"
-                    alt="Original sample food image"
+                    alt="Original sample image"
                     fill
                     className="object-cover"
                   />
@@ -276,10 +337,13 @@ export default function PremiumPricingPage() {
                 <div className="relative h-44 w-full overflow-hidden rounded-2xl bg-black">
                   <Image
                     src="/images/sample-enhanced.png"
-                    alt="Enhanced sample food image"
+                    alt="Enhanced sample image"
                     fill
                     className="object-cover"
                   />
+                  <div className="absolute bottom-3 right-3 rounded-xl bg-black/65 p-1.5 backdrop-blur">
+                    <LogoMark className="h-5 w-5 rounded-md" />
+                  </div>
                 </div>
                 <div className="mt-4 text-sm font-bold">Enhanced</div>
                 <div className="mt-1 text-xs text-white/45">Premium upgrade</div>
@@ -288,11 +352,16 @@ export default function PremiumPricingPage() {
               <div className="rounded-3xl border border-white/10 bg-white/[0.06] p-4">
                 <div className="relative h-44 w-full overflow-hidden rounded-2xl bg-black">
                   <Image
-                    src="/images/sample-watermarked.jpg"
-                    alt="Watermarked sample food image"
+                    src="/images/sample-watermarked.png"
+                    alt="Watermarked preview sample image"
                     fill
                     className="object-cover"
                   />
+                  <div className="absolute inset-0 flex items-center justify-center bg-black/10">
+                    <div className="rounded-full border border-white/25 bg-black/45 px-4 py-2 text-xs font-black tracking-[0.2em] text-white/90 backdrop-blur">
+                      PREVIEW
+                    </div>
+                  </div>
                 </div>
                 <div className="mt-4 text-sm font-bold">Preview</div>
                 <div className="mt-1 text-xs text-white/45">Free preview</div>
@@ -503,10 +572,15 @@ export default function PremiumPricingPage() {
 
       {/* OWNERSHIP */}
       <section className="mx-auto max-w-7xl px-5 py-12 sm:px-8 lg:px-10">
-        <div className="rounded-[34px] bg-black p-7 text-white sm:p-10">
+        <div className="relative overflow-hidden rounded-[34px] bg-black p-7 text-white sm:p-10">
+          <div className="pointer-events-none absolute -right-14 -top-14 opacity-[0.08]">
+            <LogoMark className="h-52 w-52 rounded-[48px]" />
+          </div>
+
           <div className="grid gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
             <div>
-              <h2 className="mt-5 text-4xl font-black tracking-[-0.05em]">You own every image.</h2>
+              <BrandLockup dark />
+              <h2 className="mt-7 text-4xl font-black tracking-[-0.05em]">You own every image.</h2>
               <p className="mt-5 max-w-xl text-base leading-7 text-white/65">
                 Use your completed images across Uber Eats, DoorDash, your website, social media,
                 print menus, and future campaigns. No restrictions.
@@ -529,7 +603,10 @@ export default function PremiumPricingPage() {
 
       {/* FINAL CTA */}
       <section className="mx-auto max-w-5xl px-5 py-14 text-center sm:px-8 lg:px-10">
-        <div className="rounded-[34px] border border-neutral-200 bg-white p-9 shadow-[0_25px_90px_rgba(0,0,0,0.08)] sm:p-14">
+        <div className="relative overflow-hidden rounded-[34px] border border-neutral-200 bg-white p-9 shadow-[0_25px_90px_rgba(0,0,0,0.08)] sm:p-14">
+          <div className="mx-auto flex justify-center">
+            <LogoMark className="h-12 w-12 rounded-2xl" />
+          </div>
           <h2 className="mt-6 text-4xl font-black leading-[0.95] tracking-[-0.06em]">Start with 3 free images.</h2>
           <p className="mx-auto mt-5 max-w-xl text-neutral-600">We’ll show the upgrade before you commit. Watermarked samples. No pressure.</p>
           <div className="mt-7 flex flex-col justify-center gap-3 sm:flex-row">
@@ -539,8 +616,11 @@ export default function PremiumPricingPage() {
         </div>
       </section>
 
-      <footer className="border-t border-black/5 px-5 py-8 text-center text-sm text-neutral-500 sm:px-8 lg:px-10">
-        Delivery Ignite — premium restaurant visual upgrades.
+      <footer className="border-t border-black/5 px-5 py-8 sm:px-8 lg:px-10">
+        <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 text-sm text-neutral-500 sm:flex-row">
+          <BrandLockup />
+          <div>Delivery Ignite — premium restaurant visual upgrades.</div>
+        </div>
       </footer>
     </main>
   );
