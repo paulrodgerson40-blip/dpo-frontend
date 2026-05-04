@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 
 function LogoMark({ className = "" }: { className?: string }) {
@@ -49,6 +49,395 @@ function CheckItem({ children }: { children: React.ReactNode }) {
   );
 }
 
+
+type DrinkAsset = {
+  filename: string;
+  url: string;
+  size?: number;
+};
+
+type DrinksPayload = {
+  ok: boolean;
+  originals: DrinkAsset[];
+  enhanced: DrinkAsset[];
+};
+
+const DPO_API_BASE =
+  process.env.NEXT_PUBLIC_DPO_API_BASE || "https://170.64.209.149.sslip.io";
+
+function assetUrl(url: string) {
+  if (!url) return "";
+  if (url.startsWith("http")) return url;
+  return `${DPO_API_BASE}${url}`;
+}
+
+function formatBytes(bytes?: number) {
+  if (!bytes) return "";
+  if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+function toggleSetValue(set: React.Dispatch<React.SetStateAction<Set<string>>>, value: string) {
+  set((prev) => {
+    const next = new Set(prev);
+    if (next.has(value)) next.delete(value);
+    else next.add(value);
+    return next;
+  });
+}
+
+function DrinksGrid({
+  title,
+  subtitle,
+  assets,
+  selected,
+  onToggle,
+  emptyText,
+}: {
+  title: string;
+  subtitle: string;
+  assets: DrinkAsset[];
+  selected: Set<string>;
+  onToggle: (filename: string) => void;
+  emptyText: string;
+}) {
+  return (
+    <div className="rounded-[30px] border border-black/10 bg-white p-5 shadow-sm">
+      <div className="mb-4 flex items-end justify-between gap-3">
+        <div>
+          <h3 className="text-xl font-black tracking-tight">{title}</h3>
+          <p className="mt-1 text-xs font-medium text-neutral-500">{subtitle}</p>
+        </div>
+        <div className="rounded-full bg-neutral-100 px-3 py-1 text-xs font-black text-neutral-700">
+          {selected.size}/{assets.length} selected
+        </div>
+      </div>
+
+      {assets.length === 0 ? (
+        <div className="flex h-56 items-center justify-center rounded-3xl border border-dashed border-black/10 bg-neutral-50 text-sm font-semibold text-neutral-400">
+          {emptyText}
+        </div>
+      ) : (
+        <div className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-4">
+          {assets.map((asset) => {
+            const isSelected = selected.has(asset.filename);
+            return (
+              <button
+                key={asset.filename}
+                type="button"
+                onClick={() => onToggle(asset.filename)}
+                className={`group relative overflow-hidden rounded-3xl border bg-neutral-50 text-left transition ${
+                  isSelected
+                    ? "border-[#06C167] ring-4 ring-[#06C167]/20"
+                    : "border-black/10 hover:border-black/30"
+                }`}
+              >
+                <div className="relative aspect-square w-full overflow-hidden bg-neutral-100">
+                  <img
+                    src={assetUrl(asset.url)}
+                    alt={asset.filename}
+                    className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
+                  />
+                  <div
+                    className={`absolute right-3 top-3 flex h-7 w-7 items-center justify-center rounded-full border text-xs font-black shadow-sm ${
+                      isSelected
+                        ? "border-[#06C167] bg-[#06C167] text-black"
+                        : "border-white/70 bg-black/45 text-white backdrop-blur"
+                    }`}
+                  >
+                    {isSelected ? "✓" : ""}
+                  </div>
+                </div>
+                <div className="p-3">
+                  <div className="truncate text-xs font-black text-neutral-800">{asset.filename}</div>
+                  <div className="mt-1 text-[11px] font-semibold text-neutral-400">{formatBytes(asset.size)}</div>
+                </div>
+              </button>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function DrinksLibraryPanel() {
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const [originals, setOriginals] = useState<DrinkAsset[]>([]);
+  const [enhanced, setEnhanced] = useState<DrinkAsset[]>([]);
+  const [selectedOriginals, setSelectedOriginals] = useState<Set<string>>(new Set());
+  const [selectedEnhanced, setSelectedEnhanced] = useState<Set<string>>(new Set());
+  const [busy, setBusy] = useState(false);
+  const [message, setMessage] = useState("Ready");
+
+  const selectedOriginalList = useMemo(() => Array.from(selectedOriginals), [selectedOriginals]);
+  const selectedEnhancedList = useMemo(() => Array.from(selectedEnhanced), [selectedEnhanced]);
+
+  async function loadDrinks() {
+    const res = await fetch(`${DPO_API_BASE}/api/dpo/drinks`, { cache: "no-store" });
+    if (!res.ok) throw new Error(`Failed to load drinks: ${res.status}`);
+    const data = (await res.json()) as DrinksPayload;
+    setOriginals(data.originals || []);
+    setEnhanced(data.enhanced || []);
+  }
+
+  useEffect(() => {
+    loadDrinks().catch((err) => setMessage(err.message || "Failed to load drinks"));
+  }, []);
+
+  async function uploadFiles(files: FileList | null) {
+    if (!files || files.length === 0) return;
+    setBusy(true);
+    setMessage(`Uploading ${files.length} drink image${files.length === 1 ? "" : "s"}...`);
+    try {
+      const form = new FormData();
+      Array.from(files).forEach((file) => form.append("files", file));
+      const res = await fetch(`${DPO_API_BASE}/api/dpo/drinks/upload`, {
+        method: "POST",
+        body: form,
+      });
+      if (!res.ok) throw new Error(await res.text());
+      await loadDrinks();
+      setMessage("Drink originals uploaded.");
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    } catch (err: any) {
+      setMessage(err?.message || "Upload failed");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function enhanceSelected() {
+    if (selectedOriginalList.length === 0) return setMessage("Select original drinks to enhance first.");
+    setBusy(true);
+    setMessage(`Enhancing ${selectedOriginalList.length} selected drink image${selectedOriginalList.length === 1 ? "" : "s"}...`);
+    try {
+      const res = await fetch(`${DPO_API_BASE}/api/dpo/drinks/enhance-selected`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ files: selectedOriginalList }),
+      });
+      if (!res.ok) throw new Error(await res.text());
+      const data = await res.json();
+      await loadDrinks();
+      setSelectedOriginals(new Set());
+      setMessage(`Enhanced ${data.processed?.length || 0} drink image${(data.processed?.length || 0) === 1 ? "" : "s"}.`);
+    } catch (err: any) {
+      setMessage(err?.message || "Enhance failed");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function deleteSelected(folder: "originals" | "enhanced") {
+    const files = folder === "originals" ? selectedOriginalList : selectedEnhancedList;
+    if (files.length === 0) return setMessage(`Select ${folder} drinks to delete first.`);
+    setBusy(true);
+    setMessage(`Deleting ${files.length} ${folder} drink image${files.length === 1 ? "" : "s"}...`);
+    try {
+      const res = await fetch(`${DPO_API_BASE}/api/dpo/drinks/delete-selected`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ folder, files }),
+      });
+      if (!res.ok) throw new Error(await res.text());
+      await loadDrinks();
+      if (folder === "originals") setSelectedOriginals(new Set());
+      else setSelectedEnhanced(new Set());
+      setMessage("Selected drink files deleted.");
+    } catch (err: any) {
+      setMessage(err?.message || "Delete failed");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function downloadSelected(folder: "originals" | "enhanced") {
+    const files = folder === "originals" ? selectedOriginalList : selectedEnhancedList;
+    if (files.length === 0) return setMessage(`Select ${folder} drinks to download first.`);
+    setBusy(true);
+    setMessage(`Preparing ${folder} drink ZIP...`);
+    try {
+      const res = await fetch(`${DPO_API_BASE}/api/dpo/drinks/download-selected`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ folder, files }),
+      });
+      if (!res.ok) throw new Error(await res.text());
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `drinks_${folder}.zip`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+      setMessage("Download started.");
+    } catch (err: any) {
+      setMessage(err?.message || "Download failed");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <section id="drinks-library" className="mx-auto max-w-7xl px-5 py-10 sm:px-8 lg:px-10">
+      <div className="overflow-hidden rounded-[34px] border border-black bg-white shadow-[0_24px_80px_rgba(0,0,0,0.10)]">
+        <div className="grid gap-6 bg-black p-7 text-white lg:grid-cols-[0.8fr_1.2fr] lg:items-center">
+          <div>
+            <div className="inline-flex rounded-full bg-[#06C167] px-4 py-2 text-xs font-black text-black">
+              Global Drinks Library
+            </div>
+            <h2 className="mt-5 text-4xl font-black tracking-[-0.06em]">
+              Upload drinks once. Enhance, download, delete anytime.
+            </h2>
+            <p className="mt-4 max-w-xl text-sm leading-6 text-white/65">
+              This is separate from restaurant folders. Use it to grow a reusable beverage asset library across all jobs.
+            </p>
+          </div>
+
+          <div className="rounded-3xl border border-white/10 bg-white/[0.06] p-4">
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={busy}
+                className="rounded-full bg-[#06C167] px-5 py-3 text-sm font-black text-black transition hover:bg-[#05ad5c] disabled:opacity-50"
+              >
+                Upload Drinks
+              </button>
+              <button
+                type="button"
+                onClick={enhanceSelected}
+                disabled={busy || selectedOriginals.size === 0}
+                className="rounded-full bg-white px-5 py-3 text-sm font-black text-black transition hover:bg-neutral-100 disabled:opacity-40"
+              >
+                Enhance Selected
+              </button>
+              <button
+                type="button"
+                onClick={() => downloadSelected("enhanced")}
+                disabled={busy || selectedEnhanced.size === 0}
+                className="rounded-full border border-white/15 px-5 py-3 text-sm font-black text-white transition hover:bg-white/10 disabled:opacity-40"
+              >
+                Download Enhanced
+              </button>
+              <button
+                type="button"
+                onClick={() => loadDrinks().then(() => setMessage("Refreshed."))}
+                disabled={busy}
+                className="rounded-full border border-white/15 px-5 py-3 text-sm font-black text-white transition hover:bg-white/10 disabled:opacity-40"
+              >
+                Refresh
+              </button>
+            </div>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/png,image/jpeg,image/webp"
+              multiple
+              className="hidden"
+              onChange={(event) => uploadFiles(event.target.files)}
+            />
+            <div className="mt-4 rounded-2xl bg-black/30 px-4 py-3 text-xs font-semibold text-white/65">
+              Status: <span className="text-white">{busy ? "Working... " : ""}{message}</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="grid gap-5 p-5 lg:grid-cols-2">
+          <div>
+            <div className="mb-3 flex flex-wrap gap-2">
+              <button
+                type="button"
+                onClick={() => setSelectedOriginals(new Set(originals.map((x) => x.filename)))}
+                className="rounded-full border border-black/10 bg-white px-4 py-2 text-xs font-black"
+              >
+                Select all originals
+              </button>
+              <button
+                type="button"
+                onClick={() => setSelectedOriginals(new Set())}
+                className="rounded-full border border-black/10 bg-white px-4 py-2 text-xs font-black"
+              >
+                Clear originals
+              </button>
+              <button
+                type="button"
+                onClick={() => downloadSelected("originals")}
+                disabled={busy || selectedOriginals.size === 0}
+                className="rounded-full border border-black/10 bg-white px-4 py-2 text-xs font-black disabled:opacity-40"
+              >
+                Download originals
+              </button>
+              <button
+                type="button"
+                onClick={() => deleteSelected("originals")}
+                disabled={busy || selectedOriginals.size === 0}
+                className="rounded-full bg-red-50 px-4 py-2 text-xs font-black text-red-600 disabled:opacity-40"
+              >
+                Delete originals
+              </button>
+            </div>
+            <DrinksGrid
+              title="Original Drinks"
+              subtitle="Raw drink images waiting for enhancement"
+              assets={originals}
+              selected={selectedOriginals}
+              onToggle={(filename) => toggleSetValue(setSelectedOriginals, filename)}
+              emptyText="No original drinks uploaded yet"
+            />
+          </div>
+
+          <div>
+            <div className="mb-3 flex flex-wrap gap-2">
+              <button
+                type="button"
+                onClick={() => setSelectedEnhanced(new Set(enhanced.map((x) => x.filename)))}
+                className="rounded-full border border-black/10 bg-white px-4 py-2 text-xs font-black"
+              >
+                Select all enhanced
+              </button>
+              <button
+                type="button"
+                onClick={() => setSelectedEnhanced(new Set())}
+                className="rounded-full border border-black/10 bg-white px-4 py-2 text-xs font-black"
+              >
+                Clear enhanced
+              </button>
+              <button
+                type="button"
+                onClick={() => downloadSelected("enhanced")}
+                disabled={busy || selectedEnhanced.size === 0}
+                className="rounded-full bg-black px-4 py-2 text-xs font-black text-white disabled:opacity-40"
+              >
+                Download enhanced
+              </button>
+              <button
+                type="button"
+                onClick={() => deleteSelected("enhanced")}
+                disabled={busy || selectedEnhanced.size === 0}
+                className="rounded-full bg-red-50 px-4 py-2 text-xs font-black text-red-600 disabled:opacity-40"
+              >
+                Delete enhanced
+              </button>
+            </div>
+            <DrinksGrid
+              title="Enhanced Drinks"
+              subtitle="Finished beverage images ready to download"
+              assets={enhanced}
+              selected={selectedEnhanced}
+              onToggle={(filename) => toggleSetValue(setSelectedEnhanced, filename)}
+              emptyText="No enhanced drinks yet"
+            />
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 export default function PremiumPricingPage() {
   return (
     <main className="min-h-screen bg-[#F7F7F4] text-black">
@@ -58,6 +447,7 @@ export default function PremiumPricingPage() {
           <BrandLockup />
 
           <nav className="hidden items-center gap-8 text-sm font-semibold text-neutral-600 md:flex">
+            <a href="#drinks-library" className="hover:text-black">Drinks</a>
             <a href="#sample" className="hover:text-black">Free sample</a>
             <a href="#proof" className="hover:text-black">Proof</a>
             <a href="#pricing" className="hover:text-black">Pricing</a>
@@ -72,6 +462,8 @@ export default function PremiumPricingPage() {
           </a>
         </div>
       </header>
+
+      <DrinksLibraryPanel />
 
       {/* HERO */}
       <section className="relative overflow-hidden">
