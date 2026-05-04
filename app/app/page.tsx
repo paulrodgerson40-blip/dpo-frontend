@@ -1588,15 +1588,37 @@ function DrinksLibrary({ onPreview }: { onPreview: (img: PreviewImage) => void }
     }
   }
 
-  function downloadOne(img: LibraryImage, folder: string) {
+  async function downloadOne(img: LibraryImage, folder: string) {
     const url = fullImageUrl(img.url);
     if (!url) return;
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = img.filename;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
+
+    setError("");
+    setMessage("");
+    setStatus("Preparing download...");
+
+    try {
+      // Fetch as a blob so the browser downloads the file instead of opening it in a new tab.
+      // This keeps individual drink downloads as image files, while batch downloads remain ZIP files.
+      const res = await fetch(url, { cache: "no-store" });
+      if (!res.ok) throw new Error("Download failed");
+
+      const blob = await res.blob();
+      const objectUrl = URL.createObjectURL(blob);
+
+      const a = document.createElement("a");
+      a.href = objectUrl;
+      a.download = img.filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+
+      URL.revokeObjectURL(objectUrl);
+      setStatus("Download ready");
+      setMessage(`Downloaded ${img.filename}.`);
+    } catch (err) {
+      setStatus("Download failed");
+      setError(err instanceof Error ? err.message : "Download failed");
+    }
   }
 
   async function deleteOne(img: LibraryImage, folder: string) {
