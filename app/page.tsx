@@ -550,7 +550,7 @@ export default function PremiumPricingPage() {
               <CheckItem>Uber Eats updates handled for you</CheckItem>
               <CheckItem>Priority service</CheckItem>
             </ul>
-            <button className="mt-6 rounded-full bg-[#06C167] px-6 py-3 text-sm font-black text-black">Add Updates Plan →</button>
+            <button className="mt-6 rounded-full bg-[#06C167] px-6 py-3 text-sm font-black text-black">Add Growth Plan →</button>
           </div>
 
           <div className="grid gap-5">
