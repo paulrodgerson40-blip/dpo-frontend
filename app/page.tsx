@@ -2,6 +2,16 @@
 
 import React from "react";
 
+
+function CheckItem({ children }: { children: React.ReactNode }) {
+  return (
+    <li className="flex items-start gap-3 text-sm leading-6 text-neutral-700">
+      <span className="mt-1 shrink-0 text-[#06C167]">✓</span>
+      <span>{children}</span>
+    </li>
+  );
+}
+
 export default function PremiumPricingPage() {
   return (
     <main className="min-h-screen bg-[#F7F7F4] text-black">
