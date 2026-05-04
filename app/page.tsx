@@ -521,7 +521,7 @@ export default function PremiumPricingPage() {
 
       {/* UPDATES + COMPLETION */}
       <section id="updates" className="mx-auto max-w-7xl px-5 py-14 sm:px-8 lg:px-10">
-        <div className="grid gap-6 lg:grid-cols-[1fr_1fr]">
+        <div className="grid gap-6 lg:grid-cols-[0.92fr_1.08fr]">
           <div className="rounded-[30px] border border-black bg-white p-7 shadow-[0_24px_80px_rgba(0,0,0,0.10)]">
             <div className="inline-flex rounded-full bg-[#06C167]/15 px-4 py-2 text-sm font-black">Managed only</div>
             <h2 className="mt-5 text-4xl font-black tracking-[-0.05em]">Menu Updates Plan</h2>
@@ -542,18 +542,43 @@ export default function PremiumPricingPage() {
 
           <div className="grid gap-5">
             <div className="rounded-[30px] border border-neutral-200 bg-white p-7 shadow-sm">
-              <h3 className="text-3xl font-black tracking-[-0.04em]">Finish your menu</h3>
+              <div className="inline-flex rounded-full border border-black/10 bg-neutral-50 px-4 py-2 text-sm font-black">Completion packs</div>
+              <h3 className="mt-5 text-3xl font-black tracking-[-0.04em]">Finish your menu</h3>
               <p className="mt-3 text-sm leading-6 text-neutral-600">
-                Completion Packs are available after purchasing a Starter or Standard package to finish remaining menu items.
+                Choose how you want it done. DIY gives you upload-ready files. Managed means we handle the image update work for you.
               </p>
-              <div className="mt-6 grid gap-4 sm:grid-cols-2">
-                <div className="rounded-3xl bg-neutral-50 p-6">
-                  <div className="text-4xl font-black">$199</div>
-                  <div className="mt-1 text-sm text-neutral-500">Up to 10 items</div>
+
+              <div className="mt-6 grid gap-4 md:grid-cols-2">
+                <div className="rounded-[26px] border border-neutral-200 bg-neutral-50 p-5">
+                  <div className="mb-4 w-fit rounded-full bg-white px-3 py-1 text-xs font-black text-neutral-700 shadow-sm">DIY completion</div>
+                  <p className="text-sm leading-6 text-neutral-600">You upload the completed files yourself.</p>
+                  <div className="mt-5 grid gap-3">
+                    <div className="rounded-3xl bg-white p-5 shadow-sm">
+                      <div className="text-4xl font-black">$99</div>
+                      <div className="mt-1 text-sm font-semibold text-neutral-500">Up to 10 items</div>
+                    </div>
+                    <div className="rounded-3xl bg-white p-5 shadow-sm">
+                      <div className="text-4xl font-black">$179</div>
+                      <div className="mt-1 text-sm font-semibold text-neutral-500">Up to 20 items</div>
+                    </div>
+                  </div>
+                  <button className="mt-5 rounded-full border border-black/10 bg-white px-5 py-3 text-sm font-black">Choose DIY completion →</button>
                 </div>
-                <div className="rounded-3xl bg-neutral-50 p-6">
-                  <div className="text-4xl font-black">$349</div>
-                  <div className="mt-1 text-sm text-neutral-500">Up to 20 items</div>
+
+                <div className="rounded-[26px] border border-black bg-black p-5 text-white shadow-[0_18px_60px_rgba(0,0,0,0.14)]">
+                  <div className="mb-4 w-fit rounded-full bg-[#06C167] px-3 py-1 text-xs font-black text-black">Managed completion</div>
+                  <p className="text-sm leading-6 text-white/65">We enhance and update the remaining Uber Eats images for you.</p>
+                  <div className="mt-5 grid gap-3">
+                    <div className="rounded-3xl bg-white/[0.08] p-5">
+                      <div className="text-4xl font-black">$199</div>
+                      <div className="mt-1 text-sm font-semibold text-white/60">Up to 10 items</div>
+                    </div>
+                    <div className="rounded-3xl bg-white/[0.08] p-5">
+                      <div className="text-4xl font-black">$349</div>
+                      <div className="mt-1 text-sm font-semibold text-white/60">Up to 20 items</div>
+                    </div>
+                  </div>
+                  <button className="mt-5 rounded-full bg-[#06C167] px-5 py-3 text-sm font-black text-black">Choose managed completion →</button>
                 </div>
               </div>
             </div>
