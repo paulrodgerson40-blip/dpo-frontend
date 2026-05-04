@@ -102,9 +102,10 @@ export default function PremiumPricingPage() {
             </h1>
 
             <p className="mt-6 max-w-xl text-base leading-7 text-neutral-600">
-              Premium food image upgrades for restaurants. Use the files yourself,
-              or let us update your Uber Eats visuals for you.
+              Turn low-quality menu photos into premium, order-ready visuals. Use the files yourself,
+              or let us handle the Uber Eats image updates for you.
             </p>
+            <p className="mt-3 text-sm font-bold text-neutral-800">Increase orders with better images.</p>
 
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
               <a href="#sample" className="inline-flex items-center justify-center gap-2 rounded-full bg-[#06C167] px-7 py-4 text-sm font-black text-black shadow-[0_10px_30px_rgba(6,193,103,0.25)] transition hover:bg-[#05ad5c]">
@@ -118,7 +119,7 @@ export default function PremiumPricingPage() {
             <div className="mt-8 grid max-w-xl grid-cols-3 gap-3">
               <div className="rounded-3xl border border-black/10 bg-white p-5 shadow-sm">
                 <div className="text-3xl font-black tracking-tight">3</div>
-                <div className="mt-1 text-xs font-medium text-neutral-500">Free sample</div>
+                <div className="mt-1 text-xs font-medium text-neutral-500">3-image proof</div>
               </div>
               <div className="rounded-3xl border border-black/10 bg-white p-5 shadow-sm">
                 <div className="text-3xl font-black tracking-tight">$499</div>
@@ -166,7 +167,7 @@ export default function PremiumPricingPage() {
                         <LogoMark className="h-5 w-5 rounded-md" />
                       </div>
                     </div>
-                    <p className="mt-3 text-xs leading-5 text-white/70">  Premium. Drives more orders.</p>
+                    <p className="mt-3 text-xs leading-5 text-white/70">Premium. Drives more orders.</p>
                   </div>
                 </div>
               </div>
@@ -189,7 +190,7 @@ export default function PremiumPricingPage() {
             One good image helps. A consistent menu changes everything.
           </h2>
           <p className="mt-4 text-base leading-7 text-neutral-600">
-            The biggest impact is not one hero shot — it is making the whole menu feel clean,
+            The biggest impact is not one hero shot — it is making the whole menu feel consistent,
             premium, and worth ordering from.
           </p>
         </div>
@@ -245,7 +246,7 @@ export default function PremiumPricingPage() {
             </h2>
             <p className="mt-4 text-base leading-7 text-neutral-600">
               Headers are often the first thing customers see. We create premium visual headers
-              that make the store feel more established and more appetising.
+              that make the store feel established, polished, and more appetising.
             </p>
           </div>
 
@@ -373,7 +374,7 @@ export default function PremiumPricingPage() {
             DIY or Managed. See both clearly.
           </h2>
           <p className="mt-4 text-base leading-7 text-neutral-600">
-            No confusing switch. Choose files only, or let us handle the Uber image upload for you.
+            Choose upload-ready files, or let us handle everything for you — images, drinks, headers, and Uber Eats updates.
           </p>
         </div>
 
@@ -416,7 +417,7 @@ export default function PremiumPricingPage() {
           <div className="rounded-[26px] border border-neutral-200 bg-white p-6 shadow-sm">
             <h3 className="text-2xl font-bold tracking-tight">Starter Managed</h3>
             <p className="mt-3 min-h-[48px] text-sm leading-6 text-neutral-600">
-              We enhance your visuals and update your Uber Eats images.
+              We enhance your visuals and update your Uber Eats images for you.
             </p>
             <div className="mt-6 text-4xl font-black tracking-tight">$899</div>
             <div className="mt-2 text-sm font-semibold text-neutral-500">Up to 20 items</div>
@@ -435,7 +436,7 @@ export default function PremiumPricingPage() {
             <div className="mb-4 w-fit rounded-full bg-[#06C167] px-3 py-1 text-xs font-black text-black">Most Popular</div>
             <h3 className="text-2xl font-bold tracking-tight">Standard Managed</h3>
             <p className="mt-3 min-h-[48px] text-sm leading-6 text-white/65">
-              The full done-for-you visual upgrade for serious restaurants.
+              The full done-for-you visual upgrade for serious restaurants. We handle everything.
             </p>
             <div className="mt-6 text-4xl font-black tracking-tight">$1,299</div>
             <div className="mt-2 text-sm font-semibold text-white/60">Up to 50 items</div>
@@ -536,9 +537,9 @@ export default function PremiumPricingPage() {
       <section id="updates" className="mx-auto max-w-7xl px-5 py-14 sm:px-8 lg:px-10">
         <div className="grid gap-6 lg:grid-cols-[0.92fr_1.08fr]">
           <div className="rounded-[30px] border border-black bg-white p-7 shadow-[0_24px_80px_rgba(0,0,0,0.10)]">
-            <div className="inline-flex rounded-full bg-[#06C167]/15 px-4 py-2 text-sm font-black">Managed only</div>
+            <div className="inline-flex rounded-full bg-[#06C167]/15 px-4 py-2 text-sm font-black">Best for growing restaurants</div>
             <h2 className="mt-5 text-4xl font-black tracking-[-0.05em]">Growth Plan</h2>
-            <p className="mt-4 text-neutral-600">Keep your menu current as you add new dishes. Managed clients receive priority updates.</p>
+            <p className="mt-4 text-neutral-600">Keep your menu fresh, premium, and conversion-ready as you add new dishes. Managed clients receive priority updates.</p>
             <div className="mt-6 flex items-end gap-2">
               <span className="text-5xl font-black tracking-tight">$149</span>
               <span className="pb-2 text-neutral-500">/ month</span>
@@ -550,7 +551,7 @@ export default function PremiumPricingPage() {
               <CheckItem>Uber Eats updates handled for you</CheckItem>
               <CheckItem>Priority service</CheckItem>
             </ul>
-            <button className="mt-6 rounded-full bg-[#06C167] px-6 py-3 text-sm font-black text-black">Add Growth Plan →</button>
+            <button className="mt-6 rounded-full bg-[#06C167] px-6 py-3 text-sm font-black text-black">Start Growth Plan →</button>
           </div>
 
           <div className="grid gap-5">
@@ -558,7 +559,7 @@ export default function PremiumPricingPage() {
               <div className="inline-flex rounded-full border border-black/10 bg-neutral-50 px-4 py-2 text-sm font-black">Completion packs</div>
               <h3 className="mt-5 text-3xl font-black tracking-[-0.04em]">Finish your menu</h3>
               <p className="mt-3 text-sm leading-6 text-neutral-600">
-                Choose how you want it done. DIY gives you upload-ready files. Managed means we handle the image update work for you.
+                Finish the rest of your menu without buying a full package. DIY gives you upload-ready files. Managed means we handle the image update work for you.
               </p>
 
               <div className="mt-6 grid gap-4 md:grid-cols-2">
@@ -575,7 +576,7 @@ export default function PremiumPricingPage() {
                       <div className="mt-1 text-sm font-semibold text-neutral-500">Up to 20 items</div>
                     </div>
                   </div>
-                  <button className="mt-5 rounded-full border border-black/10 bg-white px-5 py-3 text-sm font-black">Choose DIY completion →</button>
+                  <button className="mt-5 rounded-full border border-black/10 bg-white px-5 py-3 text-sm font-black">Get DIY files →</button>
                 </div>
 
                 <div className="rounded-[26px] border border-black bg-black p-5 text-white shadow-[0_18px_60px_rgba(0,0,0,0.14)]">
@@ -591,7 +592,7 @@ export default function PremiumPricingPage() {
                       <div className="mt-1 text-sm font-semibold text-white/60">Up to 20 items</div>
                     </div>
                   </div>
-                  <button className="mt-5 rounded-full bg-[#06C167] px-5 py-3 text-sm font-black text-black">Choose managed completion →</button>
+                  <button className="mt-5 rounded-full bg-[#06C167] px-5 py-3 text-sm font-black text-black">We handle everything →</button>
                 </div>
               </div>
             </div>
@@ -646,7 +647,7 @@ export default function PremiumPricingPage() {
             <LogoMark className="h-12 w-12 rounded-2xl" />
           </div>
           <h2 className="mt-6 text-4xl font-black leading-[0.95] tracking-[-0.06em]">Start with 3 free images.</h2>
-          <p className="mx-auto mt-5 max-w-xl text-neutral-600">We’ll show the upgrade before you commit. Watermarked samples. No pressure.</p>
+          <p className="mx-auto mt-5 max-w-xl text-neutral-600">See your own menu upgraded before you commit. Watermarked samples. No pressure.</p>
           <div className="mt-7 flex flex-col justify-center gap-3 sm:flex-row">
             <button className="rounded-full bg-[#06C167] px-7 py-4 text-sm font-black text-black">Get Free Sample →</button>
             <button className="rounded-full border border-black/10 bg-white px-7 py-4 text-sm font-black text-black">Contact Us →</button>
@@ -657,7 +658,7 @@ export default function PremiumPricingPage() {
       <footer className="border-t border-black/5 px-5 py-8 sm:px-8 lg:px-10">
         <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 text-sm text-neutral-500 sm:flex-row">
           <BrandLockup />
-          <div>Delivery Ignite — premium restaurant visual upgrades.</div>
+          <div>Delivery Ignite — premium restaurant visual upgrades that help menus look worth ordering.</div>
         </div>
       </footer>
     </main>
