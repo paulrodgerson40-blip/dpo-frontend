@@ -125,7 +125,7 @@ export default function PremiumPricingPage() {
               </div>
             </div>
 
-            <div className="absolute -bottom-5 -left-5 hidden rounded-3xl border border-black/10 bg-white p-5 shadow-xl lg:block">
+            <div className="absolute -bottom-15 -left-5 hidden rounded-3xl border border-black/10 bg-white p-5 shadow-xl lg:block">
               <div className="flex items-center gap-3">
                 <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#06C167]/15 text-[#06C167]">✓</div>
                 <div>
