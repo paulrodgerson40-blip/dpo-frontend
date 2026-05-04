@@ -352,8 +352,8 @@ export default function PremiumPricingPage() {
               <div className="rounded-3xl border border-white/10 bg-white/[0.06] p-4">
                 <div className="relative h-44 w-full overflow-hidden rounded-2xl bg-black">
                   <Image
-                    src="/images/sample-watermarked.png"
-                    alt="Watermarked preview sample image"
+                    src="/images/sample-enhanced.png"
+                    alt="Preview sample image"
                     fill
                     className="object-cover"
                   />
