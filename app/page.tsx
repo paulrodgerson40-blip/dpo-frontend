@@ -27,7 +27,7 @@ function LogoMark({ className = "" }: { className?: string }) {
 function BrandLockup({ dark = false }: { dark?: boolean }) {
   return (
     <div className="flex items-center gap-3">
-      <LogoMark className="h-10 w-10" />
+      <LogoMark -10 w-10" />
       <div>
         <div className={`text-sm font-black tracking-tight ${dark ? "text-white" : "text-black"}`}>
           Delivery Ignite
@@ -57,11 +57,11 @@ export default function PremiumPricingPage() {
         <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-4 sm:px-8 lg:px-10">
           <BrandLockup />
 
-          <nav className="hidden items-center gap-8 text-sm font-semibold text-neutral-600 md:flex">
-            <a href="#sample" className="hover:text-black">Free sample</a>
-            <a href="#proof" className="hover:text-black">Proof</a>
-            <a href="#pricing" className="hover:text-black">Pricing</a>
-            <a href="#updates" className="hover:text-black">Updates</a>
+          <nav idden items-center gap-8 text-sm font-semibold text-neutral-600 md:flex">
+            <a href="#sample" over:text-black">Free sample</a>
+            <a href="#proof" over:text-black">Proof</a>
+            <a href="#pricing" over:text-black">Pricing</a>
+            <a href="#updates" over:text-black">Updates</a>
           </nav>
 
           <a
@@ -80,7 +80,7 @@ export default function PremiumPricingPage() {
 
         {/* subtle brand watermark */}
         <div className="pointer-events-none absolute right-[8%] top-24 hidden opacity-[0.035] lg:block">
-          <LogoMark className="h-52 w-52 rounded-[48px]" />
+          <LogoMark -52 w-52 rounded-[48px]" />
         </div>
 
         <div className="mx-auto grid max-w-7xl items-center gap-14 px-5 py-16 sm:px-8 lg:grid-cols-[0.95fr_1.05fr] lg:px-10 lg:py-20">
@@ -91,7 +91,7 @@ export default function PremiumPricingPage() {
             </div>
 
             <div className="mt-7 flex items-center gap-3">
-              <LogoMark className="h-8 w-8 rounded-lg" />
+              <LogoMark -8 w-8 rounded-lg" />
               <span className="text-sm font-black tracking-tight text-neutral-700">
                 Delivery Ignite
               </span>
@@ -135,7 +135,7 @@ export default function PremiumPricingPage() {
             <div className="rounded-[34px] border border-black/10 bg-white p-3 shadow-[0_30px_100px_rgba(0,0,0,0.16)]">
               <div className="relative overflow-hidden rounded-[28px] bg-black p-4">
                 <div className="absolute right-4 top-4 z-10 opacity-80">
-                  <LogoMark className="h-8 w-8 rounded-lg" />
+                  <LogoMark -8 w-8 rounded-lg" />
                 </div>
 
                 <div className="grid gap-4 sm:grid-cols-2">
@@ -163,7 +163,7 @@ export default function PremiumPricingPage() {
                         priority
                       />
                       <div className="absolute bottom-3 right-3 rounded-xl bg-black/65 p-1.5 backdrop-blur">
-                        <LogoMark className="h-5 w-5 rounded-md" />
+                        <LogoMark -5 w-5 rounded-md" />
                       </div>
                     </div>
                     <p className="mt-3 text-xs leading-5 text-white/70">  Premium. Drives more orders.</p>
@@ -197,7 +197,7 @@ export default function PremiumPricingPage() {
         <div className="mt-10 grid gap-7 lg:grid-cols-2">
           <div className="rounded-[36px] border border-neutral-200 bg-white p-5 shadow-sm">
             <div className="mb-4 w-fit rounded-full bg-neutral-100 px-4 py-2 text-sm font-black">Before</div>
-            <div className="relative h-[500px] w-full overflow-hidden rounded-[24px] bg-white">
+            <div className="relative h-[560px] w-full overflow-hidden rounded-[24px] bg-white">
               <Image
                 src="/images/menu-before.png"
                 alt="Full menu before image upgrade"
@@ -212,7 +212,7 @@ export default function PremiumPricingPage() {
 
           <div className="rounded-[36px] border border-black bg-white p-5 shadow-[0_24px_80px_rgba(0,0,0,0.12)]">
             <div className="mb-4 w-fit rounded-full bg-[#06C167] px-4 py-2 text-sm font-black text-black">After</div>
-            <div className="relative h-[500px] w-full overflow-hidden rounded-[24px] bg-white">
+            <div className="relative h-[560px] w-full overflow-hidden rounded-[24px] bg-white">
               <Image
                 src="/images/menu-after.png"
                 alt="Full menu after image upgrade"
@@ -220,7 +220,7 @@ export default function PremiumPricingPage() {
                 className="object-contain scale-[1.12]"
               />
               <div className="absolute bottom-4 right-4 rounded-xl bg-white/85 p-2 shadow-sm backdrop-blur">
-                <LogoMark className="h-6 w-6 rounded-lg" />
+                <LogoMark -6 w-6 rounded-lg" />
               </div>
             </div>
             <p className="mt-4 text-sm leading-6 text-neutral-600">
@@ -272,7 +272,7 @@ export default function PremiumPricingPage() {
                   className="object-cover"
                 />
                 <div className="absolute bottom-4 right-4 rounded-xl bg-black/65 p-2 backdrop-blur">
-                  <LogoMark className="h-6 w-6 rounded-lg" />
+                  <LogoMark -6 w-6 rounded-lg" />
                 </div>
               </div>
             </div>
