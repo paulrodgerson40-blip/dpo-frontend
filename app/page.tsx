@@ -150,7 +150,7 @@ export default function PremiumPricingPage() {
                         priority
                       />
                     </div>
-                    <p className="mt-3 text-xs leading-5 text-white/50">Flat lighting, inconsistent framing, low appetite appeal.</p>
+                    <p className="mt-3 text-xs leading-5 text-white/50">Looks cheap. Gets skipped.</p>
                   </div>
                   <div>
                     <div className="mb-2 w-fit rounded-full bg-[#06C167] px-3 py-1 text-xs font-black text-black">After</div>
@@ -166,7 +166,7 @@ export default function PremiumPricingPage() {
                         <LogoMark className="h-5 w-5 rounded-md" />
                       </div>
                     </div>
-                    <p className="mt-3 text-xs leading-5 text-white/70">Premium style, stronger texture, platform-ready presentation.</p>
+                    <p className="mt-3 text-xs leading-5 text-white/70">  Premium. Drives more orders.</p>
                   </div>
                 </div>
               </div>
