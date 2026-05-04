@@ -260,24 +260,39 @@ export default function PremiumPricingPage() {
 
             <div className="grid gap-4 sm:grid-cols-3">
               <div className="rounded-3xl border border-white/10 bg-white/[0.06] p-4">
-                <div className="flex h-44 items-center justify-center rounded-2xl bg-neutral-700 text-center text-sm font-black text-white/60">
-                  IMAGE<br />ORIGINAL
+                <div className="relative h-44 w-full overflow-hidden rounded-2xl bg-neutral-800">
+                  <Image
+                    src="/images/sample-original.png"
+                    alt="Original sample food image"
+                    fill
+                    className="object-cover"
+                  />
                 </div>
                 <div className="mt-4 text-sm font-bold">Original</div>
                 <div className="mt-1 text-xs text-white/45">Current menu photo</div>
               </div>
 
               <div className="rounded-3xl border border-white/10 bg-white/[0.06] p-4">
-                <div className="flex h-44 items-center justify-center rounded-2xl bg-gradient-to-br from-orange-300 via-red-500 to-black text-center text-sm font-black text-white">
-                  IMAGE<br />ENHANCED
+                <div className="relative h-44 w-full overflow-hidden rounded-2xl bg-black">
+                  <Image
+                    src="/images/sample-enhanced.png"
+                    alt="Enhanced sample food image"
+                    fill
+                    className="object-cover"
+                  />
                 </div>
                 <div className="mt-4 text-sm font-bold">Enhanced</div>
                 <div className="mt-1 text-xs text-white/45">Premium upgrade</div>
               </div>
 
               <div className="rounded-3xl border border-white/10 bg-white/[0.06] p-4">
-                <div className="flex h-44 items-center justify-center rounded-2xl bg-gradient-to-br from-[#06C167] via-orange-400 to-black text-center text-sm font-black text-white">
-                  IMAGE<br />WATERMARKED
+                <div className="relative h-44 w-full overflow-hidden rounded-2xl bg-black">
+                  <Image
+                    src="/images/sample-watermarked.jpg"
+                    alt="Watermarked sample food image"
+                    fill
+                    className="object-cover"
+                  />
                 </div>
                 <div className="mt-4 text-sm font-bold">Watermarked</div>
                 <div className="mt-1 text-xs text-white/45">Free preview</div>
