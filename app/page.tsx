@@ -537,7 +537,7 @@ export default function PremiumPricingPage() {
         <div className="grid gap-6 lg:grid-cols-[0.92fr_1.08fr]">
           <div className="rounded-[30px] border border-black bg-white p-7 shadow-[0_24px_80px_rgba(0,0,0,0.10)]">
             <div className="inline-flex rounded-full bg-[#06C167]/15 px-4 py-2 text-sm font-black">Managed only</div>
-            <h2 className="mt-5 text-4xl font-black tracking-[-0.05em]">Menu Updates Plan</h2>
+            <h2 className="mt-5 text-4xl font-black tracking-[-0.05em]">Growth Plan</h2>
             <p className="mt-4 text-neutral-600">Keep your menu current as you add new dishes. Managed clients receive priority updates.</p>
             <div className="mt-6 flex items-end gap-2">
               <span className="text-5xl font-black tracking-tight">$149</span>
