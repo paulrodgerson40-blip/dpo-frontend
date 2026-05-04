@@ -7,6 +7,8 @@ const BACKEND_URL = "https://170.64.209.149.sslip.io";
 type RestaurantMode = "new" | "existing";
 type ActiveTab = "originals" | "compare" | "enhanced" | "headers" | "headerEnhanced";
 type UploadType = "menu" | "header";
+type WorkspaceMode = "restaurants" | "drinks";
+type DrinksTab = "originals" | "enhanced";
 
 type LibraryImage = {
   filename: string;
@@ -93,6 +95,7 @@ function imageSelectKey(folder: string, filename: string) {
 }
 
 export default function Home() {
+  const [workspaceMode, setWorkspaceMode] = useState<WorkspaceMode>("restaurants");
   const [mode, setMode] = useState<RestaurantMode>("new");
   const [restaurantName, setRestaurantName] = useState("");
   const [selectedRestaurant, setSelectedRestaurant] = useState("");
@@ -952,6 +955,35 @@ export default function Home() {
     };
   }, [activeRestaurantSlug, originalImages.length, enhancedImages.length, unmatchedOriginalImages.length, matchedOriginalImages.length, headerImages.length, headerEnhancedImages.length]);
 
+  if (workspaceMode === "drinks") {
+    return (
+      <main
+        style={{
+          minHeight: "100vh",
+          background:
+            "radial-gradient(circle at top left, rgba(99,102,241,0.16), transparent 34%), linear-gradient(180deg, #f8fafc 0%, #eef2f7 100%)",
+          padding: "34px 20px 56px",
+          fontFamily:
+            'Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+          color: "#0f172a",
+        }}
+      >
+        {previewImage && (
+          <PreviewModal
+            image={previewImage}
+            onClose={() => setPreviewImage(null)}
+          />
+        )}
+
+        <section style={{ maxWidth: 1220, margin: "0 auto" }}>
+          <Hero modeTitle="Drinks Library" modeSubtitle="Global beverage asset library" />
+          <WorkspaceSwitch active={workspaceMode} onChange={setWorkspaceMode} />
+          <DrinksLibrary onPreview={setPreviewImage} />
+        </section>
+      </main>
+    );
+  }
+
   return (
     <main
       style={{
@@ -975,6 +1007,7 @@ export default function Home() {
 
       <section style={{ maxWidth: 1220, margin: "0 auto" }}>
         <Hero modeTitle={workflowState.title} modeSubtitle={workflowState.subtitle} />
+        <WorkspaceSwitch active={workspaceMode} onChange={setWorkspaceMode} />
 
         <div
           style={{
@@ -1278,6 +1311,427 @@ export default function Home() {
         </div>
       </section>
     </main>
+  );
+}
+
+
+function WorkspaceSwitch({ active, onChange }: { active: WorkspaceMode; onChange: (mode: WorkspaceMode) => void }) {
+  return (
+    <div
+      style={{
+        display: "flex",
+        gap: 10,
+        margin: "0 0 20px",
+        background: "rgba(255,255,255,0.74)",
+        border: "1px solid rgba(226,232,240,0.95)",
+        borderRadius: 22,
+        padding: 8,
+        boxShadow: "0 12px 30px rgba(15,23,42,0.06)",
+        width: "fit-content",
+      }}
+    >
+      <button
+        type="button"
+        onClick={() => onChange("restaurants")}
+        style={workspaceButton(active === "restaurants")}
+      >
+        Restaurant Library
+      </button>
+      <button
+        type="button"
+        onClick={() => onChange("drinks")}
+        style={workspaceButton(active === "drinks")}
+      >
+        Global Drinks Library
+      </button>
+    </div>
+  );
+}
+
+function DrinksLibrary({ onPreview }: { onPreview: (img: PreviewImage) => void }) {
+  const [tab, setTab] = useState<DrinksTab>("originals");
+  const [originals, setOriginals] = useState<LibraryImage[]>([]);
+  const [enhanced, setEnhanced] = useState<LibraryImage[]>([]);
+  const [files, setFiles] = useState<File[]>([]);
+  const [selectedKeys, setSelectedKeys] = useState<Set<string>>(new Set());
+  const [loading, setLoading] = useState(false);
+  const [workingLabel, setWorkingLabel] = useState("");
+  const [progress, setProgress] = useState(0);
+  const [status, setStatus] = useState("Ready");
+  const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
+
+  function normalise(images: any[] | undefined): LibraryImage[] {
+    return (images || []).map((img) => {
+      const filename = img.filename || img.name || "image";
+      const rawUrl = img.url || "";
+      return {
+        ...img,
+        filename,
+        name: filename,
+        url: rawUrl && rawUrl.startsWith("http") ? rawUrl : rawUrl ? `${BACKEND_URL}${rawUrl}?t=${Date.now()}` : undefined,
+      };
+    });
+  }
+
+  async function loadDrinks() {
+    setError("");
+    try {
+      const res = await fetch(`${BACKEND_URL}/api/dpo/drinks`, { cache: "no-store" });
+      const data = await res.json();
+      if (!res.ok || data.ok === false) throw new Error(data.detail || data.error || "Could not load drinks library");
+      setOriginals(normalise(data.originals));
+      setEnhanced(normalise(data.enhanced));
+      setStatus("Library loaded");
+    } catch (err) {
+      setStatus("Load failed");
+      setError(err instanceof Error ? err.message : "Could not load drinks library");
+    }
+  }
+
+  useEffect(() => {
+    loadDrinks();
+  }, []);
+
+  useEffect(() => {
+    if (!workingLabel) return;
+    setProgress(8);
+    const timer = window.setInterval(() => {
+      setProgress((p) => (p >= 92 ? p : p + Math.max(2, Math.floor((92 - p) / 5))));
+    }, 700);
+    return () => window.clearInterval(timer);
+  }, [workingLabel]);
+
+  const activeFolder = tab === "originals" ? "originals" : "enhanced";
+  const activeImages = tab === "originals" ? originals : enhanced;
+  const selectedImages = useMemo(() => {
+    return activeImages.filter((img) => selectedKeys.has(imageSelectKey(activeFolder, img.filename)));
+  }, [activeImages, activeFolder, selectedKeys]);
+
+  function handleFiles(e: React.ChangeEvent<HTMLInputElement>) {
+    setFiles(Array.from(e.target.files || []));
+    setError("");
+    setMessage("");
+  }
+
+  function clearInput() {
+    setFiles([]);
+    const input = document.getElementById("drinks-file") as HTMLInputElement | null;
+    if (input) input.value = "";
+  }
+
+  async function uploadDrinks() {
+    if (!files.length) {
+      setError("Choose drink images first.");
+      return;
+    }
+
+    setLoading(true);
+    setError("");
+    setMessage("");
+    setStatus("Uploading drinks...");
+
+    try {
+      const form = new FormData();
+      files.forEach((f) => form.append("files", f));
+
+      const res = await fetch(`${BACKEND_URL}/api/dpo/drinks/upload`, {
+        method: "POST",
+        body: form,
+      });
+      const data = await res.json();
+      if (!res.ok || data.ok === false) throw new Error(data.detail || data.error || "Upload failed");
+
+      clearInput();
+      await loadDrinks();
+      setTab("originals");
+      setStatus("Uploaded");
+      setMessage(`Uploaded ${data.saved?.length || 0} drink image(s).`);
+    } catch (err) {
+      setStatus("Upload failed");
+      setError(err instanceof Error ? err.message : "Upload failed");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  function toggleSelected(folder: string, filename: string) {
+    const key = imageSelectKey(folder, filename);
+    setSelectedKeys((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
+      return next;
+    });
+  }
+
+  function selectAllVisible() {
+    setSelectedKeys((prev) => {
+      const next = new Set(prev);
+      activeImages.forEach((img) => next.add(imageSelectKey(activeFolder, img.filename)));
+      return next;
+    });
+  }
+
+  function clearSelected() {
+    setSelectedKeys((prev) => {
+      const next = new Set(prev);
+      activeImages.forEach((img) => next.delete(imageSelectKey(activeFolder, img.filename)));
+      return next;
+    });
+  }
+
+  async function enhanceSelected() {
+    if (tab !== "originals" || selectedImages.length === 0) return;
+    const check = window.prompt(`Enhance ${selectedImages.length} selected drink image(s)?\n\nType ENHANCE to confirm.`);
+    if (check !== "ENHANCE") return;
+
+    setLoading(true);
+    setWorkingLabel(`Enhancing ${selectedImages.length} drink image(s)...`);
+    setError("");
+    setMessage("");
+    setStatus("Enhancing drinks...");
+
+    try {
+      const res = await fetch(`${BACKEND_URL}/api/dpo/drinks/enhance-selected`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ files: selectedImages.map((img) => img.filename) }),
+      });
+      const data = await res.json();
+      if (!res.ok || data.ok === false) throw new Error(data.detail || data.error || "Enhance failed");
+
+      setProgress(100);
+      setSelectedKeys(new Set());
+      await loadDrinks();
+      setTab("enhanced");
+      setStatus("Enhanced");
+      setMessage(`Enhanced ${data.processed?.length || 0} drink image(s).${data.failed?.length ? ` ${data.failed.length} failed.` : ""}`);
+    } catch (err) {
+      setStatus("Enhance failed");
+      setError(err instanceof Error ? err.message : "Enhance failed");
+    } finally {
+      setLoading(false);
+      setWorkingLabel("");
+      setProgress(0);
+    }
+  }
+
+  async function deleteSelected() {
+    if (selectedImages.length === 0) return;
+    const check = window.prompt(`Delete ${selectedImages.length} selected ${activeFolder} drink image(s)?\n\nType DELETE to confirm.`);
+    if (check !== "DELETE") return;
+
+    setLoading(true);
+    setError("");
+    setMessage("");
+    setStatus("Deleting drinks...");
+
+    try {
+      const res = await fetch(`${BACKEND_URL}/api/dpo/drinks/delete-selected`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ folder: activeFolder, files: selectedImages.map((img) => img.filename) }),
+      });
+      const data = await res.json();
+      if (!res.ok || data.ok === false) throw new Error(data.detail || data.error || "Delete failed");
+
+      setSelectedKeys(new Set());
+      await loadDrinks();
+      setStatus("Deleted");
+      setMessage(`Deleted ${data.deleted?.length || 0} drink image(s).`);
+    } catch (err) {
+      setStatus("Delete failed");
+      setError(err instanceof Error ? err.message : "Delete failed");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function downloadSelected() {
+    if (selectedImages.length === 0) return;
+
+    setError("");
+    setMessage("");
+    setStatus("Preparing drinks download...");
+
+    try {
+      const res = await fetch(`${BACKEND_URL}/api/dpo/drinks/download-selected`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ folder: activeFolder, files: selectedImages.map((img) => img.filename) }),
+      });
+      if (!res.ok) {
+        let details = "Download failed";
+        try {
+          const data = await res.json();
+          details = data.detail || data.error || details;
+        } catch {}
+        throw new Error(details);
+      }
+
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `drinks_${activeFolder}_selected.zip`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+
+      setStatus("Download ready");
+      setMessage(`Downloaded ${selectedImages.length} selected drink file(s).`);
+    } catch (err) {
+      setStatus("Download failed");
+      setError(err instanceof Error ? err.message : "Download failed");
+    }
+  }
+
+  function downloadOne(img: LibraryImage, folder: string) {
+    const url = fullImageUrl(img.url);
+    if (!url) return;
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = img.filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+  }
+
+  async function deleteOne(img: LibraryImage, folder: string) {
+    const check = window.prompt(`Delete "${img.filename}"?\n\nType DELETE to confirm.`);
+    if (check !== "DELETE") return;
+
+    setLoading(true);
+    setError("");
+    setMessage("");
+    setStatus("Deleting drink...");
+
+    try {
+      const res = await fetch(`${BACKEND_URL}/api/dpo/drinks/delete-selected`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ folder, files: [img.filename] }),
+      });
+      const data = await res.json();
+      if (!res.ok || data.ok === false) throw new Error(data.detail || data.error || "Delete failed");
+      await loadDrinks();
+      setStatus("Deleted");
+      setMessage(`Deleted ${img.filename}.`);
+    } catch (err) {
+      setStatus("Delete failed");
+      setError(err instanceof Error ? err.message : "Delete failed");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <div style={{ display: "grid", gap: 20 }}>
+      {workingLabel && <ProgressOverlay label={workingLabel} progress={progress} />}
+
+      <Panel>
+        <div style={{ display: "flex", justifyContent: "space-between", gap: 18, alignItems: "center", flexWrap: "wrap" }}>
+          <div>
+            <Kicker>Global drinks library</Kicker>
+            <h2 style={{ ...sectionTitle, marginTop: 4 }}>Reusable drink assets</h2>
+            <p style={{ margin: "6px 0 0", color: "#64748b", maxWidth: 720 }}>
+              Upload drink screenshots or product images once, enhance them with the beverage prompt, then download selected files whenever needed.
+            </p>
+          </div>
+          <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+            <Metric label="Original drinks" value={String(originals.length)} />
+            <Metric label="Enhanced drinks" value={String(enhanced.length)} tone={enhanced.length > 0 ? "good" : "neutral"} />
+            <StatusPill text={status} tone={status.toLowerCase().includes("failed") ? "bad" : status === "Enhanced" || status === "Uploaded" ? "good" : "neutral"} />
+          </div>
+        </div>
+
+        <Divider />
+
+        <div style={{ display: "grid", gridTemplateColumns: "minmax(260px, 1fr) auto", gap: 12, alignItems: "end" }}>
+          <div>
+            <Label>Upload drink originals</Label>
+            <input
+              id="drinks-file"
+              type="file"
+              multiple
+              onChange={handleFiles}
+              style={{ ...inputStyle, padding: 12, background: "#f8fafc" }}
+            />
+            <HelpText>These files go to the global drinks library, not a restaurant folder.</HelpText>
+          </div>
+          <button onClick={uploadDrinks} disabled={loading || files.length === 0} style={primaryButton(loading || files.length === 0)}>
+            Upload drinks
+          </button>
+        </div>
+
+        {files.length > 0 && (
+          <div style={selectedFilesBox}>
+            <div style={{ fontWeight: 900 }}>{files.length} drink file(s) selected</div>
+            <div style={{ marginTop: 8, display: "grid", gap: 6 }}>
+              {files.slice(0, 6).map((f, idx) => (
+                <div key={`${f.name}-${f.size}-${f.lastModified}-${idx}`} style={fileChip}>{f.name}</div>
+              ))}
+              {files.length > 6 && <div style={{ color: "#64748b", fontSize: 13 }}>+ {files.length - 6} more</div>}
+            </div>
+          </div>
+        )}
+
+        {message && <Notice tone="good">{message}</Notice>}
+        {error && <Notice tone="bad">{error}</Notice>}
+      </Panel>
+
+      <Panel>
+        <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+            <button type="button" onClick={() => { setTab("originals"); setSelectedKeys(new Set()); }} style={tabButton(tab === "originals")}>
+              Originals
+            </button>
+            <button type="button" onClick={() => { setTab("enhanced"); setSelectedKeys(new Set()); }} style={tabButton(tab === "enhanced")}>
+              Enhanced
+            </button>
+          </div>
+          <button type="button" onClick={loadDrinks} disabled={loading} style={miniButton(loading)}>
+            Refresh library
+          </button>
+        </div>
+
+        {activeImages.length > 0 && (
+          <BatchActionBar
+            selectedCount={selectedImages.length}
+            totalCount={activeImages.length}
+            canEnhance={tab === "originals"}
+            enhanceLabel="Enhance Selected Drinks"
+            disabled={loading}
+            onSelectAll={selectAllVisible}
+            onClear={clearSelected}
+            onDelete={deleteSelected}
+            onEnhance={enhanceSelected}
+            onDownloadSelected={downloadSelected}
+          />
+        )}
+
+        <ImageGrid
+          title={tab === "originals" ? "Drink Originals" : "Enhanced Drinks"}
+          subtitle={tab === "originals" ? "Global beverage source images. Select and enhance these with the drink-only prompt." : "Enhanced beverage outputs ready to download and use."}
+          images={activeImages}
+          emptyText={tab === "originals" ? "No drink originals yet. Upload drinks above to start the global library." : "No enhanced drinks yet. Select originals and run Enhance Selected Drinks."}
+          folder={activeFolder}
+          restaurantSlug="drinks-library"
+          onPreview={onPreview}
+          onDownload={downloadOne}
+          onDelete={(img) => deleteOne(img, activeFolder)}
+          onEnhance={tab === "originals" ? (img) => {
+            setSelectedKeys(new Set([imageSelectKey("originals", img.filename)]));
+            window.setTimeout(() => enhanceSelected(), 0);
+          } : undefined}
+          showEnhance={false}
+          selectedKeys={selectedKeys}
+          onToggleSelected={toggleSelected}
+        />
+      </Panel>
+    </div>
   );
 }
 
@@ -2087,6 +2541,32 @@ function Notice({ children, tone }: { children: React.ReactNode; tone: "good" | 
 
 function Divider() {
   return <div style={{ height: 1, background: "#e2e8f0", margin: "22px 0" }} />;
+}
+
+
+function workspaceButton(active: boolean): React.CSSProperties {
+  return {
+    border: active ? "1px solid #4f46e5" : "1px solid transparent",
+    background: active ? "#eef2ff" : "transparent",
+    color: active ? "#3730a3" : "#475569",
+    borderRadius: 16,
+    padding: "11px 14px",
+    fontWeight: 950,
+    cursor: "pointer",
+    boxShadow: active ? "0 8px 18px rgba(79,70,229,0.12)" : "none",
+  };
+}
+
+function tabButton(active: boolean): React.CSSProperties {
+  return {
+    border: active ? "1px solid #4f46e5" : "1px solid #e2e8f0",
+    background: active ? "#eef2ff" : "white",
+    color: active ? "#3730a3" : "#475569",
+    borderRadius: 999,
+    padding: "9px 13px",
+    fontWeight: 900,
+    cursor: "pointer",
+  };
 }
 
 const sectionTitle: React.CSSProperties = {
