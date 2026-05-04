@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import { motion } from "framer-motion";
 import {
   ArrowRight,
@@ -8,10 +8,8 @@ import {
   Building2,
   Camera,
   Check,
-  ChevronRight,
   Download,
   ImagePlus,
-  LayoutGrid,
   PackageCheck,
   ShieldCheck,
   Sparkles,
@@ -21,66 +19,19 @@ import {
 } from "lucide-react";
 
 const fadeUp = {
-  hidden: { opacity: 0, y: 22 },
+  hidden: { opacity: 0, y: 20 },
   visible: { opacity: 1, y: 0 },
 };
 
-type Mode = "managed" | "diy";
-
-const pricing = {
-  diy: [
-    {
-      name: "Starter DIY",
-      price: "$499",
-      subtitle: "Up to 20 images",
-      description: "We enhance your menu images and deliver upload-ready files.",
-      features: ["Premium image enhancement", "Ready-to-upload files", "Consistent restaurant style", "Use anywhere, no restrictions"],
-      cta: "Start with DIY",
-      highlighted: false,
-    },
-    {
-      name: "Standard DIY",
-      price: "$799",
-      subtitle: "Up to 50 images",
-      description: "Best for restaurants upgrading most of their existing menu visuals.",
-      features: ["Premium image enhancement", "Ready-to-upload files", "Larger menu coverage", "Use anywhere, no restrictions"],
-      cta: "Choose Standard DIY",
-      highlighted: true,
-      badge: "Best DIY Value",
-    },
-  ],
-  managed: [
-    {
-      name: "Starter Managed",
-      price: "$899",
-      subtitle: "Up to 20 items",
-      description: "We upgrade your visuals and update your Uber Eats images for you.",
-      features: ["Image enhancement", "Drinks handled", "Header banners included", "Uber Eats image upload", "Priority service"],
-      cta: "Choose Starter Managed",
-      highlighted: false,
-    },
-    {
-      name: "Standard Managed",
-      price: "$1,299",
-      subtitle: "Up to 50 items",
-      description: "The complete done-for-you visual upgrade for serious restaurants.",
-      features: ["Image enhancement", "Drinks handled", "Header banners included", "Uber Eats image upload", "Priority service"],
-      cta: "Choose Standard Managed",
-      highlighted: true,
-      badge: "Most Popular",
-    },
-  ],
-};
-
-function Button({ children, variant = "primary" }: { children: React.ReactNode; variant?: "primary" | "secondary" | "dark" }) {
+function Button({ children, variant = "primary" }: { children: React.ReactNode; variant?: "primary" | "dark" | "light" }) {
   const styles = {
-    primary: "bg-[#06C167] text-black hover:bg-[#05ad5c]",
-    secondary: "bg-white text-black border border-black/10 hover:bg-neutral-50",
+    primary: "bg-[#06C167] text-black hover:bg-[#05ad5c] shadow-[0_10px_30px_rgba(6,193,103,0.25)]",
     dark: "bg-black text-white hover:bg-neutral-800",
+    light: "bg-white text-black border border-black/10 hover:bg-neutral-50",
   };
 
   return (
-    <button className={`inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-semibold transition ${styles[variant]}`}>
+    <button className={`inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-bold transition ${styles[variant]}`}>
       {children}
       <ArrowRight className="h-4 w-4" />
     </button>
@@ -96,42 +47,67 @@ function CheckItem({ children }: { children: React.ReactNode }) {
   );
 }
 
-function PlanCard({ plan }: { plan: any }) {
+function MiniMetric({ value, label }: { value: string; label: string }) {
+  return (
+    <div className="rounded-3xl border border-black/10 bg-white p-5 shadow-sm">
+      <div className="text-3xl font-bold tracking-tight">{value}</div>
+      <div className="mt-1 text-xs font-medium text-neutral-500">{label}</div>
+    </div>
+  );
+}
+
+function PricingCard({
+  title,
+  price,
+  limit,
+  description,
+  features,
+  cta,
+  highlighted = false,
+  badge,
+}: {
+  title: string;
+  price: string;
+  limit: string;
+  description: string;
+  features: string[];
+  cta: string;
+  highlighted?: boolean;
+  badge?: string;
+}) {
   return (
     <motion.div
       variants={fadeUp}
       whileHover={{ y: -5 }}
-      transition={{ type: "spring", stiffness: 240, damping: 24 }}
-      className={`relative rounded-[28px] border bg-white p-7 shadow-sm transition ${
-        plan.highlighted ? "border-black shadow-[0_18px_60px_rgba(0,0,0,0.12)]" : "border-neutral-200 hover:border-neutral-300"
+      transition={{ type: "spring", stiffness: 230, damping: 22 }}
+      className={`relative rounded-[30px] border bg-white p-7 shadow-sm transition ${
+        highlighted ? "border-black shadow-[0_24px_80px_rgba(0,0,0,0.13)]" : "border-neutral-200 hover:border-neutral-300"
       }`}
     >
-      {plan.badge && (
-        <div className="absolute right-5 top-5 rounded-full bg-black px-3 py-1 text-xs font-semibold text-white">
-          {plan.badge}
+      {badge && (
+        <div className="absolute right-5 top-5 rounded-full bg-black px-3 py-1 text-xs font-bold text-white">
+          {badge}
         </div>
       )}
 
-      <div className={`mb-7 flex h-12 w-12 items-center justify-center rounded-2xl ${plan.highlighted ? "bg-black text-white" : "bg-neutral-100 text-black"}`}>
-        {plan.highlighted ? <Sparkles className="h-6 w-6" /> : <ImagePlus className="h-6 w-6" />}
+      <div className={`mb-7 flex h-12 w-12 items-center justify-center rounded-2xl ${highlighted ? "bg-black text-white" : "bg-neutral-100 text-black"}`}>
+        {highlighted ? <Sparkles className="h-6 w-6" /> : <ImagePlus className="h-6 w-6" />}
       </div>
 
-      <h3 className="text-2xl font-semibold tracking-tight text-black">{plan.name}</h3>
-      <p className="mt-3 min-h-[48px] text-sm leading-6 text-neutral-600">{plan.description}</p>
+      <h3 className="text-2xl font-bold tracking-tight">{title}</h3>
+      <p className="mt-3 min-h-[48px] text-sm leading-6 text-neutral-600">{description}</p>
 
-      <div className="mt-7 flex items-end gap-2">
-        <span className="text-5xl font-semibold tracking-tight text-black">{plan.price}</span>
-      </div>
-      <p className="mt-2 text-sm font-semibold text-neutral-500">{plan.subtitle}</p>
+      <div className="mt-7 text-5xl font-bold tracking-tight">{price}</div>
+      <div className="mt-2 text-sm font-semibold text-neutral-500">{limit}</div>
 
       <div className="mt-7">
-        <Button variant={plan.highlighted ? "dark" : "secondary"}>{plan.cta}</Button>
+        <Button variant={highlighted ? "dark" : "light"}>{cta}</Button>
       </div>
 
-      <div className="mt-7 h-px bg-neutral-100" />
+      <div className="my-7 h-px bg-neutral-100" />
 
-      <ul className="mt-7 space-y-3">
-        {plan.features.map((feature: string) => (
+      <ul className="space-y-3">
+        {features.map((feature) => (
           <CheckItem key={feature}>{feature}</CheckItem>
         ))}
       </ul>
@@ -139,21 +115,20 @@ function PlanCard({ plan }: { plan: any }) {
   );
 }
 
-function Metric({ label, value }: { label: string; value: string }) {
+function CompareRow({ label, diy, managed }: { label: string; diy: string; managed: string }) {
   return (
-    <div className="rounded-3xl border border-neutral-200 bg-white p-6 shadow-sm">
-      <div className="text-3xl font-semibold tracking-tight text-black">{value}</div>
-      <div className="mt-2 text-sm text-neutral-500">{label}</div>
+    <div className="grid grid-cols-[1.1fr_1fr_1fr] border-b border-neutral-100 text-sm last:border-b-0">
+      <div className="px-4 py-4 font-semibold text-neutral-800">{label}</div>
+      <div className="px-4 py-4 text-neutral-600">{diy}</div>
+      <div className="px-4 py-4 font-semibold text-black">{managed}</div>
     </div>
   );
 }
 
 export default function PremiumPricingPage() {
-  const [mode, setMode] = useState<Mode>("managed");
-
   return (
     <main className="min-h-screen bg-[#F7F7F4] text-black">
-      <header className="sticky top-0 z-50 border-b border-black/5 bg-[#F7F7F4]/85 backdrop-blur-xl">
+      <header className="sticky top-0 z-50 border-b border-black/5 bg-[#F7F7F4]/90 backdrop-blur-xl">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-4 sm:px-8 lg:px-10">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-black text-white">
@@ -165,9 +140,10 @@ export default function PremiumPricingPage() {
             </div>
           </div>
 
-          <nav className="hidden items-center gap-7 text-sm font-medium text-neutral-600 md:flex">
-            <a href="#samples" className="hover:text-black">Free sample</a>
+          <nav className="hidden items-center gap-8 text-sm font-semibold text-neutral-600 md:flex">
+            <a href="#sample" className="hover:text-black">Free sample</a>
             <a href="#pricing" className="hover:text-black">Pricing</a>
+            <a href="#compare" className="hover:text-black">Compare</a>
             <a href="#updates" className="hover:text-black">Updates</a>
           </nav>
 
@@ -176,31 +152,33 @@ export default function PremiumPricingPage() {
       </header>
 
       <section className="relative overflow-hidden">
-        <div className="absolute right-[-12rem] top-[-12rem] h-[34rem] w-[34rem] rounded-full bg-[#06C167]/10 blur-3xl" />
-        <div className="mx-auto grid max-w-7xl items-center gap-12 px-5 py-20 sm:px-8 lg:grid-cols-[0.95fr_1.05fr] lg:px-10 lg:py-28">
+        <div className="absolute right-[-10rem] top-[-12rem] h-[34rem] w-[34rem] rounded-full bg-[#06C167]/12 blur-3xl" />
+        <div className="absolute bottom-[-18rem] left-[-14rem] h-[30rem] w-[30rem] rounded-full bg-black/5 blur-3xl" />
+
+        <div className="mx-auto grid max-w-7xl items-center gap-14 px-5 py-20 sm:px-8 lg:grid-cols-[0.95fr_1.05fr] lg:px-10 lg:py-28">
           <motion.div initial="hidden" animate="visible" variants={fadeUp} transition={{ duration: 0.55 }}>
-            <div className="inline-flex items-center gap-2 rounded-full border border-black/10 bg-white px-4 py-2 text-sm font-semibold text-black shadow-sm">
+            <div className="inline-flex items-center gap-2 rounded-full border border-black/10 bg-white px-4 py-2 text-sm font-bold shadow-sm">
               <Zap className="h-4 w-4 text-[#06C167]" />
               Free 3 image preview available
             </div>
 
-            <h1 className="mt-7 max-w-2xl text-6xl font-semibold tracking-[-0.07em] text-black sm:text-7xl lg:text-8xl">
+            <h1 className="mt-7 max-w-2xl text-6xl font-black leading-[0.88] tracking-[-0.08em] sm:text-7xl lg:text-8xl">
               Make your menu look worth ordering.
             </h1>
 
             <p className="mt-7 max-w-xl text-lg leading-8 text-neutral-600">
-              Premium food image upgrades for restaurants on Uber Eats and beyond. We can deliver the files, or handle the Uber image upload for you.
+              Premium food image upgrades for restaurants. Use the files yourself, or let us update your Uber Eats visuals for you.
             </p>
 
             <div className="mt-10 flex flex-col gap-3 sm:flex-row">
               <Button>Get Free Sample</Button>
-              <Button variant="secondary">View Pricing</Button>
+              <Button variant="light">View Pricing</Button>
             </div>
 
             <div className="mt-10 grid max-w-xl grid-cols-3 gap-3">
-              <Metric label="Free sample" value="3" />
-              <Metric label="Starter from" value="$499" />
-              <Metric label="Managed from" value="$899" />
+              <MiniMetric value="3" label="Free sample" />
+              <MiniMetric value="$499" label="DIY from" />
+              <MiniMetric value="$899" label="Managed from" />
             </div>
           </motion.div>
 
@@ -210,17 +188,17 @@ export default function PremiumPricingPage() {
             transition={{ delay: 0.12, duration: 0.6 }}
             className="relative"
           >
-            <div className="rounded-[36px] border border-black/10 bg-white p-4 shadow-[0_30px_90px_rgba(0,0,0,0.14)]">
-              <div className="overflow-hidden rounded-[28px] bg-black">
-                <div className="grid grid-cols-2">
-                  <div className="p-5">
-                    <div className="mb-3 rounded-full bg-white/15 px-3 py-1 text-xs font-semibold text-white/80 w-fit">Before</div>
-                    <div className="h-72 rounded-3xl bg-gradient-to-br from-neutral-600 via-neutral-800 to-black opacity-70" />
-                    <p className="mt-4 text-xs leading-5 text-white/55">Flat lighting, inconsistent framing, low appetite appeal.</p>
+            <div className="rounded-[40px] border border-black/10 bg-white p-4 shadow-[0_30px_100px_rgba(0,0,0,0.16)]">
+              <div className="rounded-[32px] bg-black p-5">
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div>
+                    <div className="mb-3 w-fit rounded-full bg-white/15 px-3 py-1 text-xs font-bold text-white">Before</div>
+                    <div className="h-72 rounded-[28px] bg-gradient-to-br from-neutral-700 via-neutral-900 to-black" />
+                    <p className="mt-4 text-xs leading-5 text-white/50">Flat lighting, inconsistent framing, low appetite appeal.</p>
                   </div>
-                  <div className="bg-[#111] p-5">
-                    <div className="mb-3 rounded-full bg-[#06C167] px-3 py-1 text-xs font-bold text-black w-fit">After</div>
-                    <div className="relative h-72 overflow-hidden rounded-3xl bg-gradient-to-br from-[#06C167]/20 via-orange-400/40 to-black">
+                  <div>
+                    <div className="mb-3 w-fit rounded-full bg-[#06C167] px-3 py-1 text-xs font-black text-black">After</div>
+                    <div className="relative h-72 overflow-hidden rounded-[28px] bg-gradient-to-br from-[#06C167]/25 via-orange-400/45 to-black">
                       <div className="absolute inset-x-8 bottom-8 h-32 rounded-full bg-orange-300/60 blur-2xl" />
                       <div className="absolute bottom-7 left-1/2 h-40 w-40 -translate-x-1/2 rounded-full border-[18px] border-orange-300 bg-red-700 shadow-2xl" />
                     </div>
@@ -230,14 +208,14 @@ export default function PremiumPricingPage() {
               </div>
             </div>
 
-            <div className="absolute -bottom-8 -left-8 hidden rounded-3xl border border-black/10 bg-white p-5 shadow-xl lg:block">
+            <div className="absolute -bottom-8 -left-6 hidden rounded-3xl border border-black/10 bg-white p-5 shadow-xl lg:block">
               <div className="flex items-center gap-3">
                 <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#06C167]/15 text-[#06C167]">
                   <BadgeCheck className="h-6 w-6" />
                 </div>
                 <div>
-                  <div className="text-sm font-bold">Client owns all images</div>
-                  <div className="text-xs text-neutral-500">Use anywhere, no restrictions</div>
+                  <div className="text-sm font-black">You own every image</div>
+                  <div className="text-xs text-neutral-500">Use anywhere. No restrictions.</div>
                 </div>
               </div>
             </div>
@@ -245,16 +223,14 @@ export default function PremiumPricingPage() {
         </div>
       </section>
 
-      <section id="samples" className="mx-auto max-w-7xl px-5 py-16 sm:px-8 lg:px-10">
-        <div className="rounded-[36px] bg-black p-8 text-white shadow-[0_30px_100px_rgba(0,0,0,0.18)] sm:p-12">
-          <div className="grid gap-10 lg:grid-cols-[0.8fr_1.2fr] lg:items-center">
+      <section id="sample" className="mx-auto max-w-7xl px-5 py-12 sm:px-8 lg:px-10">
+        <div className="rounded-[40px] bg-black p-8 text-white shadow-[0_30px_100px_rgba(0,0,0,0.16)] sm:p-12">
+          <div className="grid gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
             <div>
-              <div className="inline-flex items-center rounded-full bg-white/10 px-4 py-2 text-sm font-semibold text-white">
-                Free proof of value
-              </div>
-              <h2 className="mt-6 text-4xl font-semibold tracking-[-0.04em] sm:text-5xl">We enhance 3 images first.</h2>
-              <p className="mt-5 text-base leading-7 text-white/65">
-                Show the improvement before they pay. Send restaurants a watermarked preview and let the quality do the selling.
+              <div className="inline-flex rounded-full bg-white/10 px-4 py-2 text-sm font-bold">Free proof of value</div>
+              <h2 className="mt-6 text-4xl font-black tracking-[-0.05em] sm:text-5xl">We enhance 3 images first.</h2>
+              <p className="mt-5 max-w-lg text-base leading-7 text-white/65">
+                Send restaurants a watermarked preview before they pay. The improvement becomes the sales pitch.
               </p>
               <div className="mt-8">
                 <Button>Request Free Sample</Button>
@@ -265,7 +241,7 @@ export default function PremiumPricingPage() {
               {["Original", "Enhanced", "Watermarked"].map((label, i) => (
                 <div key={label} className="rounded-3xl border border-white/10 bg-white/[0.06] p-4">
                   <div className={`h-48 rounded-2xl ${i === 0 ? "bg-neutral-700" : i === 1 ? "bg-gradient-to-br from-orange-300 via-red-500 to-black" : "bg-gradient-to-br from-[#06C167] via-orange-400 to-black"}`} />
-                  <div className="mt-4 text-sm font-semibold">{label}</div>
+                  <div className="mt-4 text-sm font-bold">{label}</div>
                   <div className="mt-1 text-xs text-white/45">Sample preview</div>
                 </div>
               ))}
@@ -276,65 +252,101 @@ export default function PremiumPricingPage() {
 
       <section id="pricing" className="mx-auto max-w-7xl px-5 py-20 sm:px-8 lg:px-10">
         <div className="mx-auto max-w-3xl text-center">
-          <div className="inline-flex items-center rounded-full border border-black/10 bg-white px-4 py-2 text-sm font-semibold shadow-sm">Pricing</div>
-          <h2 className="mt-6 text-5xl font-semibold tracking-[-0.06em] sm:text-6xl">Choose your level of involvement.</h2>
-          <p className="mt-5 text-lg leading-8 text-neutral-600">DIY if you want the files. Managed if you want us to handle the Uber Eats image upgrade for you.</p>
+          <div className="inline-flex rounded-full border border-black/10 bg-white px-4 py-2 text-sm font-bold shadow-sm">Pricing</div>
+          <h2 className="mt-6 text-5xl font-black leading-[0.95] tracking-[-0.07em] sm:text-6xl">DIY or Managed. See both clearly.</h2>
+          <p className="mt-5 text-lg leading-8 text-neutral-600">No confusing switch. Choose files only, or let us handle the Uber image upload for you.</p>
         </div>
 
-        <div className="mx-auto mt-10 flex w-fit rounded-full border border-black/10 bg-white p-1 shadow-sm">
-          <button
-            onClick={() => setMode("diy")}
-            className={`rounded-full px-7 py-3 text-sm font-bold transition ${mode === "diy" ? "bg-black text-white" : "text-neutral-500 hover:text-black"}`}
-          >
-            DIY
-          </button>
-          <button
-            onClick={() => setMode("managed")}
-            className={`rounded-full px-7 py-3 text-sm font-bold transition ${mode === "managed" ? "bg-[#06C167] text-black" : "text-neutral-500 hover:text-black"}`}
-          >
-            Managed
-          </button>
-        </div>
-
-        <motion.div
-          key={mode}
-          initial="hidden"
-          animate="visible"
-          transition={{ staggerChildren: 0.12 }}
-          className="mx-auto mt-10 grid max-w-5xl gap-6 md:grid-cols-2"
-        >
-          {pricing[mode].map((plan) => (
-            <PlanCard key={plan.name} plan={plan} />
-          ))}
+        <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-100px" }} transition={{ staggerChildren: 0.1 }} className="mt-12 grid gap-6 lg:grid-cols-4">
+          <PricingCard
+            title="Starter DIY"
+            price="$499"
+            limit="Up to 20 images"
+            description="We enhance your images and deliver upload-ready files."
+            cta="Start DIY"
+            features={["Premium image enhancement", "Ready-to-upload files", "Use anywhere, no restrictions", "Client uploads images"]}
+          />
+          <PricingCard
+            title="Standard DIY"
+            price="$799"
+            limit="Up to 50 images"
+            description="For restaurants upgrading most of their menu visuals."
+            cta="Choose Standard DIY"
+            highlighted
+            badge="Best DIY"
+            features={["Premium image enhancement", "Ready-to-upload files", "Larger menu coverage", "Client uploads images"]}
+          />
+          <PricingCard
+            title="Starter Managed"
+            price="$899"
+            limit="Up to 20 items"
+            description="We enhance your visuals and update your Uber Eats images."
+            cta="Choose Managed"
+            features={["Image enhancement", "Drinks handled", "Headers included", "Uber Eats image upload", "Priority service"]}
+          />
+          <PricingCard
+            title="Standard Managed"
+            price="$1,299"
+            limit="Up to 50 items"
+            description="The full done-for-you visual upgrade for serious restaurants."
+            cta="Choose Standard Managed"
+            highlighted
+            badge="Most Popular"
+            features={["Image enhancement", "Drinks handled", "Headers included", "Uber Eats image upload", "Priority service"]}
+          />
         </motion.div>
 
-        <div className="mx-auto mt-7 grid max-w-5xl gap-4 md:grid-cols-3">
-          <div className="rounded-[26px] border border-neutral-200 bg-white p-6 shadow-sm">
-            <LayoutGrid className="h-6 w-6 text-[#06C167]" />
-            <h3 className="mt-5 font-bold">Large menus</h3>
-            <p className="mt-2 text-sm leading-6 text-neutral-600">Contact us for bulk or custom pricing.</p>
-          </div>
-          <div className="rounded-[26px] border border-neutral-200 bg-white p-6 shadow-sm">
+        <div className="mt-8 grid gap-4 md:grid-cols-3">
+          <div className="rounded-[28px] border border-neutral-200 bg-white p-6 shadow-sm">
             <PackageCheck className="h-6 w-6 text-[#06C167]" />
-            <h3 className="mt-5 font-bold">DIY add-ons</h3>
+            <h3 className="mt-5 font-black">DIY add-ons</h3>
             <p className="mt-2 text-sm leading-6 text-neutral-600">Drinks Pack $99. Header Pack $99.</p>
           </div>
-          <div className="rounded-[26px] border border-neutral-200 bg-white p-6 shadow-sm">
+          <div className="rounded-[28px] border border-neutral-200 bg-white p-6 shadow-sm">
             <ShieldCheck className="h-6 w-6 text-[#06C167]" />
-            <h3 className="mt-5 font-bold">Managed includes more</h3>
+            <h3 className="mt-5 font-black">Managed includes more</h3>
             <p className="mt-2 text-sm leading-6 text-neutral-600">Headers, drinks, Uber upload, and priority service are included.</p>
+          </div>
+          <div className="rounded-[28px] border border-neutral-200 bg-white p-6 shadow-sm">
+            <Building2 className="h-6 w-6 text-[#06C167]" />
+            <h3 className="mt-5 font-black">Large menus</h3>
+            <p className="mt-2 text-sm leading-6 text-neutral-600">Contact us for bulk or custom pricing.</p>
           </div>
         </div>
       </section>
 
-      <section id="updates" className="mx-auto max-w-7xl px-5 py-16 sm:px-8 lg:px-10">
+      <section id="compare" className="mx-auto max-w-7xl px-5 py-12 sm:px-8 lg:px-10">
+        <div className="grid gap-8 lg:grid-cols-[0.75fr_1.25fr] lg:items-start">
+          <div>
+            <div className="inline-flex rounded-full border border-black/10 bg-white px-4 py-2 text-sm font-bold shadow-sm">Comparison</div>
+            <h2 className="mt-6 text-4xl font-black leading-[0.95] tracking-[-0.06em] sm:text-5xl">The difference is who does the work.</h2>
+            <p className="mt-5 text-neutral-600">DIY gives you premium images. Managed gives you premium images plus Uber image upload and priority service.</p>
+          </div>
+
+          <div className="overflow-hidden rounded-[32px] border border-neutral-200 bg-white shadow-sm">
+            <div className="grid grid-cols-[1.1fr_1fr_1fr] bg-neutral-50 text-sm font-black">
+              <div className="px-4 py-4">Feature</div>
+              <div className="px-4 py-4">DIY</div>
+              <div className="px-4 py-4">Managed</div>
+            </div>
+            <CompareRow label="Image enhancement" diy="Included" managed="Included" />
+            <CompareRow label="Drinks" diy="$99 add-on" managed="Included" />
+            <CompareRow label="Header banners" diy="$99 add-on" managed="Included" />
+            <CompareRow label="Uber Eats image upload" diy="You handle it" managed="We handle it" />
+            <CompareRow label="Priority service" diy="Standard queue" managed="Included" />
+            <CompareRow label="Best for" diy="Hands-on owners" managed="Busy owners" />
+          </div>
+        </div>
+      </section>
+
+      <section id="updates" className="mx-auto max-w-7xl px-5 py-20 sm:px-8 lg:px-10">
         <div className="grid gap-6 lg:grid-cols-[1fr_1fr]">
-          <div className="rounded-[34px] border border-black bg-white p-8 shadow-[0_25px_80px_rgba(0,0,0,0.10)]">
-            <div className="inline-flex rounded-full bg-[#06C167]/15 px-4 py-2 text-sm font-bold text-black">Managed only</div>
-            <h2 className="mt-6 text-4xl font-semibold tracking-[-0.04em]">Menu Updates Plan</h2>
-            <p className="mt-4 text-neutral-600">Keep your menu fresh as you add new dishes. Managed clients receive priority updates.</p>
+          <div className="rounded-[36px] border border-black bg-white p-8 shadow-[0_24px_80px_rgba(0,0,0,0.10)]">
+            <div className="inline-flex rounded-full bg-[#06C167]/15 px-4 py-2 text-sm font-black">Managed only</div>
+            <h2 className="mt-6 text-4xl font-black tracking-[-0.05em]">Menu Updates Plan</h2>
+            <p className="mt-4 text-neutral-600">Keep your menu current as you add new dishes. Managed clients receive priority updates.</p>
             <div className="mt-7 flex items-end gap-2">
-              <span className="text-5xl font-semibold">$149</span>
+              <span className="text-6xl font-black tracking-tight">$149</span>
               <span className="pb-2 text-neutral-500">/ month</span>
             </div>
             <ul className="mt-8 space-y-3">
@@ -349,33 +361,33 @@ export default function PremiumPricingPage() {
           </div>
 
           <div className="grid gap-5">
-            <div className="rounded-[34px] border border-neutral-200 bg-white p-8 shadow-sm">
-              <h3 className="text-2xl font-semibold tracking-tight">Completion Packs</h3>
+            <div className="rounded-[36px] border border-neutral-200 bg-white p-8 shadow-sm">
+              <h3 className="text-3xl font-black tracking-[-0.04em]">Completion Packs</h3>
               <p className="mt-3 text-sm leading-6 text-neutral-600">Available after purchasing a Starter or Standard package to finish remaining menu items.</p>
               <div className="mt-6 grid gap-4 sm:grid-cols-2">
                 <div className="rounded-3xl bg-neutral-50 p-6">
-                  <div className="text-3xl font-semibold">$199</div>
+                  <div className="text-4xl font-black">$199</div>
                   <div className="mt-1 text-sm text-neutral-500">Up to 10 items</div>
                 </div>
                 <div className="rounded-3xl bg-neutral-50 p-6">
-                  <div className="text-3xl font-semibold">$349</div>
+                  <div className="text-4xl font-black">$349</div>
                   <div className="mt-1 text-sm text-neutral-500">Up to 20 items</div>
                 </div>
               </div>
             </div>
 
-            <div className="rounded-[34px] border border-neutral-200 bg-white p-8 shadow-sm">
+            <div className="rounded-[36px] border border-neutral-200 bg-white p-8 shadow-sm">
               <div className="flex items-center gap-4">
                 <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-black text-white">
                   <Store className="h-6 w-6" />
                 </div>
                 <div>
-                  <h3 className="text-2xl font-semibold tracking-tight">Multi-location restaurants</h3>
+                  <h3 className="text-2xl font-black tracking-tight">Multi-location restaurants</h3>
                   <p className="mt-1 text-sm text-neutral-600">Custom pricing for franchises and groups.</p>
                 </div>
               </div>
               <div className="mt-7">
-                <Button variant="secondary">Contact Us</Button>
+                <Button variant="light">Contact Us</Button>
               </div>
             </div>
           </div>
@@ -383,20 +395,20 @@ export default function PremiumPricingPage() {
       </section>
 
       <section className="mx-auto max-w-7xl px-5 py-16 sm:px-8 lg:px-10">
-        <div className="rounded-[36px] bg-black p-8 text-white sm:p-12">
+        <div className="rounded-[40px] bg-black p-8 text-white sm:p-12">
           <div className="grid gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
             <div>
               <Download className="h-9 w-9 text-[#06C167]" />
-              <h2 className="mt-6 text-4xl font-semibold tracking-[-0.04em]">You own every image.</h2>
+              <h2 className="mt-6 text-4xl font-black tracking-[-0.05em]">You own every image.</h2>
               <p className="mt-5 max-w-xl text-base leading-7 text-white/65">
-                All completed images are yours to use across delivery platforms, your website, social media, menus, and future campaigns. No restrictions.
+                Use your completed images across Uber Eats, DoorDash, your website, social media, print menus, and future campaigns. No restrictions.
               </p>
             </div>
             <div className="grid gap-3 sm:grid-cols-2">
               {["Uber Eats", "DoorDash", "Website", "Social Media", "Print Menus", "Franchise Assets"].map((item) => (
                 <div key={item} className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.06] p-4">
                   <BadgeCheck className="h-5 w-5 text-[#06C167]" />
-                  <span className="text-sm font-semibold">{item}</span>
+                  <span className="text-sm font-bold">{item}</span>
                 </div>
               ))}
             </div>
@@ -405,13 +417,13 @@ export default function PremiumPricingPage() {
       </section>
 
       <section className="mx-auto max-w-5xl px-5 py-20 text-center sm:px-8 lg:px-10">
-        <div className="rounded-[36px] border border-neutral-200 bg-white p-10 shadow-[0_25px_90px_rgba(0,0,0,0.08)] sm:p-14">
+        <div className="rounded-[40px] border border-neutral-200 bg-white p-10 shadow-[0_25px_90px_rgba(0,0,0,0.08)] sm:p-14">
           <Camera className="mx-auto h-10 w-10 text-[#06C167]" />
-          <h2 className="mt-6 text-5xl font-semibold tracking-[-0.06em]">Start with 3 free images.</h2>
+          <h2 className="mt-6 text-5xl font-black leading-[0.95] tracking-[-0.06em]">Start with 3 free images.</h2>
           <p className="mx-auto mt-5 max-w-xl text-neutral-600">We’ll show the upgrade before you commit. Watermarked samples. No pressure.</p>
           <div className="mt-9 flex flex-col justify-center gap-3 sm:flex-row">
             <Button>Get Free Sample</Button>
-            <Button variant="secondary">Contact Us</Button>
+            <Button variant="light">Contact Us</Button>
           </div>
         </div>
       </section>
