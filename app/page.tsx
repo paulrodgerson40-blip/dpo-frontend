@@ -159,10 +159,13 @@ export default function PremiumPricingPage() {
         <div className="mt-12 grid gap-6 lg:grid-cols-2">
           <div className="rounded-[36px] border border-neutral-200 bg-white p-5 shadow-sm">
             <div className="mb-4 w-fit rounded-full bg-neutral-100 px-4 py-2 text-sm font-black">Before</div>
-            <div className="flex h-[420px] items-center justify-center rounded-[28px] bg-neutral-200 text-center text-xl font-black text-neutral-500">
-              IMAGE<br />
-              FULL MENU BEFORE<br />
-              Uber Eats screenshot with mixed quality images
+            <div className="relative h-[420px] w-full overflow-hidden rounded-[28px] bg-neutral-200">
+              <Image
+                src="/images/menu-before.png"
+                alt="Full menu before image upgrade"
+                fill
+                className="object-cover"
+              />
             </div>
             <p className="mt-5 text-sm leading-6 text-neutral-600">
               Inconsistent lighting, random angles, low quality photos, and no visual brand consistency.
@@ -171,10 +174,13 @@ export default function PremiumPricingPage() {
 
           <div className="rounded-[36px] border border-black bg-white p-5 shadow-[0_24px_80px_rgba(0,0,0,0.12)]">
             <div className="mb-4 w-fit rounded-full bg-[#06C167] px-4 py-2 text-sm font-black text-black">After</div>
-            <div className="flex h-[420px] items-center justify-center rounded-[28px] bg-gradient-to-br from-[#06C167]/20 via-white to-orange-100 text-center text-xl font-black text-black">
-              IMAGE<br />
-              FULL MENU AFTER<br />
-              Premium consistent upgraded menu
+            <div className="relative h-[420px] w-full overflow-hidden rounded-[28px] bg-gradient-to-br from-[#06C167]/20 via-white to-orange-100">
+              <Image
+                src="/images/menu-after.png"
+                alt="Full menu after image upgrade"
+                fill
+                className="object-cover"
+              />
             </div>
             <p className="mt-5 text-sm leading-6 text-neutral-600">
               Consistent image style, stronger appetite appeal, cleaner presentation, and a more premium store presence.
