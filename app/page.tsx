@@ -172,15 +172,6 @@ export default function PremiumPricingPage() {
               </div>
             </div>
 
-            <div className="absolute -bottom-9 left-8 hidden rounded-3xl border border-black/10 bg-white p-5 shadow-xl lg:block">
-              <div className="flex items-center gap-3">
-                <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#06C167]/15 text-[#06C167]">✓</div>
-                <div>
-                  <div className="text-sm font-black">You own every image</div>
-                  <div className="text-xs text-neutral-500">Use anywhere. No restrictions.</div>
-                </div>
-              </div>
-            </div>
           </div>
         </div>
       </section>
@@ -206,12 +197,12 @@ export default function PremiumPricingPage() {
         <div className="mt-10 grid gap-7 lg:grid-cols-2">
           <div className="rounded-[36px] border border-neutral-200 bg-white p-5 shadow-sm">
             <div className="mb-4 w-fit rounded-full bg-neutral-100 px-4 py-2 text-sm font-black">Before</div>
-            <div className="relative h-[430px] w-full overflow-hidden rounded-[24px] bg-white">
+            <div className="relative h-[500px] w-full overflow-hidden rounded-[24px] bg-white">
               <Image
                 src="/images/menu-before.png"
                 alt="Full menu before image upgrade"
                 fill
-                className="object-contain scale-[1.16]"
+                className="object-contain scale-[1.12]"
               />
             </div>
             <p className="mt-4 text-sm leading-6 text-neutral-600">
@@ -221,12 +212,12 @@ export default function PremiumPricingPage() {
 
           <div className="rounded-[36px] border border-black bg-white p-5 shadow-[0_24px_80px_rgba(0,0,0,0.12)]">
             <div className="mb-4 w-fit rounded-full bg-[#06C167] px-4 py-2 text-sm font-black text-black">After</div>
-            <div className="relative h-[430px] w-full overflow-hidden rounded-[24px] bg-white">
+            <div className="relative h-[500px] w-full overflow-hidden rounded-[24px] bg-white">
               <Image
                 src="/images/menu-after.png"
                 alt="Full menu after image upgrade"
                 fill
-                className="object-contain scale-[1.16]"
+                className="object-contain scale-[1.12]"
               />
               <div className="absolute bottom-4 right-4 rounded-xl bg-white/85 p-2 shadow-sm backdrop-blur">
                 <LogoMark className="h-6 w-6 rounded-lg" />
@@ -472,6 +463,28 @@ export default function PremiumPricingPage() {
           <div className="rounded-[24px] border border-neutral-200 bg-white p-5 shadow-sm">
             <h3 className="font-black">Large menus</h3>
             <p className="mt-2 text-sm leading-6 text-neutral-600">Contact us for bulk or custom pricing.</p>
+          </div>
+        </div>
+
+
+        <div className="mt-8 overflow-hidden rounded-[30px] border border-black bg-black p-6 text-white shadow-[0_24px_80px_rgba(0,0,0,0.16)]">
+          <div className="grid gap-5 md:grid-cols-[0.9fr_1.1fr] md:items-center">
+            <div className="flex items-center gap-4">
+              <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-[#06C167]/20 text-2xl text-[#06C167]">✓</div>
+              <div>
+                <div className="text-2xl font-black tracking-tight">You own every image.</div>
+                <p className="mt-1 text-sm leading-6 text-white/65">
+                  Use your completed images anywhere — Uber Eats, DoorDash, your website, social media, ads, print menus, and future campaigns.
+                </p>
+              </div>
+            </div>
+            <div className="grid gap-3 sm:grid-cols-3">
+              {["No licensing fees", "No usage limits", "Use across platforms"].map((item) => (
+                <div key={item} className="rounded-2xl border border-white/10 bg-white/[0.06] p-4 text-sm font-bold">
+                  <span className="mr-2 text-[#06C167]">✓</span>{item}
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </section>
