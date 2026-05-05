@@ -5,10 +5,16 @@ import { useEffect, useMemo, useState } from "react";
 const BACKEND_URL = "https://170.64.209.149.sslip.io";
 
 type RestaurantMode = "new" | "existing";
-type ActiveTab = "originals" | "compare" | "enhanced" | "headers" | "headerEnhanced";
+type ActiveTab = "originals" | "compare" | "enhanced" | "samples" | "headers" | "headerEnhanced";
 type UploadType = "menu" | "header";
 type WorkspaceMode = "restaurants" | "drinks";
 type DrinksTab = "originals" | "enhanced";
+
+type ProgressDetails = {
+  processed?: number;
+  total?: number;
+  current?: string;
+};
 
 type LibraryImage = {
   filename: string;
@@ -28,6 +34,7 @@ type Restaurant = {
   headers_count?: number;
   outputs_count?: number;
   header_enhanced_count?: number;
+  samples_count?: number;
 };
 
 type ManualJobResponse = {
@@ -49,6 +56,7 @@ const TAB_LABELS: Record<ActiveTab, string> = {
   originals: "Original",
   compare: "Comparison",
   enhanced: "Enhanced",
+  samples: "Samples",
   headers: "Header",
   headerEnhanced: "Header Enhanced",
 };
@@ -57,6 +65,7 @@ const IMAGE_FOLDERS: Record<ActiveTab, string> = {
   originals: "originals_approved",
   compare: "originals_approved",
   enhanced: "enhanced",
+  samples: "samples",
   headers: "headers",
   headerEnhanced: "header_enhanced",
 };
@@ -115,12 +124,14 @@ export default function Home() {
 
   const [originalImages, setOriginalImages] = useState<LibraryImage[]>([]);
   const [enhancedImages, setEnhancedImages] = useState<LibraryImage[]>([]);
+  const [sampleImages, setSampleImages] = useState<LibraryImage[]>([]);
   const [headerImages, setHeaderImages] = useState<LibraryImage[]>([]);
   const [headerEnhancedImages, setHeaderEnhancedImages] = useState<LibraryImage[]>([]);
 
   const [previewImage, setPreviewImage] = useState<PreviewImage | null>(null);
   const [workingLabel, setWorkingLabel] = useState("");
   const [progress, setProgress] = useState(0);
+  const [progressDetails, setProgressDetails] = useState<ProgressDetails | undefined>(undefined);
   const [selectedImageKeys, setSelectedImageKeys] = useState<Set<string>>(new Set());
 
   function normaliseLibraryImages(images: any[] | undefined): LibraryImage[] {
@@ -165,6 +176,7 @@ export default function Home() {
 
       setOriginalImages(normaliseLibraryImages(folders.originals || folders.originals_approved));
       setEnhancedImages(normaliseLibraryImages(folders.enhanced));
+      setSampleImages(normaliseLibraryImages(folders.samples));
       setHeaderImages(normaliseLibraryImages(folders.headers));
       setHeaderEnhancedImages(normaliseLibraryImages(folders.header_enhanced || folders.outputs));
       setSelectedImageKeys(new Set());
@@ -173,6 +185,7 @@ export default function Home() {
     } catch {
       setOriginalImages([]);
       setEnhancedImages([]);
+      setSampleImages([]);
       setHeaderImages([]);
       setHeaderEnhancedImages([]);
       setSelectedImageKeys(new Set());
@@ -260,6 +273,7 @@ export default function Home() {
     setLastUploadedFiles([]);
     setOriginalImages([]);
     setEnhancedImages([]);
+    setSampleImages([]);
     setHeaderImages([]);
     setHeaderEnhancedImages([]);
     setSelectedImageKeys(new Set());
@@ -538,6 +552,7 @@ export default function Home() {
       setLoading(false);
       setWorkingLabel("");
       setProgress(0);
+      setProgressDetails(undefined);
     }
   }
 
@@ -576,6 +591,7 @@ export default function Home() {
       setLoading(false);
       setWorkingLabel("");
       setProgress(0);
+      setProgressDetails(undefined);
     }
   }
 
@@ -615,6 +631,7 @@ export default function Home() {
       setLoading(false);
       setWorkingLabel("");
       setProgress(0);
+      setProgressDetails(undefined);
     }
   }
 
@@ -653,6 +670,7 @@ export default function Home() {
       setLoading(false);
       setWorkingLabel("");
       setProgress(0);
+      setProgressDetails(undefined);
     }
   }
 
@@ -764,11 +782,14 @@ export default function Home() {
     if (activeTab === "enhanced") {
       return { images: enhancedImages, folder: "enhanced", canEnhance: false, enhanceKind: "none" as const };
     }
+    if (activeTab === "samples") {
+      return { images: sampleImages, folder: "samples", canEnhance: false, enhanceKind: "none" as const };
+    }
     if (activeTab === "headerEnhanced") {
       return { images: headerEnhancedImages, folder: "header_enhanced", canEnhance: false, enhanceKind: "none" as const };
     }
     return { images: originalImages, folder: "originals_approved", canEnhance: activeTab === "originals", enhanceKind: "menu" as const };
-  }, [activeTab, originalImages, enhancedImages, headerImages, headerEnhancedImages]);
+  }, [activeTab, originalImages, enhancedImages, sampleImages, headerImages, headerEnhancedImages]);
 
   const selectedImages = useMemo(() => {
     return activeBatch.images.filter((img) => selectedImageKeys.has(imageSelectKey(activeBatch.folder, img.filename)));
@@ -854,9 +875,12 @@ export default function Home() {
     setStatus("Enhancing selected images...");
 
     try {
+      const total = selectedImages.length;
       let enhanced = 0;
+      setProgressDetails({ processed: 0, total, current: selectedImages[0]?.filename });
 
       for (const img of selectedImages) {
+        setProgressDetails({ processed: enhanced, total, current: img.filename });
         const endpoint = activeBatch.enhanceKind === "header"
           ? `${BACKEND_URL}/api/dpo/restaurants/${encodeURIComponent(activeRestaurantSlug)}/headers/${encodeURIComponent(img.filename)}/enhance`
           : `${BACKEND_URL}/api/dpo/restaurants/${encodeURIComponent(activeRestaurantSlug)}/images/${encodeURIComponent(img.filename)}/enhance`;
@@ -869,7 +893,8 @@ export default function Home() {
         }
 
         enhanced += 1;
-        setProgress(Math.min(98, Math.round((enhanced / selectedImages.length) * 100)));
+        setProgressDetails({ processed: enhanced, total, current: img.filename });
+        setProgress(Math.min(98, Math.round((enhanced / total) * 100)));
       }
 
       setSelectedImageKeys(new Set());
@@ -885,6 +910,57 @@ export default function Home() {
       setLoading(false);
       setWorkingLabel("");
       setProgress(0);
+      setProgressDetails(undefined);
+    }
+  }
+
+  async function createSampleImages() {
+    if (!activeRestaurantSlug || selectedImages.length === 0 || activeTab !== "enhanced") return;
+
+    const check = window.prompt(`Create ${selectedImages.length} watermarked sales sample(s)?
+
+Type SAMPLE to confirm.`);
+    if (check !== "SAMPLE") return;
+
+    setLoading(true);
+    setWorkingLabel(`Creating ${selectedImages.length} watermarked sample(s)...`);
+    setProgressDetails({ processed: 0, total: selectedImages.length, current: selectedImages[0]?.filename });
+    setProgress(8);
+    setError("");
+    setMessage("");
+    setStatus("Creating samples...");
+
+    try {
+      const res = await fetch(`${BACKEND_URL}/api/dpo/restaurants/${encodeURIComponent(activeRestaurantSlug)}/samples/create`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          filenames: selectedImages.map((img) => img.filename),
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok || data.ok === false) {
+        throw new Error(data.detail || data.error || "Create samples failed");
+      }
+
+      const createdCount = data.count || data.created?.length || selectedImages.length;
+      setProgressDetails({ processed: createdCount, total: selectedImages.length });
+      setProgress(100);
+      setSelectedImageKeys(new Set());
+      await refreshRestaurantLibrary(activeRestaurantSlug);
+      setActiveTab("samples");
+      setStatus("Samples ready");
+      setMessage(`Created ${createdCount} watermarked sample(s).`);
+    } catch (err) {
+      setStatus("Create samples failed");
+      setError(err instanceof Error ? err.message : "Create samples failed");
+    } finally {
+      setLoading(false);
+      setWorkingLabel("");
+      setProgress(0);
+      setProgressDetails(undefined);
     }
   }
 
@@ -996,7 +1072,7 @@ export default function Home() {
         color: "#0f172a",
       }}
     >
-      {workingLabel && <ProgressOverlay label={workingLabel} progress={progress} />}
+      {workingLabel && <ProgressOverlay label={workingLabel} progress={progress} details={progressDetails} />}
 
       {previewImage && (
         <PreviewModal
@@ -1169,6 +1245,7 @@ export default function Home() {
                 <div style={{ display: "flex", gap: 10, flexWrap: "wrap", justifyContent: "flex-end" }}>
                   <Metric label="Original" value={String(originalImages.length)} />
                   <Metric label="Enhanced" value={String(enhancedImages.length)} />
+                  <Metric label="Samples" value={String(sampleImages.length)} tone={sampleImages.length > 0 ? "good" : "neutral"} />
                   <Metric label="Missing" value={String(unmatchedOriginalImages.length)} tone={unmatchedOriginalImages.length > 0 ? "warn" : "good"} />
                   <Metric label="Headers" value={String(headerImages.length)} />
                 </div>
@@ -1198,6 +1275,8 @@ export default function Home() {
                   onDelete={deleteSelectedImages}
                   onEnhance={enhanceSelectedImages}
                   onDownloadSelected={downloadSelectedFiles}
+                  canCreateSamples={activeTab === "enhanced"}
+                  onCreateSamples={createSampleImages}
                 />
               )}
 
@@ -1244,6 +1323,23 @@ export default function Home() {
                   onPreview={setPreviewImage}
                   onDownload={downloadImage}
                   onDelete={(img) => deleteImage(img, "enhanced")}
+                  selectedKeys={selectedImageKeys}
+                  onToggleSelected={toggleImageSelected}
+                  onRename={renameImage}
+                />
+              )}
+
+              {activeTab === "samples" && (
+                <ImageGrid
+                  title="Samples"
+                  subtitle="Watermarked sales samples created from selected enhanced images. These are separate from full restaurant downloads."
+                  images={sampleImages}
+                  emptyText="No samples yet. Go to Enhanced, select 3 images, then click Create Samples."
+                  folder="samples"
+                  restaurantSlug={activeRestaurantSlug}
+                  onPreview={setPreviewImage}
+                  onDownload={downloadImage}
+                  onDelete={(img) => deleteImage(img, "samples")}
                   selectedKeys={selectedImageKeys}
                   onToggleSelected={toggleImageSelected}
                   onRename={renameImage}
@@ -1357,6 +1453,7 @@ function DrinksLibrary({ onPreview }: { onPreview: (img: PreviewImage) => void }
   const [loading, setLoading] = useState(false);
   const [workingLabel, setWorkingLabel] = useState("");
   const [progress, setProgress] = useState(0);
+  const [progressDetails, setProgressDetails] = useState<ProgressDetails | undefined>(undefined);
   const [status, setStatus] = useState("Ready");
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
@@ -1514,6 +1611,7 @@ function DrinksLibrary({ onPreview }: { onPreview: (img: PreviewImage) => void }
       setLoading(false);
       setWorkingLabel("");
       setProgress(0);
+      setProgressDetails(undefined);
     }
   }
 
@@ -1651,7 +1749,7 @@ function DrinksLibrary({ onPreview }: { onPreview: (img: PreviewImage) => void }
 
   return (
     <div style={{ display: "grid", gap: 20 }}>
-      {workingLabel && <ProgressOverlay label={workingLabel} progress={progress} />}
+      {workingLabel && <ProgressOverlay label={workingLabel} progress={progress} details={progressDetails} />}
 
       <Panel>
         <div style={{ display: "flex", justifyContent: "space-between", gap: 18, alignItems: "center", flexWrap: "wrap" }}>
@@ -1815,7 +1913,7 @@ function Hero({ modeTitle, modeSubtitle }: { modeTitle: string; modeSubtitle: st
   );
 }
 
-function ProgressOverlay({ label, progress }: { label: string; progress: number }) {
+function ProgressOverlay({ label, progress, details }: { label: string; progress: number; details?: ProgressDetails }) {
   return (
     <div
       style={{
@@ -1834,7 +1932,15 @@ function ProgressOverlay({ label, progress }: { label: string; progress: number 
           <div style={spinnerStyle} />
           <div>
             <div style={{ fontWeight: 950, fontSize: 19 }}>{label}</div>
-            <div style={{ color: "#64748b", marginTop: 4 }}>Please keep this page open.</div>
+            {details?.total ? (
+              <div style={{ color: "#64748b", marginTop: 4 }}>
+                Processed: <b>{details.processed || 0}</b> / <b>{details.total}</b>
+                {typeof details.processed === "number" ? ` • Remaining: ${Math.max(details.total - details.processed, 0)}` : ""}
+                {details.current ? ` • Current: ${details.current}` : ""}
+              </div>
+            ) : (
+              <div style={{ color: "#64748b", marginTop: 4 }}>Please keep this page open.</div>
+            )}
           </div>
         </div>
         <div style={{ marginTop: 18, background: "#e2e8f0", height: 12, borderRadius: 999, overflow: "hidden" }}>
@@ -1949,6 +2055,7 @@ function Tabs({ active, setActive }: { active: ActiveTab; setActive: (tab: Activ
   const tabs: { id: ActiveTab; label: string }[] = [
     { id: "originals", label: "Original" },
     { id: "enhanced", label: "Enhanced" },
+    { id: "samples", label: "Samples" },
     { id: "headers", label: "Header" },
     { id: "headerEnhanced", label: "Header Enhanced" },
     { id: "compare", label: "Comparison" },
@@ -1991,6 +2098,8 @@ function BatchActionBar({
   onDelete,
   onEnhance,
   onDownloadSelected,
+  canCreateSamples = false,
+  onCreateSamples,
 }: {
   selectedCount: number;
   totalCount: number;
@@ -2002,6 +2111,8 @@ function BatchActionBar({
   onDelete: () => void;
   onEnhance: () => void;
   onDownloadSelected: () => void;
+  canCreateSamples?: boolean;
+  onCreateSamples?: () => void;
 }) {
   const noSelection = selectedCount === 0;
 
@@ -2037,6 +2148,11 @@ function BatchActionBar({
         {canEnhance && (
           <button type="button" onClick={onEnhance} disabled={disabled || noSelection} style={miniDarkButton(disabled || noSelection)}>
             {enhanceLabel}
+          </button>
+        )}
+        {canCreateSamples && (
+          <button type="button" onClick={onCreateSamples} disabled={disabled || noSelection} style={successButton(disabled || noSelection)}>
+            Create Samples
           </button>
         )}
         <button type="button" onClick={onDelete} disabled={disabled || noSelection} style={dangerButton(disabled || noSelection)}>
