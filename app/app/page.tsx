@@ -5,8 +5,8 @@ import { useEffect, useMemo, useState } from "react";
 const BACKEND_URL = "https://170.64.209.149.sslip.io";
 
 type RestaurantMode = "new" | "existing";
-type ActiveTab = "originals" | "compare" | "enhanced" | "samples" | "headers" | "headerEnhanced";
-type UploadType = "menu" | "header";
+type ActiveTab = "originals" | "compare" | "enhanced" | "samples" | "banners";
+type UploadType = "menu";
 type WorkspaceMode = "restaurants" | "drinks";
 type DrinksTab = "originals" | "enhanced";
 
@@ -31,10 +31,8 @@ type Restaurant = {
   originals_count?: number;
   approved_count?: number;
   enhanced_count?: number;
-  headers_count?: number;
-  outputs_count?: number;
-  header_enhanced_count?: number;
   samples_count?: number;
+  banners_count?: number;
 };
 
 type ManualJobResponse = {
@@ -57,8 +55,7 @@ const TAB_LABELS: Record<ActiveTab, string> = {
   compare: "Comparison",
   enhanced: "Enhanced",
   samples: "Samples",
-  headers: "Header",
-  headerEnhanced: "Header Enhanced",
+  banners: "Banners",
 };
 
 const IMAGE_FOLDERS: Record<ActiveTab, string> = {
@@ -66,8 +63,7 @@ const IMAGE_FOLDERS: Record<ActiveTab, string> = {
   compare: "originals_approved",
   enhanced: "enhanced",
   samples: "samples",
-  headers: "headers",
-  headerEnhanced: "header_enhanced",
+  banners: "banners",
 };
 
 function fileName(path: string) {
@@ -125,8 +121,7 @@ export default function Home() {
   const [originalImages, setOriginalImages] = useState<LibraryImage[]>([]);
   const [enhancedImages, setEnhancedImages] = useState<LibraryImage[]>([]);
   const [sampleImages, setSampleImages] = useState<LibraryImage[]>([]);
-  const [headerImages, setHeaderImages] = useState<LibraryImage[]>([]);
-  const [headerEnhancedImages, setHeaderEnhancedImages] = useState<LibraryImage[]>([]);
+  const [bannerImages, setBannerImages] = useState<LibraryImage[]>([]);
 
   const [previewImage, setPreviewImage] = useState<PreviewImage | null>(null);
   const [workingLabel, setWorkingLabel] = useState("");
@@ -177,8 +172,7 @@ export default function Home() {
       setOriginalImages(normaliseLibraryImages(folders.originals || folders.originals_approved));
       setEnhancedImages(normaliseLibraryImages(folders.enhanced));
       setSampleImages(normaliseLibraryImages(folders.samples));
-      setHeaderImages(normaliseLibraryImages(folders.headers));
-      setHeaderEnhancedImages(normaliseLibraryImages(folders.header_enhanced || folders.outputs));
+      setBannerImages(normaliseLibraryImages(folders.banners));
       setSelectedImageKeys(new Set());
 
       setStatus("Library loaded");
@@ -186,8 +180,7 @@ export default function Home() {
       setOriginalImages([]);
       setEnhancedImages([]);
       setSampleImages([]);
-      setHeaderImages([]);
-      setHeaderEnhancedImages([]);
+      setBannerImages([]);
       setSelectedImageKeys(new Set());
       setStatus("Ready");
       setError("Could not load saved images for this restaurant.");
@@ -258,11 +251,6 @@ export default function Home() {
     return originalImages.filter((img) => !enhancedByFilename.has(img.filename));
   }, [originalImages, enhancedByFilename]);
 
-  const headerEnhancedByFilename = useMemo(() => {
-    const map = new Map<string, LibraryImage>();
-    headerEnhancedImages.forEach((img) => map.set(img.filename, img));
-    return map;
-  }, [headerEnhancedImages]);
 
   function clearRestaurantScopedState() {
     setFiles([]);
@@ -274,8 +262,7 @@ export default function Home() {
     setOriginalImages([]);
     setEnhancedImages([]);
     setSampleImages([]);
-    setHeaderImages([]);
-    setHeaderEnhancedImages([]);
+    setBannerImages([]);
     setSelectedImageKeys(new Set());
 
     const input = document.getElementById("file") as HTMLInputElement | null;
@@ -330,7 +317,7 @@ export default function Home() {
     setLoading(true);
     setError("");
     setMessage("");
-    setStatus(uploadType === "header" ? "Uploading header files..." : "Uploading original images...");
+    setStatus("Uploading original images...");
     setLastJobId("");
     setLastUploadedFiles([]);
 
@@ -366,15 +353,9 @@ export default function Home() {
       setLastUploadedFiles(uploadedFiles);
       setStatus("Uploaded");
 
-      if (uploadType === "header") {
-        setHeaderImages(previews);
-        setActiveTab("headers");
-        setMessage("Header files uploaded. Approve latest to save them to the Header library.");
-      } else {
-        setOriginalImages(previews);
-        setActiveTab("originals");
-        setMessage("Original images uploaded. Approve latest to save them to the restaurant library.");
-      }
+      setOriginalImages(previews);
+      setActiveTab("originals");
+      setMessage("Original images uploaded. Approve latest to save them to the restaurant library.");
 
       resetUploadOnly();
     } catch (err) {
@@ -595,84 +576,6 @@ export default function Home() {
     }
   }
 
-  async function enhanceHeaderImage(img: LibraryImage) {
-    if (!activeRestaurantSlug) return;
-
-    const check = window.prompt(`Enhance header "${img.filename}" as a 16:9 banner?\n\nType ENHANCE to confirm.`);
-    if (check !== "ENHANCE") return;
-
-    setLoading(true);
-    setWorkingLabel(`Enhancing header ${img.filename}...`);
-    setError("");
-    setMessage("");
-    setStatus("Enhancing header...");
-
-    try {
-      const res = await fetch(
-        `${BACKEND_URL}/api/dpo/restaurants/${encodeURIComponent(activeRestaurantSlug)}/headers/${encodeURIComponent(img.filename)}/enhance`,
-        { method: "POST" }
-      );
-
-      const data = await res.json();
-
-      if (!res.ok || data.ok === false) {
-        throw new Error(data.detail || data.error || "Header enhance failed");
-      }
-
-      setProgress(100);
-      await refreshRestaurantLibrary(activeRestaurantSlug);
-      setActiveTab("headerEnhanced");
-      setStatus("Header enhanced");
-      setMessage(`${img.filename} enhanced as a 16:9 header.`);
-    } catch (err) {
-      setStatus("Header enhance failed");
-      setError(err instanceof Error ? err.message : "Header enhance failed");
-    } finally {
-      setLoading(false);
-      setWorkingLabel("");
-      setProgress(0);
-      setProgressDetails(undefined);
-    }
-  }
-
-  async function enhanceAllHeaders() {
-    if (!activeRestaurantSlug) return;
-
-    const check = window.prompt("Enhance all headers as 16:9 banners?\n\nType ENHANCE ALL to confirm.");
-    if (check !== "ENHANCE ALL") return;
-
-    setLoading(true);
-    setWorkingLabel("Enhancing all headers...");
-    setError("");
-    setMessage("");
-    setStatus("Header Phase B running...");
-
-    try {
-      const res = await fetch(`${BACKEND_URL}/api/dpo/restaurants/${encodeURIComponent(activeRestaurantSlug)}/headers/enhance-all`, {
-        method: "POST",
-      });
-
-      const data = await res.json();
-
-      if (!res.ok || data.ok === false) {
-        throw new Error(data.detail || data.error || "Enhance all headers failed");
-      }
-
-      setProgress(100);
-      await refreshRestaurantLibrary(activeRestaurantSlug);
-      setActiveTab("headerEnhanced");
-      setStatus("Header Phase B complete");
-      setMessage(`Enhanced ${data.count || data.processed?.length || 0} header image(s).`);
-    } catch (err) {
-      setStatus("Header Phase B failed");
-      setError(err instanceof Error ? err.message : "Enhance all headers failed");
-    } finally {
-      setLoading(false);
-      setWorkingLabel("");
-      setProgress(0);
-      setProgressDetails(undefined);
-    }
-  }
 
   async function downloadImage(img: LibraryImage, folder: string) {
     if (!activeRestaurantSlug) return;
@@ -802,20 +705,17 @@ export default function Home() {
   }
 
   const activeBatch = useMemo(() => {
-    if (activeTab === "headers") {
-      return { images: headerImages, folder: "headers", canEnhance: true, enhanceKind: "header" as const };
-    }
     if (activeTab === "enhanced") {
       return { images: enhancedImages, folder: "enhanced", canEnhance: false, enhanceKind: "none" as const };
     }
     if (activeTab === "samples") {
       return { images: sampleImages, folder: "samples", canEnhance: false, enhanceKind: "none" as const };
     }
-    if (activeTab === "headerEnhanced") {
-      return { images: headerEnhancedImages, folder: "header_enhanced", canEnhance: false, enhanceKind: "none" as const };
+    if (activeTab === "banners") {
+      return { images: bannerImages, folder: "banners", canEnhance: false, enhanceKind: "none" as const };
     }
     return { images: originalImages, folder: "originals_approved", canEnhance: activeTab === "originals", enhanceKind: "menu" as const };
-  }, [activeTab, originalImages, enhancedImages, sampleImages, headerImages, headerEnhancedImages]);
+  }, [activeTab, originalImages, enhancedImages, sampleImages, bannerImages]);
 
   const selectedImages = useMemo(() => {
     return activeBatch.images.filter((img) => selectedImageKeys.has(imageSelectKey(activeBatch.folder, img.filename)));
@@ -907,9 +807,7 @@ export default function Home() {
 
       for (const img of selectedImages) {
         setProgressDetails({ processed: enhanced, total, current: img.filename });
-        const endpoint = activeBatch.enhanceKind === "header"
-          ? `${BACKEND_URL}/api/dpo/restaurants/${encodeURIComponent(activeRestaurantSlug)}/headers/${encodeURIComponent(img.filename)}/enhance`
-          : `${BACKEND_URL}/api/dpo/restaurants/${encodeURIComponent(activeRestaurantSlug)}/images/${encodeURIComponent(img.filename)}/enhance`;
+        const endpoint = `${BACKEND_URL}/api/dpo/restaurants/${encodeURIComponent(activeRestaurantSlug)}/images/${encodeURIComponent(img.filename)}/enhance`;
 
         const res = await fetch(endpoint, { method: "POST" });
         const data = await res.json();
@@ -926,7 +824,7 @@ export default function Home() {
       setSelectedImageKeys(new Set());
       setProgress(100);
       await refreshRestaurantLibrary(activeRestaurantSlug);
-      setActiveTab(activeBatch.enhanceKind === "header" ? "headerEnhanced" : "enhanced");
+      setActiveTab("enhanced");
       setStatus("Enhanced");
       setMessage(`Enhanced ${enhanced} selected image(s).`);
     } catch (err) {
@@ -990,6 +888,58 @@ Type SAMPLE to confirm.`);
     }
   }
 
+  async function createBannerImage() {
+    if (!activeRestaurantSlug || selectedImages.length !== 3 || activeTab !== "enhanced") {
+      setError("Select exactly 3 enhanced images to create one banner.");
+      return;
+    }
+
+    const check = window.prompt(`Create 1 composed 16:9 banner from ${selectedImages.length} selected enhanced image(s)?
+
+Type BANNER to confirm.`);
+    if (check !== "BANNER") return;
+
+    setLoading(true);
+    setWorkingLabel("Creating composed restaurant banner...");
+    setProgressDetails({ processed: 0, total: 1, current: selectedImages.map((img) => img.filename).join(" + ") });
+    setProgress(8);
+    setError("");
+    setMessage("");
+    setStatus("Creating banner...");
+
+    try {
+      const res = await fetch(`${BACKEND_URL}/api/dpo/restaurants/${encodeURIComponent(activeRestaurantSlug)}/banners/create`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          filenames: selectedImages.map((img) => img.filename),
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok || data.ok === false) {
+        throw new Error(data.detail || data.error || "Create banner failed");
+      }
+
+      setProgressDetails({ processed: data.count || 1, total: 1 });
+      setProgress(100);
+      setSelectedImageKeys(new Set());
+      await refreshRestaurantLibrary(activeRestaurantSlug);
+      setActiveTab("banners");
+      setStatus("Banner ready");
+      setMessage(`Created ${data.count || 1} composed banner.`);
+    } catch (err) {
+      setStatus("Create banner failed");
+      setError(err instanceof Error ? err.message : "Create banner failed");
+    } finally {
+      setLoading(false);
+      setWorkingLabel("");
+      setProgress(0);
+      setProgressDetails(undefined);
+    }
+  }
+
   const emptyLibraryText = activeRestaurantSlug
     ? "No saved images found yet. Upload files and approve them to build this restaurant library."
     : "Select or create a restaurant to begin.";
@@ -1004,10 +954,10 @@ Type SAMPLE to confirm.`);
       };
     }
 
-    if (originalImages.length === 0 && headerImages.length === 0) {
+    if (originalImages.length === 0) {
       return {
         title: "Setup",
-        subtitle: "Upload originals or headers",
+        subtitle: "Upload originals",
         badge: "Setup mode",
         tone: "neutral" as const,
       };
@@ -1040,14 +990,6 @@ Type SAMPLE to confirm.`);
       };
     }
 
-    if (headerImages.length > 0 && headerEnhancedImages.length === 0) {
-      return {
-        title: "Header Phase A",
-        subtitle: "Headers ready → enhance next",
-        badge: "Header setup",
-        tone: "neutral" as const,
-      };
-    }
 
     return {
       title: "Ready",
@@ -1055,7 +997,7 @@ Type SAMPLE to confirm.`);
       badge: "Ready",
       tone: "good" as const,
     };
-  }, [activeRestaurantSlug, originalImages.length, enhancedImages.length, unmatchedOriginalImages.length, matchedOriginalImages.length, headerImages.length, headerEnhancedImages.length]);
+  }, [activeRestaurantSlug, originalImages.length, enhancedImages.length, unmatchedOriginalImages.length, matchedOriginalImages.length]);
 
   if (workspaceMode === "drinks") {
     return (
@@ -1180,31 +1122,14 @@ Type SAMPLE to confirm.`);
                     );
                   })}
                 </select>
-                <HelpText>Selecting a restaurant loads its Original, Enhanced, Header and Header Enhanced libraries.</HelpText>
+                <HelpText>Selecting a restaurant loads its Original, Enhanced, Samples and Banners libraries.</HelpText>
               </div>
             )}
 
             <Divider />
 
-            <div>
-              <Kicker>Upload type</Kicker>
-              <div style={{ marginTop: 10 }}>
-                <SegmentedControl
-                  value={uploadType}
-                  options={[
-                    { value: "menu", label: "Original images" },
-                    { value: "header", label: "Headers" },
-                  ]}
-                  onChange={(v) => {
-                    setUploadType(v as UploadType);
-                    setActiveTab(v === "header" ? "headers" : "originals");
-                  }}
-                />
-              </div>
-            </div>
-
             <div style={{ marginTop: 18 }}>
-              <Label>{uploadType === "header" ? "Upload header/banner files" : "Upload original food/menu images"}</Label>
+              <Label>Upload original food/menu images</Label>
               <input
                 id="file"
                 type="file"
@@ -1273,7 +1198,7 @@ Type SAMPLE to confirm.`);
                   <Metric label="Enhanced" value={String(enhancedImages.length)} />
                   <Metric label="Samples" value={String(sampleImages.length)} tone={sampleImages.length > 0 ? "good" : "neutral"} />
                   <Metric label="Missing" value={String(unmatchedOriginalImages.length)} tone={unmatchedOriginalImages.length > 0 ? "warn" : "good"} />
-                  <Metric label="Headers" value={String(headerImages.length)} />
+                  <Metric label="Banners" value={String(bannerImages.length)} tone={bannerImages.length > 0 ? "good" : "neutral"} />
                 </div>
               </div>
 
@@ -1294,7 +1219,7 @@ Type SAMPLE to confirm.`);
                   selectedCount={selectedImages.length}
                   totalCount={activeBatch.images.length}
                   canEnhance={activeBatch.canEnhance}
-                  enhanceLabel={activeBatch.enhanceKind === "header" ? "Enhance Selected Headers" : "Enhance Selected"}
+                  enhanceLabel="Enhance Selected"
                   disabled={loading || !activeRestaurantSlug}
                   onSelectAll={selectAllVisible}
                   onClear={clearSelectedImages}
@@ -1303,6 +1228,8 @@ Type SAMPLE to confirm.`);
                   onDownloadSelected={downloadSelectedFiles}
                   canCreateSamples={activeTab === "enhanced"}
                   onCreateSamples={createSampleImages}
+                  canCreateBanner={activeTab === "enhanced"}
+                  onCreateBanner={createBannerImage}
                 />
               )}
 
@@ -1330,8 +1257,7 @@ Type SAMPLE to confirm.`);
                 <CompareGrid
                   originals={originalImages}
                   enhancedByFilename={enhancedByFilename}
-                  headers={headerImages}
-                  headerEnhanced={headerEnhancedImages}
+                  banners={bannerImages}
                   restaurantSlug={activeRestaurantSlug}
                   emptyText={emptyLibraryText}
                   onPreview={setPreviewImage}
@@ -1372,20 +1298,17 @@ Type SAMPLE to confirm.`);
                 />
               )}
 
-              {activeTab === "headers" && (
+              {activeTab === "banners" && (
                 <ImageGrid
-                  title="Header"
-                  subtitle="Original header/banner files. Header enhancement uses a separate 16:9 prompt."
-                  images={headerImages}
-                  emptyText="Upload header/banner files to start building this library."
-                  folder="headers"
+                  title="Banners"
+                  subtitle="Final 16:9 restaurant banners composed from exactly 3 selected enhanced menu images."
+                  images={bannerImages}
+                  emptyText="No banner yet. Go to Enhanced, select exactly 3 images, then click Create Banner."
+                  folder="banners"
                   restaurantSlug={activeRestaurantSlug}
                   onPreview={setPreviewImage}
                   onDownload={downloadImage}
-                  onDelete={(img) => deleteImage(img, "headers")}
-                  onEnhance={enhanceHeaderImage}
-                  showEnhance
-                  enhanceLabel="Enhance header"
+                  onDelete={(img) => deleteImage(img, "banners")}
                   selectedKeys={selectedImageKeys}
                   onToggleSelected={toggleImageSelected}
                   onRename={renameImage}
@@ -1393,23 +1316,7 @@ Type SAMPLE to confirm.`);
                 />
               )}
 
-              {activeTab === "headerEnhanced" && (
-                <ImageGrid
-                  title="Header Enhanced"
-                  subtitle="16:9 enhanced restaurant/storefront header outputs."
-                  images={headerEnhancedImages}
-                  emptyText="No enhanced headers yet."
-                  folder="header_enhanced"
-                  restaurantSlug={activeRestaurantSlug}
-                  onPreview={setPreviewImage}
-                  onDownload={downloadImage}
-                  onDelete={(img) => deleteImage(img, "header_enhanced")}
-                  selectedKeys={selectedImageKeys}
-                  onToggleSelected={toggleImageSelected}
-                  onRename={renameImage}
-                  wide
-                />
-              )}
+
             </Panel>
 
             <Panel>
@@ -1423,10 +1330,10 @@ Type SAMPLE to confirm.`);
 
               <div style={workflowGrid}>
                 <WorkflowStep number="01" title="Original" text="Upload and approve source images. Files are auto-renamed to avoid duplicate conflicts." />
-                <WorkflowStep number="02" title="Comparison" text="Review header and menu images side-by-side before publishing." />
+                <WorkflowStep number="02" title="Comparison" text="Review original and enhanced menu images before publishing." />
                 <WorkflowStep number="03" title="Enhanced" text="Generate menu-item outputs with the square food-photo prompt." />
-                <WorkflowStep number="04" title="Header" text="Upload banner/header assets separately from menu images." />
-                <WorkflowStep number="05" title="Header Enhanced" text="Generate 16:9 hero banners using the dedicated header prompt." />
+                <WorkflowStep number="04" title="Samples" text="Create watermarked sales previews from selected enhanced images." />
+                <WorkflowStep number="05" title="Banners" text="Select exactly 3 enhanced menu images to create a composed 16:9 banner." />
               </div>
             </Panel>
           </div>
@@ -1916,7 +1823,7 @@ function Hero({ modeTitle, modeSubtitle }: { modeTitle: string; modeSubtitle: st
             Restaurant Image Library
           </h1>
           <p style={{ margin: 0, color: "#dbeafe", fontSize: 17, maxWidth: 720 }}>
-            Manage original images, compare old vs new, enhance menu assets, and create 16:9 restaurant headers.
+            Manage original images, compare old vs new, enhance menu assets, create samples, and generate composed 16:9 banners from enhanced dishes.
           </p>
         </div>
 
@@ -2082,8 +1989,7 @@ function Tabs({ active, setActive }: { active: ActiveTab; setActive: (tab: Activ
     { id: "originals", label: "Original" },
     { id: "enhanced", label: "Enhanced" },
     { id: "samples", label: "Samples" },
-    { id: "headers", label: "Header" },
-    { id: "headerEnhanced", label: "Header Enhanced" },
+    { id: "banners", label: "Banners" },
     { id: "compare", label: "Comparison" },
   ];
 
@@ -2126,6 +2032,8 @@ function BatchActionBar({
   onDownloadSelected,
   canCreateSamples = false,
   onCreateSamples,
+  canCreateBanner = false,
+  onCreateBanner,
 }: {
   selectedCount: number;
   totalCount: number;
@@ -2139,6 +2047,8 @@ function BatchActionBar({
   onDownloadSelected: () => void;
   canCreateSamples?: boolean;
   onCreateSamples?: () => void;
+  canCreateBanner?: boolean;
+  onCreateBanner?: () => void;
 }) {
   const noSelection = selectedCount === 0;
 
@@ -2179,6 +2089,11 @@ function BatchActionBar({
         {canCreateSamples && (
           <button type="button" onClick={onCreateSamples} disabled={disabled || noSelection} style={successButton(disabled || noSelection)}>
             Create Samples
+          </button>
+        )}
+        {canCreateBanner && (
+          <button type="button" onClick={onCreateBanner} disabled={disabled || selectedCount !== 3} style={miniDarkButton(disabled || selectedCount !== 3)}>
+            Create Banner
           </button>
         )}
         <button type="button" onClick={onDelete} disabled={disabled || noSelection} style={dangerButton(disabled || noSelection)}>
@@ -2405,25 +2320,21 @@ function ImageGrid({
 function CompareGrid({
   originals,
   enhancedByFilename,
-  headers,
-  headerEnhanced,
+  banners,
   restaurantSlug,
   emptyText,
   onPreview,
 }: {
   originals: LibraryImage[];
   enhancedByFilename: Map<string, LibraryImage>;
-  headers: LibraryImage[];
-  headerEnhanced: LibraryImage[];
+  banners: LibraryImage[];
   restaurantSlug: string;
   emptyText: string;
   onPreview: (img: PreviewImage) => void;
 }) {
   const matched = originals.filter((orig) => enhancedByFilename.has(orig.filename));
   const unmatched = originals.filter((orig) => !enhancedByFilename.has(orig.filename));
-  const headerOriginal = headers[0];
-  const headerFinal = headerEnhanced[0];
-  const hasAnyComparisonAssets = Boolean(headerOriginal || headerFinal || originals.length || headerEnhanced.length || matched.length);
+  const hasAnyComparisonAssets = Boolean(originals.length || matched.length || banners.length);
 
   return (
     <div style={{ marginTop: 22 }}>
@@ -2431,7 +2342,7 @@ function CompareGrid({
         <div>
           <h3 style={{ margin: 0, fontSize: 20 }}>Comparison</h3>
           <p style={{ margin: "6px 0 0", color: "#64748b", lineHeight: 1.45 }}>
-            Review the enhanced header first, then compare menu images below. Only matched menu filenames appear as comparison pairs.
+            Compare original menu images against enhanced outputs. Banners are created separately from exactly 3 selected enhanced dishes.
           </p>
         </div>
         <div style={{ color: "#64748b", fontWeight: 900 }}>{matched.length} menu pair(s)</div>
@@ -2442,106 +2353,66 @@ function CompareGrid({
       ) : (
         <>
           <div style={compareStatusGrid}>
-            <CompareStatusBadge label="Header original" value={headerOriginal ? 1 : 0} tone={headerOriginal ? "good" : "neutral"} />
-            <CompareStatusBadge label="Header enhanced" value={headerFinal ? 1 : 0} tone={headerFinal ? "good" : "warn"} />
             <CompareStatusBadge label="Menu pairs" value={matched.length} tone={matched.length > 0 ? "good" : "neutral"} />
-            <CompareStatusBadge label="Missing menu enhanced" value={unmatched.length} tone={unmatched.length > 0 ? "warn" : "good"} />
+            <CompareStatusBadge label="Missing enhanced" value={unmatched.length} tone={unmatched.length > 0 ? "warn" : "good"} />
+            <CompareStatusBadge label="Banners" value={banners.length} tone={banners.length > 0 ? "good" : "neutral"} />
           </div>
 
-          <div style={comparisonSectionBox}>
-            <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "center", marginBottom: 14, flexWrap: "wrap" }}>
-              <div>
-                <div style={{ fontWeight: 950, fontSize: 18 }}>Header Comparison</div>
-                <div style={{ marginTop: 4, color: "#64748b", fontSize: 13 }}>
-                  This is the primary delivery-platform hero image. Original on the left, enhanced on the right.
+          {banners.length > 0 && (
+            <div style={{ ...comparisonSectionBox, marginTop: 18 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "center", marginBottom: 14, flexWrap: "wrap" }}>
+                <div>
+                  <div style={{ fontWeight: 950, fontSize: 18 }}>Banner</div>
+                  <div style={{ marginTop: 4, color: "#64748b", fontSize: 13 }}>
+                    Final 16:9 banner created from selected enhanced dishes.
+                  </div>
                 </div>
+                <div style={matchedPill}>New banner system</div>
               </div>
-              <div style={matchedPill}>Top priority</div>
+              <div style={{ display: "grid", gap: 14 }}>
+                {banners.map((banner) => (
+                  <button
+                    key={banner.filename}
+                    type="button"
+                    onClick={() => onPreview({ title: "Banner", url: fullImageUrl(banner.url), filename: banner.filename })}
+                    style={{ border: "1px solid #e2e8f0", borderRadius: 18, overflow: "hidden", background: "#0f172a", padding: 0, cursor: "zoom-in" }}
+                  >
+                    <img src={fullImageUrl(banner.url)} alt={banner.filename} style={{ width: "100%", aspectRatio: "16 / 9", objectFit: "cover", display: "block" }} />
+                  </button>
+                ))}
+              </div>
             </div>
-
-            {headerOriginal || headerFinal ? (
-              <div style={headerComparisonGrid}>
-                <SideBySideImage
-                  label="Original header"
-                  image={headerOriginal}
-                  emptyText="No original header uploaded yet."
-                  title="Original Header"
-                  onPreview={onPreview}
-                  wide
-                />
-                <SideBySideImage
-                  label="Enhanced header"
-                  image={headerFinal}
-                  emptyText="No enhanced header generated yet."
-                  title="Enhanced Header"
-                  onPreview={onPreview}
-                  wide
-                />
-              </div>
-            ) : (
-              <EmptyBox>No header uploaded yet. Upload and enhance a header to create the first comparison.</EmptyBox>
-            )}
-          </div>
+          )}
 
           <div style={{ ...comparisonSectionBox, marginTop: 18 }}>
             <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "center", marginBottom: 14, flexWrap: "wrap" }}>
               <div>
-                <div style={{ fontWeight: 950, fontSize: 18 }}>Menu Image Comparison</div>
+                <div style={{ fontWeight: 950, fontSize: 18 }}>Menu image comparison</div>
                 <div style={{ marginTop: 4, color: "#64748b", fontSize: 13 }}>
-                  Original menu items compared against their enhanced outputs, matched by filename.
+                  Original on the left, enhanced on the right.
                 </div>
               </div>
               <div style={matchedPill}>{matched.length} matched</div>
             </div>
 
-            {unmatched.length > 0 && (
-              <div style={{ ...missingEnhancedBox, marginTop: 0, marginBottom: 16 }}>
-                <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
-                  <div>
-                    <div style={{ fontWeight: 950, color: "#92400e" }}>Unmatched menu originals</div>
-                    <div style={{ marginTop: 4, color: "#78350f", fontSize: 13 }}>
-                      These original menu images do not yet have matching enhanced outputs.
-                    </div>
-                  </div>
-                  <div style={{ ...smallWarnPill }}>{unmatched.length} missing</div>
-                </div>
-              </div>
-            )}
-
             {matched.length === 0 ? (
-              <EmptyBox>No matched menu comparisons yet. Enhance originals first, or make sure enhanced filenames match the originals.</EmptyBox>
+              <EmptyBox>No matched enhanced menu images yet.</EmptyBox>
             ) : (
               <div style={{ display: "grid", gap: 18 }}>
                 {matched.map((orig) => {
-                  const enhanced = enhancedByFilename.get(orig.filename)!;
+                  const enhanced = enhancedByFilename.get(orig.filename);
+                  if (!enhanced) return null;
+
                   return (
-                    <div
-                      key={`compare-${orig.filename}`}
-                      style={{
-                        background: "white",
-                        border: "1px solid #e2e8f0",
-                        borderRadius: 22,
-                        padding: 14,
-                        boxShadow: "0 10px 24px rgba(15,23,42,0.06)",
-                      }}
-                    >
+                    <div key={orig.filename} style={comparisonSectionBox}>
                       <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "center", marginBottom: 12 }}>
                         <div style={{ fontWeight: 950 }}>{orig.filename}</div>
                         <div style={matchedPill}>Matched</div>
                       </div>
-                      <CompareImage
-                        label="Original | Enhanced"
-                        url={`${BACKEND_URL}/api/dpo/restaurants/${encodeURIComponent(restaurantSlug)}/compare/${encodeURIComponent(orig.filename)}?v=${orig.modified || ""}-${enhanced.modified || ""}`}
-                        filename={orig.filename}
-                        onPreview={onPreview}
-                      />
-                      <a
-                        href={`${BACKEND_URL}/api/dpo/restaurants/${encodeURIComponent(restaurantSlug)}/compare/${encodeURIComponent(orig.filename)}`}
-                        download={`compare_${orig.filename}`}
-                        style={{ ...cardButton, display: "block", marginTop: 10, textAlign: "center", textDecoration: "none" }}
-                      >
-                        Download comparison
-                      </a>
+                      <div style={headerComparisonGrid}>
+                        <SideBySideImage label="Original" image={orig} emptyText="No original image." title="Original" onPreview={onPreview} />
+                        <SideBySideImage label="Enhanced" image={enhanced} emptyText="No enhanced image." title="Enhanced" onPreview={onPreview} />
+                      </div>
                     </div>
                   );
                 })}
