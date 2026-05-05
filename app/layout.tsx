@@ -1,3 +1,6 @@
+import type { Metadata } from "next";
+import "./globals.css";
+
 export const metadata: Metadata = {
   title: "Delivery Ignite – Restaurant Image Upgrades",
   description:
@@ -26,3 +29,15 @@ export const metadata: Metadata = {
     images: ["/images/og-preview.png"],
   },
 };
+
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
+  return (
+    <html lang="en">
+      <body>{children}</body>
+    </html>
+  );
+}
