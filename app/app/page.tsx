@@ -674,16 +674,42 @@ export default function Home() {
     }
   }
 
-  function downloadImage(img: LibraryImage, folder: string) {
+  async function downloadImage(img: LibraryImage, folder: string) {
     if (!activeRestaurantSlug) return;
 
-    const href = `${BACKEND_URL}/api/dpo/restaurants/${encodeURIComponent(activeRestaurantSlug)}/download-file/${encodeURIComponent(folder)}/${encodeURIComponent(img.filename)}`;
-    const a = document.createElement("a");
-    a.href = href;
-    a.download = img.filename;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
+    setError("");
+    setMessage("");
+    setStatus("Preparing download...");
+
+    try {
+      const href = `${BACKEND_URL}/api/dpo/restaurants/${encodeURIComponent(activeRestaurantSlug)}/download-file/${encodeURIComponent(folder)}/${encodeURIComponent(img.filename)}`;
+      const res = await fetch(href, { cache: "no-store" });
+
+      if (!res.ok) {
+        let details = "Download failed";
+        try {
+          const data = await res.json();
+          details = data.detail || data.error || details;
+        } catch {}
+        throw new Error(details);
+      }
+
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = img.filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+
+      setStatus("Download ready");
+      setMessage(`Downloaded ${img.filename}.`);
+    } catch (err) {
+      setStatus("Download failed");
+      setError(err instanceof Error ? err.message : "Download failed");
+    }
   }
 
   function downloadAllRestaurantFiles() {
