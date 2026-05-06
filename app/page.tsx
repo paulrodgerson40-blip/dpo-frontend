@@ -59,19 +59,23 @@ const pricing = [
       "Ready-to-upload image files",
       "Use anywhere, no restrictions",
       "You upload the finished images",
+      "Drinks pack +$99 + GST",
+      "Banner pack +$99 + GST",
     ],
   },
   {
     name: "Standard DIY",
     price: "$799",
     detail: "Up to 50 images",
-    button: "Choose Standard DIY",
+    button: "Choose DIY",
     badge: "Best DIY",
     features: [
       "Professional food image upgrade",
       "Ready-to-upload image files",
       "Larger menu coverage",
       "You upload the finished images",
+      "Drinks pack +$99 + GST",
+      "Banner pack +$99 + GST",
     ],
   },
   {
@@ -91,7 +95,7 @@ const pricing = [
     name: "Standard Managed",
     price: "$1,299",
     detail: "Up to 50 items",
-    button: "Choose Standard Managed",
+    button: "Choose Managed",
     badge: "Most Popular",
     highlight: true,
     features: [
@@ -162,7 +166,7 @@ function OrangeButton({
       <span className="absolute inset-y-0 -left-1/2 w-1/2 skew-x-[-18deg] bg-white/20 opacity-0 transition duration-500 group-hover:left-[130%] group-hover:opacity-100" />
       <span className="relative">{children}</span>
       <span className="relative ml-2 transition group-hover:translate-x-1">→</span>
-    </a>
+    </div>
   );
 }
 
@@ -179,7 +183,7 @@ function GhostButton({
       className="inline-flex items-center justify-center rounded-full border border-white/16 bg-white/[0.07] px-7 py-4 text-sm font-black uppercase tracking-[0.05em] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.12)] backdrop-blur transition duration-300 hover:border-cyan-300/70 hover:bg-cyan-400/10"
     >
       {children}
-    </a>
+    </div>
   );
 }
 
@@ -193,7 +197,7 @@ function Pill({ children }: { children: React.ReactNode }) {
 
 function Check({ children }: { children: React.ReactNode }) {
   return (
-    <li className="flex items-start gap-3 text-sm leading-6 text-white/72">
+    <li className="flex min-h-[28px] items-start gap-3 text-sm leading-6 text-white/72">
       <span className="mt-1 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-cyan-400/12 text-xs font-black text-cyan-200">
         ✓
       </span>
@@ -339,6 +343,11 @@ const faqs = [
       "Depending on your package, you receive upgraded food images, ready-to-upload files, store banners, drink handling and before-and-after preview examples.",
   },
   {
+    question: "What if I have a large menu?",
+    answer:
+      "For larger menus, multi-location stores or custom requirements, contact us for bulk or custom pricing.",
+  },
+  {
     question: "Do you guarantee more orders?",
     answer:
       "No one can honestly guarantee sales. What we do is improve the first impression customers see before they choose where to order from.",
@@ -392,7 +401,7 @@ export default function Page() {
             href="#sample"
             className="rounded-full border border-cyan-300/35 bg-cyan-400/8 px-5 py-3 text-[11px] font-black uppercase tracking-[0.08em] text-white shadow-[0_0_28px_rgba(34,211,238,0.20)] transition hover:border-orange-500/70 hover:bg-orange-500"
           >
-            Get Free Sample →
+            Free Sample →
           </a>
         </div>
       </header>
@@ -438,7 +447,7 @@ export default function Page() {
             </div>
 
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-              <OrangeButton href="#sample">Get Free Sample</OrangeButton>
+              <OrangeButton href="#sample">Free Sample</OrangeButton>
               <GhostButton href="#proof">See Transformations</GhostButton>
             </div>
           </div>
@@ -604,7 +613,7 @@ export default function Page() {
           </div>
 
           <div className="mt-12 grid gap-5 lg:grid-cols-[0.95fr_1.05fr]">
-            <div className="rounded-[34px] border border-cyan-300/24 bg-gradient-to-br from-cyan-400/[0.10] to-white/[0.035] p-7 shadow-[0_0_42px_rgba(34,211,238,0.06)]">
+            <div className="rounded-[34px] border border-cyan-300/24 bg-gradient-to-br from-cyan-400/[0.10] to-white/[0.035] p-7 shadow-[0_0_60px_rgba(34,211,238,0.10)]">
               <div className="text-xs font-black uppercase tracking-[0.14em] text-cyan-100">Owner takeaway</div>
               <p className="mt-4 text-3xl font-black uppercase leading-[0.94] tracking-[-0.055em] text-white sm:text-4xl">
                 Better photos do not just make food look nicer.
@@ -612,7 +621,7 @@ export default function Page() {
               </p>
             </div>
 
-            <div className="rounded-[34px] border border-cyan-300/24 bg-gradient-to-br from-white/[0.055] to-cyan-400/[0.08] p-7 shadow-[0_0_42px_rgba(34,211,238,0.06)]">
+            <div className="rounded-[34px] border border-cyan-300/24 bg-gradient-to-br from-white/[0.055] to-cyan-400/[0.08] p-7 shadow-[0_0_60px_rgba(34,211,238,0.10)]">
               <div className="text-xs font-black uppercase tracking-[0.14em] text-cyan-100">Delivery app reality</div>
               <p className="mt-4 text-3xl font-black uppercase leading-[0.94] tracking-[-0.055em] text-white sm:text-4xl">
                 Customers compare your photos before they compare your prices.
@@ -704,7 +713,7 @@ export default function Page() {
               </div>
             </div>
 
-            <div className="flex h-full flex-col rounded-[38px] border border-cyan-300/34 bg-gradient-to-b from-cyan-400/[0.10] to-white/[0.045] p-7 shadow-[0_0_58px_rgba(34,211,238,0.08),0_28px_95px_rgba(0,0,0,0.38)]">
+            <div className="flex h-full flex-col rounded-[38px] border border-cyan-300/34 bg-gradient-to-b from-cyan-400/[0.10] to-white/[0.045] p-7 shadow-[0_0_80px_rgba(34,211,238,0.13),0_28px_95px_rgba(0,0,0,0.38)]">
               <div className="flex min-h-[96px] items-start justify-between gap-4">
                 <div>
                   <div className="text-xs font-black uppercase tracking-[0.14em] text-cyan-100">Pathway two</div>
@@ -788,7 +797,7 @@ export default function Page() {
             {pricing.map((plan) => (
               <div
                 key={plan.name}
-                className={`relative flex h-full flex-col rounded-[34px] p-6 ${
+                className={`relative flex h-full min-h-[640px] flex-col rounded-[34px] p-6 ${
                   plan.highlight
                     ? "scale-[1.02] border border-cyan-300/55 bg-gradient-to-b from-cyan-400/[0.11] to-white/[0.045] shadow-[0_0_76px_rgba(34,211,238,0.20),0_0_32px_rgba(255,107,0,0.08)]"
                     : "border border-white/10 bg-white/[0.045]"
@@ -813,7 +822,7 @@ export default function Page() {
                 </div>
                 <a
                   href="#sample"
-                  className={`mt-5 flex min-h-[64px] w-full items-center justify-center rounded-full px-5 py-4 text-center text-sm font-black uppercase tracking-[0.04em] transition ${
+                  className={`mt-5 flex min-h-[64px] w-full items-center justify-center rounded-full px-5 py-4 text-center text-[13px] font-black uppercase tracking-[0.04em] transition sm:whitespace-nowrap ${
                     plan.highlight
                       ? "bg-gradient-to-r from-[#ff6b00] to-[#ff9a1f] text-white shadow-[0_0_35px_rgba(255,107,0,0.35)]"
                       : "border border-white/12 bg-white/[0.06] text-white hover:border-cyan-300/60"
@@ -822,24 +831,11 @@ export default function Page() {
                   {plan.button} →
                 </a>
                 <div className="my-6 h-px bg-white/10" />
-                <ul className="mt-auto space-y-3">
+                <ul className="space-y-3">
                   {plan.features.map((f) => (
                     <Check key={f}>{f}</Check>
                   ))}
                 </ul>
-              </div>
-            ))}
-          </div>
-
-          <div className="mt-8 grid gap-4 md:grid-cols-3">
-            {[
-              ["DIY add-ons", "Drinks Pack $99 + GST. Header Pack $99 + GST."],
-              ["Managed includes more", "Store banners, drinks, Uber upload support and priority turnaround are included."],
-              ["Large menus", "Contact us for bulk or custom pricing."],
-            ].map(([title, text]) => (
-              <div key={title} className="h-full rounded-[28px] border border-white/10 bg-white/[0.045] p-6">
-                <h3 className="text-lg font-black uppercase tracking-[-0.02em]">{title}</h3>
-                <p className="mt-2 text-sm leading-6 text-white/55">{text}</p>
               </div>
             ))}
           </div>
@@ -879,7 +875,7 @@ export default function Page() {
             Start with 3 free watermarked images and see the difference before you commit.
           </p>
           <div className="relative mt-7 flex flex-col justify-center gap-3 sm:flex-row">
-            <OrangeButton href="#sample">Get Free Sample</OrangeButton>
+            <OrangeButton href="#sample">Free Sample</OrangeButton>
             <GhostButton href="#pricing">View Packages</GhostButton>
           </div>
         </div>
