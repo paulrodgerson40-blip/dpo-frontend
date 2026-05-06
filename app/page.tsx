@@ -408,7 +408,7 @@ export default function Page() {
             href="#sample"
             className="rounded-full border border-cyan-300/35 bg-cyan-400/8 px-5 py-3 text-[11px] font-black uppercase tracking-[0.08em] text-white shadow-[0_0_28px_rgba(34,211,238,0.20)] transition hover:border-orange-500/70 hover:bg-orange-500"
           >
-            Get Free Sample →
+            Free Sample →
           </a>
         </div>
       </header>
@@ -454,7 +454,7 @@ export default function Page() {
             </div>
 
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-              <OrangeButton href="#sample">Get Free Sample</OrangeButton>
+              <OrangeButton href="#sample">Free Sample</OrangeButton>
               <GhostButton href="#proof">See Transformations</GhostButton>
             </div>
           </div>
@@ -885,7 +885,7 @@ export default function Page() {
             Start with 3 free watermarked images and see the difference before you commit.
           </p>
           <div className="relative mt-7 flex flex-col justify-center gap-3 sm:flex-row">
-            <OrangeButton href="#sample">Get Free Sample</OrangeButton>
+            <OrangeButton href="#sample">Free Sample</OrangeButton>
             <GhostButton href="#pricing">View Packages</GhostButton>
           </div>
         </div>
