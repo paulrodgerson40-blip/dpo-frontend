@@ -8,7 +8,7 @@ const img = (name: string) => `/images/${name}`;
 const ASSETS = {
   logo: img("logo-delivery-ignite.png"),
   hero: img("burger-hero.png"),
-  spread: img("banner-food-spread.png.png"),
+  spread: img("banner-food-spread.png"),
   beforeMenu: img("before-menu.png"),
   afterMenu: img("after-menu.png"),
   beforeBanner: img("before-banner.png"),
