@@ -20,7 +20,6 @@ type LibraryImage = {
   filename: string;
   name?: string;
   url?: string;
-  thumb_url?: string;
   size?: number;
   updated_at?: string;
   modified?: number;
@@ -138,8 +137,7 @@ export default function Home() {
         ...img,
         filename,
         name: filename,
-        url: rawUrl && rawUrl.startsWith("http") ? rawUrl : rawUrl ? `${BACKEND_URL}${rawUrl}` : undefined,
-        thumb_url: img.thumb_url ? (img.thumb_url.startsWith("http") ? img.thumb_url : `${BACKEND_URL}${img.thumb_url}`) : undefined,
+        url: rawUrl && rawUrl.startsWith("http") ? rawUrl : rawUrl ? `${BACKEND_URL}${rawUrl}?t=${img.modified || Date.now()}` : undefined,
       };
     });
   }
@@ -1401,8 +1399,7 @@ function DrinksLibrary({ onPreview }: { onPreview: (img: PreviewImage) => void }
         ...img,
         filename,
         name: filename,
-        url: rawUrl && rawUrl.startsWith("http") ? rawUrl : rawUrl ? `${BACKEND_URL}${rawUrl}` : undefined,
-        thumb_url: img.thumb_url ? (img.thumb_url.startsWith("http") ? img.thumb_url : `${BACKEND_URL}${img.thumb_url}`) : undefined,
+        url: rawUrl && rawUrl.startsWith("http") ? rawUrl : rawUrl ? `${BACKEND_URL}${rawUrl}?t=${Date.now()}` : undefined,
       };
     });
   }
@@ -2183,11 +2180,10 @@ function ImageGrid({
         >
           {images.map((img) => {
             const url = fullImageUrl(img.url);
-            const displayUrl = fullImageUrl(img.url);
             const selected = selectedKeys?.has(imageSelectKey(folder, img.filename)) || false;
             return (
               <div
-                key={`${folder}-${img.filename}-${img.url || ""}-${img.thumb_url || ""}`}
+                key={`${folder}-${img.filename}-${img.url || ""}`}
                 style={{
                   background: "white",
                   border: selected ? "2px solid #4f46e5" : "1px solid #e2e8f0",
@@ -2240,9 +2236,9 @@ function ImageGrid({
                     cursor: "zoom-in",
                   }}
                 >
-                  {displayUrl ? (
+                  {url ? (
                     <img
-                      src={displayUrl}
+                      src={url}
                       alt={img.filename}
                       style={{
                         width: "100%",
@@ -2445,12 +2441,11 @@ function SideBySideImage({
   wide?: boolean;
 }) {
   const url = fullImageUrl(image?.url);
-  const displayUrl = fullImageUrl(image?.url);
 
   return (
     <div style={{ background: "white", border: "1px solid #e2e8f0", borderRadius: 20, padding: 12, boxShadow: "0 10px 24px rgba(15,23,42,0.05)" }}>
       <div style={{ marginBottom: 10, fontWeight: 950, color: "#334155" }}>{label}</div>
-      {image && displayUrl ? (
+      {image && url ? (
         <button
           type="button"
           onClick={() => onPreview({ title, url, filename: image.filename })}
@@ -2465,7 +2460,7 @@ function SideBySideImage({
             cursor: "zoom-in",
           }}
         >
-          <img src={displayUrl} alt={image.filename} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
+          <img src={url} alt={image.filename} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
         </button>
       ) : (
         <div style={{ height: wide ? 230 : 180, border: "1px dashed #cbd5e1", borderRadius: 16, display: "grid", placeItems: "center", color: "#64748b", fontWeight: 850, textAlign: "center", padding: 16 }}>
