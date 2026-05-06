@@ -176,7 +176,7 @@ function GhostButton({
   return (
     <a
       href={href}
-      className="inline-flex items-center justify-center rounded-full border border-white/16 bg-white/[0.07] px-7 py-4 text-sm font-black uppercase tracking-[0.05em] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.12)] backdrop-blur transition duration-300 hover:border-orange-500/70 hover:bg-orange-500/12"
+      className="inline-flex items-center justify-center rounded-full border border-white/16 bg-white/[0.07] px-7 py-4 text-sm font-black uppercase tracking-[0.05em] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.12)] backdrop-blur transition duration-300 hover:border-cyan-300/70 hover:bg-cyan-400/10"
     >
       {children}
     </a>
@@ -194,7 +194,7 @@ function Pill({ children }: { children: React.ReactNode }) {
 function HeroProof({ icon, title, sub }: { icon: string; title: string; sub: string }) {
   return (
     <div className="group text-center">
-      <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-[22px] border border-orange-500/42 bg-orange-500/10 text-3xl shadow-[0_0_35px_rgba(255,107,0,0.20)] transition group-hover:border-orange-500 group-hover:bg-orange-500/18 group-hover:shadow-[0_0_52px_rgba(255,107,0,0.35)]">
+      <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-[22px] border border-cyan-300/38 bg-cyan-400/8 text-3xl shadow-[0_0_35px_rgba(34,211,238,0.16)] transition group-hover:border-cyan-300 group-hover:bg-cyan-400/14 group-hover:shadow-[0_0_52px_rgba(34,211,238,0.24)]">
         {icon}
       </div>
       <div className="mt-3 text-[12px] font-black uppercase leading-tight tracking-[0.05em] text-white">
@@ -208,7 +208,7 @@ function HeroProof({ icon, title, sub }: { icon: string; title: string; sub: str
 function Check({ children }: { children: React.ReactNode }) {
   return (
     <li className="flex items-start gap-3 text-sm leading-6 text-white/72">
-      <span className="mt-1 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-orange-500/15 text-xs font-black text-[#ff7a00]">
+      <span className="mt-1 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-cyan-400/12 text-xs font-black text-cyan-200">
         ✓
       </span>
       <span>{children}</span>
@@ -218,7 +218,7 @@ function Check({ children }: { children: React.ReactNode }) {
 
 function SectionEyebrow({ children }: { children: React.ReactNode }) {
   return (
-    <div className="inline-flex rounded-full border border-orange-500/30 bg-orange-500/10 px-4 py-2 text-xs font-black uppercase tracking-[0.12em] text-orange-200 shadow-[0_0_24px_rgba(255,107,0,0.14)]">
+    <div className="inline-flex rounded-full border border-cyan-300/30 bg-cyan-400/10 px-4 py-2 text-xs font-black uppercase tracking-[0.12em] text-cyan-100 shadow-[0_0_24px_rgba(34,211,238,0.14)]">
       {children}
     </div>
   );
@@ -244,9 +244,9 @@ function BeforeAfterCard({
             BEFORE
           </span>
         </div>
-        <div className="relative h-56 overflow-hidden rounded-2xl bg-black shadow-[0_0_32px_rgba(255,107,0,0.22)]">
+        <div className="relative h-56 overflow-hidden rounded-2xl bg-black shadow-[0_0_32px_rgba(34,211,238,0.18)]">
           <LocalImage src={after} alt={`${title} after`} className="object-contain" sizes="240px" />
-          <span className="absolute right-3 top-3 rounded-full bg-gradient-to-r from-[#ff5a00] to-[#ff9d20] px-3 py-1 text-xs font-black">
+          <span className="absolute right-3 top-3 rounded-full bg-gradient-to-r from-[#ff5a00] to-[#ff9d20] px-3 py-1 text-xs font-black shadow-[0_0_18px_rgba(34,211,238,0.18)]">
             AFTER
           </span>
         </div>
@@ -260,7 +260,7 @@ function BeforeAfterCard({
 function Testimonial({ quote, name, meta }: { quote: string; name: string; meta: string }) {
   return (
     <div className="mx-3 w-[360px] shrink-0 rounded-[30px] border border-white/10 bg-white/[0.055] p-6 shadow-[0_20px_70px_rgba(0,0,0,0.30)] backdrop-blur-xl">
-      <div className="text-[#ff7a00]">★★★★★</div>
+      <div className="text-cyan-200">★★★★★</div>
       <p className="mt-4 text-lg font-bold leading-7 text-white">“{quote}”</p>
       <div className="mt-6 text-sm font-black text-white">{name}</div>
       <div className="mt-1 text-xs text-white/45">{meta}</div>
@@ -301,7 +301,7 @@ export default function Page() {
           </nav>
           <a
             href="#sample"
-            className="rounded-full border border-orange-500/45 bg-orange-500/15 px-5 py-3 text-[11px] font-black uppercase tracking-[0.08em] text-white shadow-[0_0_28px_rgba(255,107,0,0.24)] transition hover:bg-orange-500"
+            className="rounded-full border border-cyan-300/35 bg-cyan-400/8 px-5 py-3 text-[11px] font-black uppercase tracking-[0.08em] text-white shadow-[0_0_28px_rgba(34,211,238,0.16)] transition hover:bg-orange-500"
           >
             Get Free Sample →
           </a>
@@ -309,7 +309,7 @@ export default function Page() {
       </header>
 
       <section className="relative min-h-[830px] overflow-hidden border-b border-white/10">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_73%_20%,rgba(255,107,0,0.43),transparent_30%),radial-gradient(circle_at_44%_78%,rgba(255,107,0,0.10),transparent_34%),linear-gradient(90deg,#050505_0%,#050505_35%,rgba(5,5,5,.80)_55%,rgba(5,5,5,.25)_100%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_73%_20%,rgba(255,107,0,0.28),transparent_30%),radial-gradient(circle_at_44%_78%,rgba(34,211,238,0.08),transparent_34%),linear-gradient(90deg,#050505_0%,#050505_35%,rgba(5,5,5,.80)_55%,rgba(5,5,5,.25)_100%)]" />
 
         <div className="absolute inset-y-0 right-0 w-full lg:w-[66%]">
           <LocalImage
@@ -323,7 +323,7 @@ export default function Page() {
         </div>
 
         <div className="absolute inset-0 opacity-[0.10] [background-image:linear-gradient(rgba(255,255,255,.08)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,.08)_1px,transparent_1px)] [background-size:72px_72px]" />
-        <div className="di-pulse absolute right-[-150px] top-[-180px] h-[560px] w-[560px] rounded-full bg-orange-500/30 blur-3xl" />
+        <div className="di-pulse absolute right-[-150px] top-[-180px] h-[560px] w-[560px] rounded-full bg-cyan-400/18 blur-3xl" />
 
         <div className="relative z-10 mx-auto max-w-7xl px-5 py-16 sm:px-8 lg:px-10 lg:py-20">
           <div className="max-w-[720px]">
@@ -332,7 +332,7 @@ export default function Page() {
             <h1 className="mt-7 text-[64px] font-black uppercase leading-[0.78] tracking-[-0.085em] sm:text-[92px] lg:text-[118px]">
               Premium
               <span className="block">Images.</span>
-              <span className="block bg-gradient-to-r from-[#ff5a00] via-[#ff7600] to-[#ffb24a] bg-clip-text text-transparent drop-shadow-[0_0_34px_rgba(255,107,0,0.22)]">
+              <span className="block bg-gradient-to-r from-[#ff5a00] via-[#ff7600] to-[#22d3ee] bg-clip-text text-transparent drop-shadow-[0_0_34px_rgba(255,107,0,0.22)]">
                 More Orders.
               </span>
             </h1>
@@ -361,7 +361,7 @@ export default function Page() {
             </div>
           </div>
 
-          <div className="absolute bottom-14 right-6 hidden max-w-[230px] rounded-full border border-orange-500/65 bg-black/78 p-5 text-center shadow-[0_0_48px_rgba(255,107,0,0.38)] backdrop-blur-xl lg:block">
+          <div className="absolute bottom-14 right-6 hidden max-w-[230px] rounded-full border border-cyan-300/45 bg-black/78 p-5 text-center shadow-[0_0_48px_rgba(34,211,238,0.22)] backdrop-blur-xl lg:block">
             <div className="text-lg font-black uppercase leading-tight text-white">
               Same Food
               <span className="block text-white/70">Better Photos</span>
@@ -372,7 +372,7 @@ export default function Page() {
       </section>
 
       <section className="relative overflow-hidden border-b border-white/10 bg-[#070707] px-5 py-20 sm:px-8 lg:px-10">
-        <div className="absolute left-[-240px] top-[-40px] h-[520px] w-[520px] rounded-full bg-orange-500/10 blur-3xl" />
+        <div className="absolute left-[-240px] top-[-40px] h-[520px] w-[520px] rounded-full bg-cyan-400/8 blur-3xl" />
         <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[0.72fr_1.28fr] lg:items-center">
           <div>
             <SectionEyebrow>Delivery platform luxury</SectionEyebrow>
@@ -393,8 +393,8 @@ export default function Page() {
           <div className="relative h-[420px] overflow-hidden rounded-[42px] border border-white/12 bg-black shadow-[0_35px_130px_rgba(0,0,0,0.60),0_0_80px_rgba(255,107,0,0.14)]">
             <LocalImage src={ASSETS.spread} alt="Premium multi-cuisine food spread" className="scale-105" />
             <div className="absolute inset-0 bg-gradient-to-r from-black/55 via-transparent to-transparent" />
-            <div className="absolute bottom-6 left-6 rounded-2xl border border-orange-500/35 bg-black/70 px-5 py-4 backdrop-blur">
-              <div className="text-xs font-black uppercase tracking-[0.12em] text-orange-200">Multi-cuisine ready</div>
+            <div className="absolute bottom-6 left-6 rounded-2xl border border-cyan-300/28 bg-black/70 px-5 py-4 backdrop-blur">
+              <div className="text-xs font-black uppercase tracking-[0.12em] text-cyan-100">Multi-cuisine ready</div>
               <div className="mt-1 text-2xl font-black uppercase tracking-[-0.04em]">Burger · Pizza · Sushi · Dessert</div>
             </div>
           </div>
@@ -402,7 +402,7 @@ export default function Page() {
       </section>
 
       <section id="menu" className="relative border-b border-white/10 bg-[#080808] px-5 py-20 sm:px-8 lg:px-10">
-        <div className="absolute right-[-260px] top-10 h-[560px] w-[560px] rounded-full bg-orange-500/12 blur-3xl" />
+        <div className="absolute right-[-260px] top-10 h-[560px] w-[560px] rounded-full bg-cyan-400/8 blur-3xl" />
         <div className="mx-auto max-w-[1500px]">
           <div className="mx-auto max-w-3xl text-center">
             <SectionEyebrow>Full menu transformation</SectionEyebrow>
@@ -431,8 +431,8 @@ export default function Page() {
                 </div>
               </div>
 
-              <div className="relative overflow-hidden rounded-[30px] border border-orange-500/30 bg-white shadow-[0_0_70px_rgba(255,107,0,0.22),0_18px_70px_rgba(0,0,0,0.35)]">
-                <div className="absolute right-4 top-4 z-10 rounded-full bg-gradient-to-r from-[#ff5a00] to-[#ff9d20] px-4 py-2 text-xs font-black uppercase tracking-[0.08em] text-white shadow-[0_10px_30px_rgba(255,107,0,0.35)]">
+              <div className="relative overflow-hidden rounded-[30px] border border-cyan-300/35 bg-white shadow-[0_0_70px_rgba(34,211,238,0.18),0_18px_70px_rgba(0,0,0,0.35)]">
+                <div className="absolute right-4 top-4 z-10 rounded-full bg-gradient-to-r from-[#ff5a00] to-[#ff9d20] px-4 py-2 text-xs font-black shadow-[0_0_18px_rgba(34,211,238,0.18)] uppercase tracking-[0.08em] text-white shadow-[0_10px_30px_rgba(255,107,0,0.35)]">
                   After
                 </div>
                 <div className="relative aspect-[1081/1137] w-full">
@@ -467,9 +467,9 @@ export default function Page() {
               <LocalImage src={ASSETS.beforeBanner} alt="Before banner" className="object-contain" />
               <span className="absolute left-5 top-5 rounded-full bg-black/75 px-4 py-2 text-xs font-black uppercase tracking-[0.08em]">Before</span>
             </div>
-            <div className="relative h-64 overflow-hidden rounded-[32px] border border-orange-500/35 bg-black shadow-[0_0_70px_rgba(255,107,0,0.20)]">
+            <div className="relative h-64 overflow-hidden rounded-[32px] border border-cyan-300/35 bg-black shadow-[0_0_70px_rgba(34,211,238,0.18)]">
               <LocalImage src={ASSETS.afterBanner} alt="After banner" className="object-contain" />
-              <span className="absolute right-5 top-5 rounded-full bg-gradient-to-r from-[#ff5a00] to-[#ff9d20] px-4 py-2 text-xs font-black uppercase tracking-[0.08em]">After</span>
+              <span className="absolute right-5 top-5 rounded-full bg-gradient-to-r from-[#ff5a00] to-[#ff9d20] px-4 py-2 text-xs font-black shadow-[0_0_18px_rgba(34,211,238,0.18)] uppercase tracking-[0.08em]">After</span>
             </div>
           </div>
         </div>
@@ -501,7 +501,7 @@ export default function Page() {
                 key={item}
                 className="rounded-2xl border border-white/10 bg-white/[0.045] px-4 py-3 text-center text-xs font-black uppercase tracking-[0.08em] text-white/68 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]"
               >
-                <span className="mr-2 text-[#ff7a00]">✓</span>{item}
+                <span className="mr-2 text-cyan-200">✓</span>{item}
               </div>
             ))}
           </div>
@@ -517,8 +517,8 @@ export default function Page() {
       </section>
 
       <section id="data" className="relative overflow-hidden border-b border-white/10 bg-[#050505] px-5 py-20 sm:px-8 lg:px-10">
-        <div className="absolute left-[-260px] top-[-120px] h-[620px] w-[620px] rounded-full bg-orange-500/10 blur-3xl" />
-        <div className="absolute right-[-260px] bottom-[-180px] h-[620px] w-[620px] rounded-full bg-orange-500/10 blur-3xl" />
+        <div className="absolute left-[-260px] top-[-120px] h-[620px] w-[620px] rounded-full bg-cyan-400/8 blur-3xl" />
+        <div className="absolute right-[-260px] bottom-[-180px] h-[620px] w-[620px] rounded-full bg-cyan-400/8 blur-3xl" />
 
         <div className="relative mx-auto max-w-7xl">
           <div className="mx-auto max-w-4xl text-center">
@@ -552,16 +552,16 @@ export default function Page() {
           </div>
 
           <div className="mt-8 grid gap-5 lg:grid-cols-[0.95fr_1.05fr]">
-            <div className="rounded-[34px] border border-orange-500/24 bg-gradient-to-br from-orange-500/[0.12] to-white/[0.035] p-7 shadow-[0_0_60px_rgba(255,107,0,0.10)]">
-              <div className="text-xs font-black uppercase tracking-[0.14em] text-orange-200">Owner takeaway</div>
+            <div className="rounded-[34px] border border-orange-500/24 bg-gradient-to-br from-orange-500/[0.12] to-white/[0.035] p-7 shadow-[0_0_60px_rgba(34,211,238,0.08)]">
+              <div className="text-xs font-black uppercase tracking-[0.14em] text-cyan-100">Owner takeaway</div>
               <p className="mt-4 text-3xl font-black uppercase leading-[0.94] tracking-[-0.055em] text-white sm:text-4xl">
                 Better photos do not just make food look nicer.
                 <span className="block text-[#ff7a00]">They make the restaurant feel safer, cleaner and more valuable.</span>
               </p>
             </div>
 
-            <div className="rounded-[34px] border border-orange-500/24 bg-gradient-to-br from-white/[0.055] to-orange-500/[0.09] p-7 shadow-[0_0_60px_rgba(255,107,0,0.10)]">
-              <div className="text-xs font-black uppercase tracking-[0.14em] text-orange-200">Delivery app reality</div>
+            <div className="rounded-[34px] border border-orange-500/24 bg-gradient-to-br from-white/[0.055] to-orange-500/[0.09] p-7 shadow-[0_0_60px_rgba(34,211,238,0.08)]">
+              <div className="text-xs font-black uppercase tracking-[0.14em] text-cyan-100">Delivery app reality</div>
               <p className="mt-4 text-3xl font-black uppercase leading-[0.94] tracking-[-0.055em] text-white sm:text-4xl">
                 Your food is not only competing against similar food.
                 <span className="block text-[#ff7a00]">It is competing against better-looking photos.</span>
@@ -610,7 +610,7 @@ export default function Page() {
             <div className="rounded-[38px] border border-white/10 bg-white/[0.045] p-7 shadow-[0_28px_95px_rgba(0,0,0,0.38)]">
               <div className="flex items-center justify-between gap-4">
                 <div>
-                  <div className="text-xs font-black uppercase tracking-[0.14em] text-orange-200">Pathway one</div>
+                  <div className="text-xs font-black uppercase tracking-[0.14em] text-cyan-100">Pathway one</div>
                   <h3 className="mt-3 text-4xl font-black uppercase leading-[0.9] tracking-[-0.06em] text-white">
                     DIY <span className="text-[#ff7a00]">files only</span>
                   </h3>
@@ -625,7 +625,7 @@ export default function Page() {
                   ["3", "You receive final files", "Download ready-to-upload images and use them anywhere, with no restrictions."],
                 ].map(([num, title, text]) => (
                   <div key={num} className="flex gap-4 rounded-[26px] border border-white/10 bg-black/28 p-5">
-                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-orange-500/55 text-2xl font-black text-[#ff7a00] shadow-[0_0_26px_rgba(255,107,0,0.18)]">{num}</div>
+                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-cyan-300/55 text-2xl font-black text-cyan-200 shadow-[0_0_26px_rgba(34,211,238,0.18)]">{num}</div>
                     <div>
                       <h4 className="text-lg font-black uppercase tracking-[-0.02em] text-white">{title}</h4>
                       <p className="mt-1 text-sm leading-6 text-white/56">{text}</p>
@@ -635,15 +635,15 @@ export default function Page() {
               </div>
             </div>
 
-            <div className="rounded-[38px] border border-orange-500/34 bg-gradient-to-b from-orange-500/[0.16] to-white/[0.045] p-7 shadow-[0_0_80px_rgba(255,107,0,0.18),0_28px_95px_rgba(0,0,0,0.38)]">
+            <div className="rounded-[38px] border border-cyan-300/34 bg-gradient-to-b from-cyan-400/[0.10] to-white/[0.045] p-7 shadow-[0_0_80px_rgba(34,211,238,0.13),0_28px_95px_rgba(0,0,0,0.38)]">
               <div className="flex items-center justify-between gap-4">
                 <div>
-                  <div className="text-xs font-black uppercase tracking-[0.14em] text-orange-200">Pathway two</div>
+                  <div className="text-xs font-black uppercase tracking-[0.14em] text-cyan-100">Pathway two</div>
                   <h3 className="mt-3 text-4xl font-black uppercase leading-[0.9] tracking-[-0.06em] text-white">
                     Managed <span className="text-[#ff7a00]">done for you</span>
                   </h3>
                 </div>
-                <div className="rounded-full bg-gradient-to-r from-[#ff5a00] to-[#ff9d20] px-4 py-2 text-xs font-black uppercase tracking-[0.08em] text-white shadow-[0_0_28px_rgba(255,107,0,0.26)]">Easiest</div>
+                <div className="rounded-full bg-gradient-to-r from-[#ff5a00] to-[#ff9d20] px-4 py-2 text-xs font-black shadow-[0_0_18px_rgba(34,211,238,0.18)] uppercase tracking-[0.08em] text-white shadow-[0_0_28px_rgba(255,107,0,0.26)]">Easiest</div>
               </div>
 
               <div className="mt-7 grid gap-4">
@@ -652,8 +652,8 @@ export default function Page() {
                   ["2", "We create the package", "Food images, drinks, banners and headers are prepared in a consistent premium style."],
                   ["3", "We support upload", "You receive the finished package, with Uber Eats image upload included in managed plans."],
                 ].map(([num, title, text]) => (
-                  <div key={num} className="flex gap-4 rounded-[26px] border border-orange-500/18 bg-black/30 p-5">
-                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-orange-500/70 text-2xl font-black text-[#ff7a00] shadow-[0_0_30px_rgba(255,107,0,0.24)]">{num}</div>
+                  <div key={num} className="flex gap-4 rounded-[26px] border border-cyan-300/18 bg-black/30 p-5">
+                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-cyan-300/60 text-2xl font-black text-cyan-200 shadow-[0_0_30px_rgba(34,211,238,0.20)]">{num}</div>
                     <div>
                       <h4 className="text-lg font-black uppercase tracking-[-0.02em] text-white">{title}</h4>
                       <p className="mt-1 text-sm leading-6 text-white/58">{text}</p>
@@ -699,7 +699,7 @@ export default function Page() {
       </section>
 
       <section id="pricing" className="relative border-y border-white/10 bg-[#0b0b0b] px-5 py-20 sm:px-8 lg:px-10">
-        <div className="absolute right-[-200px] top-16 h-[480px] w-[480px] rounded-full bg-orange-500/12 blur-3xl" />
+        <div className="absolute right-[-200px] top-16 h-[480px] w-[480px] rounded-full bg-cyan-400/8 blur-3xl" />
         <div className="mx-auto max-w-7xl">
           <div className="mx-auto max-w-3xl text-center">
             <SectionEyebrow>Packages</SectionEyebrow>
@@ -721,7 +721,7 @@ export default function Page() {
                 key={plan.name}
                 className={`relative rounded-[34px] p-6 ${
                   plan.highlight
-                    ? "scale-[1.02] border border-orange-500 bg-gradient-to-b from-orange-500/20 to-white/[0.055] shadow-[0_0_76px_rgba(255,107,0,0.28)]"
+                    ? "scale-[1.02] border border-orange-500 bg-gradient-to-b from-orange-500/16 to-cyan-400/[0.035] shadow-[0_0_76px_rgba(255,107,0,0.18),0_0_38px_rgba(34,211,238,0.08)]"
                     : "border border-white/10 bg-white/[0.045]"
                 }`}
               >
@@ -743,7 +743,7 @@ export default function Page() {
                   className={`mt-6 inline-flex w-full justify-center rounded-full px-5 py-4 text-sm font-black uppercase tracking-[0.04em] transition ${
                     plan.highlight
                       ? "bg-gradient-to-r from-[#ff6b00] to-[#ff9a1f] text-white shadow-[0_0_35px_rgba(255,107,0,0.35)]"
-                      : "border border-white/12 bg-white/[0.06] text-white hover:border-orange-500/60"
+                      : "border border-white/12 bg-white/[0.06] text-white hover:border-cyan-300/60"
                   }`}
                 >
                   {plan.button} →
@@ -774,8 +774,8 @@ export default function Page() {
       </section>
 
       <section id="sample" className="relative overflow-hidden border-t border-white/10 bg-black px-5 py-14 text-center sm:px-8 lg:px-10">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(255,107,0,0.25),transparent_36%)]" />
-        <div className="relative mx-auto max-w-3xl overflow-hidden rounded-[38px] border border-orange-500/28 bg-white/[0.055] p-8 shadow-[0_0_78px_rgba(255,107,0,0.16)] backdrop-blur-xl sm:p-10">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(34,211,238,0.16),transparent_36%)]" />
+        <div className="relative mx-auto max-w-3xl overflow-hidden rounded-[38px] border border-cyan-300/26 bg-white/[0.055] p-8 shadow-[0_0_78px_rgba(34,211,238,0.14)] backdrop-blur-xl sm:p-10">
           <h2 className="relative text-5xl font-black uppercase leading-[0.86] tracking-[-0.075em] sm:text-6xl">
             Ready to <span className="text-[#ff7a00]">ignite</span> your orders?
           </h2>
