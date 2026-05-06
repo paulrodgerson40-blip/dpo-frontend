@@ -487,6 +487,24 @@ export default function Page() {
               The goal is not to invent fake dishes. The goal is to make the restaurant’s actual menu look premium enough to stop the scroll.
             </p>
           </div>
+
+          <div className="mx-auto mt-9 grid max-w-5xl gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {[
+              "AI-enhanced food photos",
+              "Consistent branding and style",
+              "Uber Eats optimised images",
+              "Storefront banners",
+              "Ready-to-upload files",
+              "Before and after comparison",
+            ].map((item) => (
+              <div
+                key={item}
+                className="rounded-2xl border border-white/10 bg-white/[0.045] px-4 py-3 text-center text-xs font-black uppercase tracking-[0.08em] text-white/68 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]"
+              >
+                <span className="mr-2 text-[#ff7a00]">✓</span>{item}
+              </div>
+            ))}
+          </div>
         </div>
 
         <div className="mt-12 overflow-hidden">
@@ -500,7 +518,7 @@ export default function Page() {
 
       <section id="data" className="relative border-b border-white/10 bg-[#050505] px-5 py-20 sm:px-8 lg:px-10">
         <div className="absolute left-[-240px] top-20 h-[520px] w-[520px] rounded-full bg-orange-500/10 blur-3xl" />
-        <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[0.82fr_1.18fr] lg:items-center">
+        <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[0.78fr_1.22fr] lg:items-start">
           <div>
             <SectionEyebrow>Why images sell</SectionEyebrow>
             <h2 className="mt-5 text-5xl font-black uppercase leading-[0.86] tracking-[-0.075em] sm:text-7xl">
@@ -508,62 +526,38 @@ export default function Page() {
               <span className="block text-[#ff7a00]">Then your food does the rest.</span>
             </h2>
             <p className="mt-6 max-w-xl text-lg leading-8 text-white/62">
-              Delivery customers judge fast. Better images improve clarity, trust, appetite appeal and perceived quality before the customer even opens the item description.
+              On delivery apps, customers cannot smell, taste or touch the food. The photo becomes the first product signal: is it fresh, safe, generous, premium and worth ordering?
             </p>
+            <div className="mt-8 rounded-[30px] border border-orange-500/24 bg-orange-500/[0.07] p-6 shadow-[0_0_55px_rgba(255,107,0,0.12)]">
+              <div className="text-xs font-black uppercase tracking-[0.14em] text-orange-200">Owner takeaway</div>
+              <p className="mt-3 text-2xl font-black uppercase leading-[0.92] tracking-[-0.045em] text-white">
+                Better photos do not just make food look nicer. They make the restaurant feel safer, cleaner, more professional and more valuable.
+              </p>
+            </div>
           </div>
 
-          <div className="grid gap-5 md:grid-cols-3">
+          <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
             {[
-              ["Photo-first", "Uber Eats gives merchants detailed photo guidance because images shape how customers evaluate food."],
-              ["Platform-ready", "DoorDash requires clear, well-lit, unblurry item photos that properly show the dish."],
-              ["Purchase intent", "Hospitality research links food photo style with perceived food quality and purchase intention."],
+              ["First-click signal", "Before price, description or add-ons, the image is usually the fastest way a customer judges whether the item is worth opening."],
+              ["Ordering decisions", "Uber Eats says dish photos significantly influence customer ordering decisions and can elevate menu presentation."],
+              ["Platform standards", "Uber Eats and DoorDash both require clear, well-lit, accurate menu photos because poor images reduce trust and approval quality."],
+              ["Perceived quality", "Hospitality research links food photo style with perceived food quality, experiential value and stronger purchase intention."],
+              ["Trust transfer", "Clean lighting, sharp texture and consistent presentation make the whole store feel more established before the first order."],
+              ["Scroll competition", "Customers compare restaurants side-by-side in fast-moving feeds. Better photos help the item stop the scroll and win attention."],
             ].map(([title, text]) => (
-              <div key={title} className="rounded-[34px] border border-white/10 bg-white/[0.055] p-7 shadow-[0_22px_80px_rgba(0,0,0,0.35)]">
-                <div className="text-3xl font-black tracking-[-0.06em] text-[#ff7a00]">{title}</div>
+              <div key={title} className="rounded-[34px] border border-white/10 bg-white/[0.055] p-6 shadow-[0_22px_80px_rgba(0,0,0,0.35)]">
+                <div className="text-2xl font-black uppercase leading-[0.9] tracking-[-0.05em] text-[#ff7a00]">{title}</div>
                 <p className="mt-4 text-sm leading-7 text-white/60">{text}</p>
               </div>
             ))}
           </div>
         </div>
 
-        <div className="mx-auto mt-10 max-w-7xl rounded-[30px] border border-white/10 bg-white/[0.045] p-6 text-xs leading-6 text-white/45">
-          <p className="font-bold text-white/65">Supporting sources:</p>
-          <p className="mt-2">
-            Uber Eats merchant photography guidance; DoorDash merchant photo requirements; hospitality research on food photo style, perceived food quality and purchase intention.
+        <div className="mx-auto mt-10 max-w-7xl rounded-[26px] border border-white/10 bg-white/[0.035] px-5 py-4 text-[10px] leading-5 text-white/38 sm:text-xs">
+          <p>
+            <span className="font-black uppercase tracking-[0.10em] text-white/58">Evidence note: </span>
+            Based on publicly available Uber Eats merchant and user-submitted photo guidance, DoorDash merchant photo requirements and menu photography guidance, and hospitality/consumer-behaviour research connecting food photo style with perceived food quality, experiential value, trust and purchase intention. No sales uplift is guaranteed; the claim is that better visual presentation improves the customer decision environment.
           </p>
-        </div>
-      </section>
-
-      <section className="relative bg-[#070707] px-5 py-20 sm:px-8 lg:px-10">
-        <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[0.72fr_1.28fr] lg:items-center">
-          <div>
-            <h2 className="text-5xl font-black uppercase leading-[0.86] tracking-[-0.075em] sm:text-7xl">
-              What <span className="text-[#ff7a00]">you get</span>
-            </h2>
-            <p className="mt-6 max-w-lg text-lg leading-8 text-white/60">
-              A complete image upgrade package designed to make your store stand out and convert more customers.
-            </p>
-            <ul className="mt-8 space-y-3">
-              <Check>AI-enhanced food photos</Check>
-              <Check>Consistent branding and style</Check>
-              <Check>Uber Eats optimized images</Check>
-              <Check>Storefront banners</Check>
-              <Check>Ready-to-upload files</Check>
-              <Check>Before and after comparison</Check>
-            </ul>
-          </div>
-
-          <div className="grid gap-5 sm:grid-cols-2">
-            {transformations.map((item) => (
-              <div key={item.title} className="group relative h-64 overflow-hidden rounded-[32px] border border-white/12 bg-black shadow-[0_28px_90px_rgba(0,0,0,0.42)]">
-                <LocalImage src={item.after} alt={item.title} className="transition duration-700 group-hover:scale-110" />
-                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/15 to-transparent" />
-                <div className="absolute bottom-5 left-5 max-w-[220px] text-3xl font-black uppercase leading-[0.86] tracking-[-0.055em]">
-                  {item.title}
-                </div>
-              </div>
-            ))}
-          </div>
         </div>
       </section>
 
