@@ -20,31 +20,31 @@ const transformations = [
     title: "Parma Upgrade",
     before: img("beforee.png"),
     after: img("aftere.png"),
-    note: "Same Parma. Premium food photography.",
+    note: "Same parma. Cleaner, sharper and more worth ordering.",
   },
   {
     title: "Sushi Upgrade",
     before: img("beforeb.png"),
     after: img("afterb.png"),
-    note: "Same Sushi. Premium presentation.",
+    note: "Same sushi. Better lighting, better first impression.",
   },
   {
     title: "Burger Upgrade",
     before: img("beforec.png"),
     after: img("afterc.png"),
-    note: "Same Burger. Cleaner conversion image.",
+    note: "Same burger. Looks fresher, bigger and more professional.",
   },
   {
     title: "Pizza Upgrade",
     before: img("befored.png"),
     after: img("afterd.png"),
-    note: "Same Pizza. Better appetite appeal.",
+    note: "Same pizza. Warmer, cleaner and easier to choose.",
   },
   {
     title: "Spring Roll Upgrade",
     before: img("beforeA.png"),
     after: img("aftera.png"),
-    note: "Same Spring Roll. Higher perceived quality.",
+    note: "Same spring roll. More polished without changing the dish.",
   },
 ];
 
@@ -55,10 +55,10 @@ const pricing = [
     detail: "Up to 20 images",
     button: "Start DIY",
     features: [
-      "Premium image enhancement",
-      "Ready-to-upload files",
+      "Professional food image upgrade",
+      "Ready-to-upload image files",
       "Use anywhere, no restrictions",
-      "Client uploads images",
+      "You upload the finished images",
     ],
   },
   {
@@ -68,10 +68,10 @@ const pricing = [
     button: "Choose Standard DIY",
     badge: "Best DIY",
     features: [
-      "Premium image enhancement",
-      "Ready-to-upload files",
+      "Professional food image upgrade",
+      "Ready-to-upload image files",
       "Larger menu coverage",
-      "Client uploads images",
+      "You upload the finished images",
     ],
   },
   {
@@ -80,11 +80,11 @@ const pricing = [
     detail: "Up to 20 items",
     button: "Choose Managed",
     features: [
-      "Image enhancement",
-      "Drinks handled",
-      "Headers included",
-      "Uber Eats image upload",
-      "Priority service",
+      "Professional food image upgrade",
+      "Drinks and simple items handled",
+      "Store banners included",
+      "Uber Eats upload support",
+      "Priority turnaround",
     ],
   },
   {
@@ -95,11 +95,11 @@ const pricing = [
     badge: "Most Popular",
     highlight: true,
     features: [
-      "Image enhancement",
-      "Drinks handled",
-      "Headers included",
-      "Uber Eats image upload",
-      "Priority service",
+      "Professional food image upgrade",
+      "Drinks and simple items handled",
+      "Store banners included",
+      "Uber Eats upload support",
+      "Priority turnaround",
     ],
   },
 ];
@@ -257,6 +257,64 @@ function BeforeAfterCard({
   );
 }
 
+
+function FAQItem({ question, answer }: { question: string; answer: string }) {
+  return (
+    <details className="group rounded-[28px] border border-white/10 bg-white/[0.045] p-6 shadow-[0_18px_60px_rgba(0,0,0,0.28)] open:border-orange-500/35 open:bg-orange-500/[0.06]">
+      <summary className="flex cursor-pointer list-none items-center justify-between gap-5 text-left text-lg font-black uppercase tracking-[-0.02em] text-white">
+        <span>{question}</span>
+        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-white/12 bg-black/35 text-2xl leading-none text-[#ff7a00] transition group-open:rotate-45">
+          +
+        </span>
+      </summary>
+      <p className="mt-4 max-w-3xl text-sm leading-7 text-white/62">{answer}</p>
+    </details>
+  );
+}
+
+const faqs = [
+  {
+    question: "Is this my real food?",
+    answer:
+      "Yes. We work from your actual menu photos and improve the presentation while keeping the food recognisable and realistic.",
+  },
+  {
+    question: "Do I need a professional photoshoot?",
+    answer:
+      "No. Most restaurants send normal phone photos. We upgrade what you already have, so you can improve your menu without organising a full shoot.",
+  },
+  {
+    question: "Will the food still look realistic?",
+    answer:
+      "Yes. The goal is not fake AI food. The goal is to make your real menu look cleaner, more appetising and more professional online.",
+  },
+  {
+    question: "Can I use the images on Uber Eats and DoorDash?",
+    answer:
+      "Yes. Files are prepared for delivery apps, websites and social media. Managed packages also include Uber Eats upload support.",
+  },
+  {
+    question: "What if my current photos are poor quality?",
+    answer:
+      "That is completely normal. Many restaurants start with basic phone photos, mixed lighting or inconsistent menu images. That is exactly what this service is designed to improve.",
+  },
+  {
+    question: "How long does it usually take?",
+    answer:
+      "Most packages are completed within 24 to 72 hours depending on menu size, image quality and whether you choose DIY or managed.",
+  },
+  {
+    question: "What do I receive?",
+    answer:
+      "Depending on your package, you receive upgraded food images, ready-to-upload files, store banners, drink handling and before-and-after preview examples.",
+  },
+  {
+    question: "Do you guarantee more orders?",
+    answer:
+      "No one can honestly guarantee sales. What we do is improve the first impression customers see before they choose where to order from.",
+  },
+];
+
 function Testimonial({ quote, name, meta }: { quote: string; name: string; meta: string }) {
   return (
     <div className="mx-3 w-[360px] shrink-0 rounded-[30px] border border-white/10 bg-white/[0.055] p-6 shadow-[0_20px_70px_rgba(0,0,0,0.30)] backdrop-blur-xl">
@@ -298,6 +356,7 @@ export default function Page() {
             <a href="#menu" className="transition hover:text-[#ff7a00]">Menu Upgrade</a>
             <a href="#data" className="transition hover:text-[#ff7a00]">Why it works</a>
             <a href="#pricing" className="transition hover:text-[#ff7a00]">Pricing</a>
+            <a href="#faq" className="transition hover:text-[#ff7a00]">FAQ</a>
           </nav>
           <a
             href="#sample"
@@ -338,7 +397,7 @@ export default function Page() {
             </h1>
 
             <p className="mt-7 max-w-xl text-lg leading-8 text-white/72">
-              We turn ordinary restaurant photos into premium delivery-platform visuals that increase appetite appeal, improve perceived quality, and make customers order faster.
+              We help restaurants turn average menu photos into cleaner, more professional delivery-app images that look more worth ordering.
             </p>
 
             <div className="mt-7 flex flex-wrap gap-3">
@@ -356,8 +415,8 @@ export default function Page() {
             <div className="mt-10 grid max-w-3xl grid-cols-2 gap-5 sm:grid-cols-4">
               <HeroProof icon="📸" title="No Photoshoot" sub="Use existing images" />
               <HeroProof icon="⚡" title="Fast Turnaround" sub="Preview first" />
-              <HeroProof icon="📈" title="More Clicks" sub="Stronger appeal" />
-              <HeroProof icon="🏆" title="Premium Brand" sub="Storefront polish" />
+              <HeroProof icon="📈" title="More Clicks" sub="Better first impression" />
+              <HeroProof icon="🏆" title="Looks Established" sub="Cleaner online store" />
             </div>
           </div>
 
@@ -375,18 +434,18 @@ export default function Page() {
         <div className="absolute left-[-240px] top-[-40px] h-[520px] w-[520px] rounded-full bg-cyan-400/8 blur-3xl" />
         <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[0.72fr_1.28fr] lg:items-center">
           <div>
-            <SectionEyebrow>Delivery platform luxury</SectionEyebrow>
+            <SectionEyebrow>Built for delivery apps</SectionEyebrow>
             <h2 className="mt-5 text-5xl font-black uppercase leading-[0.86] tracking-[-0.075em] sm:text-7xl">
               Not fake food.
               <span className="block text-[#ff7a00]">Real food, upgraded.</span>
             </h2>
             <p className="mt-6 max-w-xl text-lg leading-8 text-white/62">
-              Your actual dishes stay recognisable. We improve lighting, texture, contrast, consistency and presentation so the whole restaurant looks more valuable.
+              We work from your actual food photos. The dish stays recognisable — it just looks cleaner, fresher and more professional online.
             </p>
             <ul className="mt-8 space-y-3">
-              <Check>Preserves the restaurant’s real food identity</Check>
-              <Check>Creates a consistent premium visual style</Check>
-              <Check>Builds trust before customers read the menu</Check>
+              <Check>Keeps your real food recognisable</Check>
+              <Check>Gives the whole menu a cleaner look</Check>
+              <Check>Helps customers feel confident before they order</Check>
             </ul>
           </div>
 
@@ -405,13 +464,13 @@ export default function Page() {
         <div className="absolute right-[-260px] top-10 h-[560px] w-[560px] rounded-full bg-cyan-400/8 blur-3xl" />
         <div className="mx-auto max-w-[1500px]">
           <div className="mx-auto max-w-3xl text-center">
-            <SectionEyebrow>Full menu transformation</SectionEyebrow>
+            <SectionEyebrow>Menu image upgrade</SectionEyebrow>
             <h2 className="mt-5 text-5xl font-black uppercase leading-[0.86] tracking-[-0.075em] sm:text-7xl">
               Same menu.
-              <span className="block text-[#ff7a00]">Higher perceived value.</span>
+              <span className="block text-[#ff7a00]">Better first impression.</span>
             </h2>
             <p className="mx-auto mt-5 max-w-2xl text-white/60">
-              Same prices, same items, same restaurant — but the upgraded version looks more trustworthy, premium and order-worthy.
+              Same food, same prices, same restaurant. The upgraded version simply looks cleaner, more trustworthy and easier to order from.
             </p>
           </div>
 
@@ -452,13 +511,13 @@ export default function Page() {
       <section className="relative border-b border-white/10 bg-[#050505] px-5 py-20 sm:px-8 lg:px-10">
         <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[0.92fr_1.08fr] lg:items-center">
           <div>
-            <SectionEyebrow>Storefront branding</SectionEyebrow>
+            <SectionEyebrow>Storefront first impression</SectionEyebrow>
             <h2 className="mt-5 text-5xl font-black uppercase leading-[0.86] tracking-[-0.075em] sm:text-7xl">
-              From takeaway photos
-              <span className="block text-[#ff7a00]">to franchise-level branding.</span>
+              From phone photos
+              <span className="block text-[#ff7a00]">to a store that looks established.</span>
             </h2>
             <p className="mt-6 max-w-xl text-lg leading-8 text-white/62">
-              We create premium storefront banners using the restaurant’s own food assets, giving the whole store a stronger first impression.
+              We can also create storefront banners from your own food images, so the whole store feels more consistent and professional.
             </p>
           </div>
 
@@ -484,17 +543,17 @@ export default function Page() {
               <span className="block text-[#ff7a00]">We upgrade the sell.</span>
             </h2>
             <p className="mx-auto mt-5 max-w-2xl text-white/60">
-              The goal is not to invent fake dishes. The goal is to make the restaurant’s actual menu look premium enough to stop the scroll.
+              The goal is not fake AI food. The goal is to make your real menu look cleaner, more professional and more worth ordering.
             </p>
           </div>
 
           <div className="mx-auto mt-9 grid max-w-5xl gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {[
-              "AI-enhanced food photos",
-              "Consistent branding and style",
-              "Uber Eats optimised images",
+              "Real food photo upgrades",
+              "Consistent menu style",
+              "Delivery-app ready images",
               "Storefront banners",
-              "Ready-to-upload files",
+              "Ready-to-upload image files",
               "Before and after comparison",
             ].map((item) => (
               <div
@@ -522,22 +581,22 @@ export default function Page() {
 
         <div className="relative mx-auto max-w-7xl">
           <div className="mx-auto max-w-4xl text-center">
-            <SectionEyebrow>Why images sell</SectionEyebrow>
+            <SectionEyebrow>Why better photos matter</SectionEyebrow>
             <h2 className="mt-5 text-5xl font-black uppercase leading-[0.86] tracking-[-0.075em] sm:text-6xl lg:text-7xl">
               Your photos decide
               <span className="block">the first click.</span>
               <span className="block text-[#ff7a00]">Then your food does the rest.</span>
             </h2>
             <p className="mx-auto mt-6 max-w-2xl text-lg leading-8 text-white/62">
-              On delivery apps, customers cannot smell, taste or touch the food. Your image becomes the first signal of freshness, trust, value and whether the meal is worth ordering.
+              On delivery apps, customers decide quickly. Before they read the full menu, your photos tell them whether the food feels fresh, safe and worth ordering.
             </p>
           </div>
 
           <div className="mt-12 grid gap-5 lg:grid-cols-3">
             {[
-              ["First-click signal", "Before price, description or add-ons, the photo is often the fastest way a customer decides whether to open the item."],
-              ["Perceived quality", "Cleaner lighting, stronger texture and consistent presentation make the restaurant feel more professional and trustworthy."],
-              ["Scroll competition", "Customers compare restaurants side-by-side in fast-moving feeds. Better photos help stop the scroll."],
+              ["First impression", "Before customers compare every detail, the photo is usually what makes them stop and look."],
+              ["Looks more trustworthy", "Cleaner photos can make the whole restaurant feel more professional, organised and safe to order from."],
+              ["Stops the scroll", "Your food is competing beside hundreds of other photos. Better images give customers a reason to pause."],
             ].map(([title, text]) => (
               <div
                 key={title}
@@ -563,17 +622,17 @@ export default function Page() {
             <div className="rounded-[34px] border border-orange-500/24 bg-gradient-to-br from-white/[0.055] to-orange-500/[0.09] p-7 shadow-[0_0_60px_rgba(34,211,238,0.08)]">
               <div className="text-xs font-black uppercase tracking-[0.14em] text-cyan-100">Delivery app reality</div>
               <p className="mt-4 text-3xl font-black uppercase leading-[0.94] tracking-[-0.055em] text-white sm:text-4xl">
-                Your food is not only competing against similar food.
-                <span className="block text-[#ff7a00]">It is competing against better-looking photos.</span>
+                Customers compare your photos before they compare your prices.
+                <span className="block text-[#ff7a00]">Better-looking menus win attention first.</span>
               </p>
             </div>
           </div>
 
           <div className="mt-8 grid gap-4 sm:grid-cols-3">
             {[
-              ["3 sec", "Customers judge fast."],
-              ["6 signals", "Lighting, clarity, texture, portion, freshness and trust."],
-              ["1 chance", "The first image decides whether they keep scrolling."],
+              ["Fast", "Customers decide quickly."],
+              ["Clear", "A cleaner menu feels easier to trust."],
+              ["Real", "Same food, better first impression."],
             ].map(([stat, text]) => (
               <div
                 key={stat}
@@ -588,7 +647,7 @@ export default function Page() {
           <div className="mt-6 rounded-[26px] border border-white/10 bg-white/[0.035] px-5 py-4 text-[10px] leading-5 text-white/38 sm:text-xs">
             <p>
               <span className="font-black uppercase tracking-[0.10em] text-white/58">Evidence note: </span>
-              Based on publicly available Uber Eats merchant photo guidance, DoorDash merchant photo requirements, and hospitality/consumer-behaviour research connecting food photo style with perceived quality, trust and purchase intention. No sales uplift is guaranteed; better visual presentation improves the customer decision environment.
+              Better photos cannot guarantee more sales, but they do improve the first thing customers judge on delivery apps: how good, fresh and trustworthy your food looks.
             </p>
           </div>
         </div>
@@ -602,7 +661,7 @@ export default function Page() {
               How it <span className="text-[#ff7a00]">works</span>
             </h2>
             <p className="mx-auto mt-5 max-w-2xl text-white/55">
-              Choose the simple DIY file package, or the managed path where we handle the image upload work for you.
+              Choose DIY if you just want the finished files, or managed if you want us to help handle the image upload work too.
             </p>
           </div>
 
@@ -612,7 +671,7 @@ export default function Page() {
                 <div>
                   <div className="text-xs font-black uppercase tracking-[0.14em] text-cyan-100">Pathway one</div>
                   <h3 className="mt-3 text-4xl font-black uppercase leading-[0.9] tracking-[-0.06em] text-white">
-                    DIY <span className="text-[#ff7a00]">files only</span>
+                    DIY <span className="text-[#ff7a00]">image files</span>
                   </h3>
                 </div>
                 <div className="rounded-full border border-white/12 bg-black/45 px-4 py-2 text-xs font-black uppercase tracking-[0.08em] text-white/65">Fastest</div>
@@ -620,9 +679,9 @@ export default function Page() {
 
               <div className="mt-7 grid gap-4">
                 {[
-                  ["1", "You send the images", "Upload your current menu photos or share the files you want improved."],
-                  ["2", "We enhance the set", "Food images are upgraded for lighting, texture, contrast and consistent presentation."],
-                  ["3", "You receive final files", "Download ready-to-upload images and use them anywhere, with no restrictions."],
+                  ["1", "You send the images", "Send your current menu photos or share the files you want improved."],
+                  ["2", "We upgrade the photos", "We clean up the look, improve the presentation and keep the food realistic."],
+                  ["3", "You get the finished files", "Download your new images and use them on delivery apps, your website or socials."],
                 ].map(([num, title, text]) => (
                   <div key={num} className="flex gap-4 rounded-[26px] border border-white/10 bg-black/28 p-5">
                     <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-cyan-300/55 text-2xl font-black text-cyan-200 shadow-[0_0_26px_rgba(34,211,238,0.18)]">{num}</div>
@@ -640,7 +699,7 @@ export default function Page() {
                 <div>
                   <div className="text-xs font-black uppercase tracking-[0.14em] text-cyan-100">Pathway two</div>
                   <h3 className="mt-3 text-4xl font-black uppercase leading-[0.9] tracking-[-0.06em] text-white">
-                    Managed <span className="text-[#ff7a00]">done for you</span>
+                    Managed <span className="text-[#ff7a00]">done with you</span>
                   </h3>
                 </div>
                 <div className="rounded-full bg-gradient-to-r from-[#ff5a00] to-[#ff9d20] px-4 py-2 text-xs font-black shadow-[0_0_18px_rgba(34,211,238,0.18)] uppercase tracking-[0.08em] text-white shadow-[0_0_28px_rgba(255,107,0,0.26)]">Easiest</div>
@@ -648,9 +707,9 @@ export default function Page() {
 
               <div className="mt-7 grid gap-4">
                 {[
-                  ["1", "Send us your store link", "Share your Uber Eats or DoorDash store. We map the menu, images and priority items."],
-                  ["2", "We create the package", "Food images, drinks, banners and headers are prepared in a consistent premium style."],
-                  ["3", "We support upload", "You receive the finished package, with Uber Eats image upload included in managed plans."],
+                  ["1", "Send us your store link", "Share your Uber Eats or DoorDash store link. We review the menu and work out what needs upgrading."],
+                  ["2", "We build the package", "Food images, drinks and store banners are prepared in one consistent style."],
+                  ["3", "We help with upload", "You get the finished package, with Uber Eats upload support included in managed plans."],
                 ].map(([num, title, text]) => (
                   <div key={num} className="flex gap-4 rounded-[26px] border border-cyan-300/18 bg-black/30 p-5">
                     <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-cyan-300/60 text-2xl font-black text-cyan-200 shadow-[0_0_30px_rgba(34,211,238,0.20)]">{num}</div>
@@ -677,7 +736,7 @@ export default function Page() {
               </h2>
             </div>
             <p className="max-w-md text-white/55">
-              Temporary testimonials for layout. Replace with real restaurant names and feedback as completed jobs come in.
+              Real feedback can be added here as pilot jobs come in. For now, keep the wording plain and believable.
             </p>
           </div>
         </div>
@@ -686,11 +745,11 @@ export default function Page() {
           <div className="di-marquee-right flex w-max">
             {[
               ["Our menu finally looks like the food we actually serve.", "Restaurant owner", "Burger shop · Melbourne"],
-              ["The before and after made the decision easy.", "Operator", "Asian restaurant · VIC"],
-              ["This made our delivery store feel like a proper brand.", "Manager", "Cafe · South East Melbourne"],
-              ["Same food, but it looks like a franchise now.", "Owner", "Pizza store · Melbourne"],
+              ["The before and after made the choice easy.", "Operator", "Asian restaurant · VIC"],
+              ["The store looked much cleaner straight away.", "Manager", "Cafe · South East Melbourne"],
+              ["Same food, but the menu looks way more professional.", "Owner", "Pizza store · Melbourne"],
               ["Our menu finally looks like the food we actually serve.", "Restaurant owner", "Burger shop · Melbourne"],
-              ["The before and after made the decision easy.", "Operator", "Asian restaurant · VIC"],
+              ["The before and after made the choice easy.", "Operator", "Asian restaurant · VIC"],
             ].map(([quote, name, meta], idx) => (
               <Testimonial key={idx} quote={quote} name={name} meta={meta} />
             ))}
@@ -705,10 +764,10 @@ export default function Page() {
             <SectionEyebrow>Packages</SectionEyebrow>
             <h2 className="mt-5 text-5xl font-black uppercase leading-[0.86] tracking-[-0.075em] sm:text-7xl">
               DIY or Managed.
-              <span className="block text-[#ff7a00]">See both clearly.</span>
+              <span className="block text-[#ff7a00]">Choose what suits you.</span>
             </h2>
             <p className="mx-auto mt-5 max-w-2xl text-white/55">
-              Choose files only, or let us handle the Uber image upload for you.
+              Start with finished image files, or choose managed if you want upload support included.
             </p>
             <p className="mt-3 text-sm font-black uppercase tracking-[0.08em] text-orange-200/80">
               All prices exclude GST unless stated otherwise.
@@ -732,7 +791,7 @@ export default function Page() {
                 )}
                 <h3 className="text-2xl font-black tracking-[-0.03em] text-white">{plan.name}</h3>
                 <p className="mt-4 min-h-[44px] text-sm leading-6 text-white/55">
-                  Premium visual upgrade package for restaurants ready to improve their delivery presence.
+                  For restaurants that want their menu to look cleaner, more professional and more worth ordering.
                 </p>
                 <div className="mt-6 text-5xl font-black tracking-[-0.05em]">
                   {plan.price} <span className="text-base text-white/45">+ GST</span>
@@ -761,7 +820,7 @@ export default function Page() {
           <div className="mt-8 grid gap-4 md:grid-cols-3">
             {[
               ["DIY add-ons", "Drinks Pack $99 + GST. Header Pack $99 + GST."],
-              ["Managed includes more", "Headers, drinks, Uber upload, and priority service are included."],
+              ["Managed includes more", "Store banners, drinks, Uber upload support and priority turnaround are included."],
               ["Large menus", "Contact us for bulk or custom pricing."],
             ].map(([title, text]) => (
               <div key={title} className="rounded-[28px] border border-white/10 bg-white/[0.045] p-6">
@@ -773,14 +832,37 @@ export default function Page() {
         </div>
       </section>
 
+
+      <section id="faq" className="relative border-t border-white/10 bg-[#070707] px-5 py-20 sm:px-8 lg:px-10">
+        <div className="absolute left-[-220px] top-[-120px] h-[520px] w-[520px] rounded-full bg-orange-500/10 blur-3xl" />
+        <div className="relative mx-auto max-w-5xl">
+          <div className="mx-auto max-w-3xl text-center">
+            <SectionEyebrow>Common questions</SectionEyebrow>
+            <h2 className="mt-5 text-5xl font-black uppercase leading-[0.86] tracking-[-0.075em] sm:text-7xl">
+              Before you
+              <span className="block text-[#ff7a00]">send photos.</span>
+            </h2>
+            <p className="mx-auto mt-5 max-w-2xl text-white/58">
+              Simple answers for restaurant owners who want better menu photos without a complicated process.
+            </p>
+          </div>
+
+          <div className="mt-12 grid gap-4">
+            {faqs.map((faq) => (
+              <FAQItem key={faq.question} question={faq.question} answer={faq.answer} />
+            ))}
+          </div>
+        </div>
+      </section>
+
       <section id="sample" className="relative overflow-hidden border-t border-white/10 bg-black px-5 py-14 text-center sm:px-8 lg:px-10">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(34,211,238,0.16),transparent_36%)]" />
         <div className="relative mx-auto max-w-3xl overflow-hidden rounded-[38px] border border-cyan-300/26 bg-white/[0.055] p-8 shadow-[0_0_78px_rgba(34,211,238,0.14)] backdrop-blur-xl sm:p-10">
           <h2 className="relative text-5xl font-black uppercase leading-[0.86] tracking-[-0.075em] sm:text-6xl">
-            Ready to <span className="text-[#ff7a00]">ignite</span> your orders?
+            Ready to make your menu <span className="text-[#ff7a00]">look worth ordering?</span>
           </h2>
           <p className="relative mx-auto mt-5 max-w-xl text-white/60">
-            Start with 3 free watermarked images. See the upgrade before you commit.
+            Start with 3 free watermarked images and see the difference before you commit.
           </p>
           <div className="relative mt-7 flex flex-col justify-center gap-3 sm:flex-row">
             <OrangeButton href="#sample">Get Free Sample</OrangeButton>
