@@ -17,34 +17,34 @@ const ASSETS = {
 
 const transformations = [
   {
-    title: "Sushi Upgrade",
+    title: "Parma Upgrade",
     before: img("beforee.png"),
     after: img("aftere.png"),
-    note: "Same rolls. Premium food photography.",
+    note: "Same Parma. Premium food photography.",
+  },
+  {
+    title: "Sushi Upgrade",
+    before: img("beforeb.png"),
+    after: img("afterb.png"),
+    note: "Same Sushi. Premium presentation.",
   },
   {
     title: "Burger Upgrade",
-    before: img("beforeb.png"),
-    after: img("afterb.png"),
-    note: "Same burger. Premium presentation.",
+    before: img("beforec.png"),
+    after: img("afterc.png"),
+    note: "Same Burger. Cleaner conversion image.",
   },
   {
     title: "Pizza Upgrade",
-    before: img("beforec.png"),
-    after: img("afterc.png"),
-    note: "Same pizza. Cleaner conversion image.",
+    before: img("befored.png"),
+    after: img("afterd.png"),
+    note: "Same Pizza. Better appetite appeal.",
   },
   {
     title: "Spring Roll Upgrade",
-    before: img("befored.png"),
-    after: img("afterd.png"),
-    note: "Same product. Better appetite appeal.",
-  },
-  {
-    title: "Parma Upgrade",
     before: img("beforeA.png"),
     after: img("aftera.png"),
-    note: "Same dish. Higher perceived quality.",
+    note: "Same Spring Roll. Higher perceived quality.",
   },
 ];
 
