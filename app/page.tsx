@@ -517,13 +517,14 @@ export default function Page() {
       </section>
 
       <section id="data" className="relative border-b border-white/10 bg-[#050505] px-5 py-20 sm:px-8 lg:px-10">
-        <div className="absolute left-[-240px] top-20 h-[520px] w-[520px] rounded-full bg-orange-500/10 blur-3xl" />
+        <div className="absolute left-[-260px] top-[-80px] h-[620px] w-[620px] rounded-full bg-orange-500/10 blur-3xl" />
+        <div className="absolute right-[-260px] bottom-[-120px] h-[520px] w-[520px] rounded-full bg-orange-500/8 blur-3xl" />
 
         <div className="mx-auto max-w-7xl">
-          <div className="grid gap-12 lg:grid-cols-[0.9fr_1.1fr] lg:items-start">
+          <div className="grid gap-12 lg:grid-cols-[0.82fr_1.18fr] lg:items-start">
             <div>
               <SectionEyebrow>Why images sell</SectionEyebrow>
-              <h2 className="mt-5 max-w-[620px] text-5xl font-black uppercase leading-[0.88] tracking-[-0.075em] sm:text-6xl lg:text-7xl">
+              <h2 className="mt-5 max-w-[640px] text-5xl font-black uppercase leading-[0.86] tracking-[-0.075em] sm:text-6xl lg:text-7xl">
                 Your photos decide the first click.
                 <span className="block text-[#ff7a00]">Then your food does the rest.</span>
               </h2>
@@ -533,7 +534,7 @@ export default function Page() {
 
               <div className="mt-8 rounded-[30px] border border-orange-500/24 bg-orange-500/[0.07] p-6 shadow-[0_0_55px_rgba(255,107,0,0.12)]">
                 <div className="text-xs font-black uppercase tracking-[0.14em] text-orange-200">Owner takeaway</div>
-                <p className="mt-3 text-2xl font-black uppercase leading-[0.98] tracking-[-0.04em] text-white">
+                <p className="mt-3 text-[26px] font-black uppercase leading-[0.94] tracking-[-0.045em] text-white">
                   Better photos do not just make food look nicer. They make the restaurant feel safer, cleaner, more professional and more valuable.
                 </p>
               </div>
@@ -559,7 +560,7 @@ export default function Page() {
             </div>
           </div>
 
-          <div className="mt-10 grid gap-5 lg:grid-cols-[1.05fr_0.95fr]">
+          <div className="mt-10 grid gap-6 lg:grid-cols-[0.95fr_1.05fr] lg:items-stretch">
             <div className="rounded-[32px] border border-orange-500/22 bg-gradient-to-br from-orange-500/[0.12] to-white/[0.035] p-7 shadow-[0_0_60px_rgba(255,107,0,0.10)]">
               <div className="text-xs font-black uppercase tracking-[0.14em] text-orange-200">Delivery app reality</div>
               <p className="mt-3 text-3xl font-black uppercase leading-[0.92] tracking-[-0.055em] text-white sm:text-4xl">
