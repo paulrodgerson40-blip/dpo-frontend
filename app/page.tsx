@@ -59,23 +59,19 @@ const pricing = [
       "Ready-to-upload image files",
       "Use anywhere, no restrictions",
       "You upload the finished images",
-      "Drinks pack +$99 + GST",
-      "Banner pack +$99 + GST",
     ],
   },
   {
     name: "Standard DIY",
     price: "$799",
     detail: "Up to 50 images",
-    button: "Choose DIY",
+    button: "Choose Standard DIY",
     badge: "Best DIY",
     features: [
       "Professional food image upgrade",
       "Ready-to-upload image files",
       "Larger menu coverage",
       "You upload the finished images",
-      "Drinks pack +$99 + GST",
-      "Banner pack +$99 + GST",
     ],
   },
   {
@@ -95,7 +91,7 @@ const pricing = [
     name: "Standard Managed",
     price: "$1,299",
     detail: "Up to 50 items",
-    button: "Choose Managed",
+    button: "Choose Standard Managed",
     badge: "Most Popular",
     highlight: true,
     features: [
@@ -197,7 +193,7 @@ function Pill({ children }: { children: React.ReactNode }) {
 
 function Check({ children }: { children: React.ReactNode }) {
   return (
-    <li className="flex min-h-[28px] items-start gap-3 text-sm leading-6 text-white/72">
+    <li className="flex items-start gap-3 text-sm leading-6 text-white/72">
       <span className="mt-1 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-cyan-400/12 text-xs font-black text-cyan-200">
         ✓
       </span>
@@ -221,22 +217,15 @@ function EvidenceCard({
   text,
   source,
   sourceSub,
-  href,
 }: {
   number: string;
   title: string;
   text: string;
   source: string;
   sourceSub: string;
-  href: string;
 }) {
   return (
-    <a
-      href={href}
-      target="_blank"
-      rel="noreferrer"
-      className="group flex h-full min-h-[330px] flex-col rounded-[30px] border border-white/10 bg-black/28 p-6 shadow-[0_22px_80px_rgba(0,0,0,0.34)] transition duration-300 hover:border-cyan-300/35 hover:bg-white/[0.055]"
-    >
+    <div className="group flex h-full min-h-[330px] flex-col rounded-[30px] border border-white/10 bg-black/28 p-6 shadow-[0_22px_80px_rgba(0,0,0,0.34)] transition duration-300 hover:border-cyan-300/22 hover:bg-white/[0.045]">
       <div className="flex min-h-[74px] items-start gap-4">
         <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-cyan-300/35 bg-cyan-400/8 text-lg font-black text-cyan-100 shadow-[0_0_24px_rgba(34,211,238,0.14)]">
           {number}
@@ -246,7 +235,7 @@ function EvidenceCard({
         </h3>
       </div>
 
-      <p className="mt-5 min-h-[126px] text-sm leading-7 text-white/62">{text}</p>
+      <p className="mt-5 min-h-[126px] text-sm leading-7 text-white/72">{text}</p>
 
       <div className="mt-auto h-px bg-white/10" />
 
@@ -308,7 +297,7 @@ function FAQItem({ question, answer }: { question: string; answer: string }) {
           +
         </span>
       </summary>
-      <p className="mt-4 max-w-3xl text-sm leading-7 text-white/62">{answer}</p>
+      <p className="mt-4 max-w-3xl text-sm leading-7 text-white/72">{answer}</p>
     </details>
   );
 }
@@ -348,11 +337,6 @@ const faqs = [
     question: "What do I receive?",
     answer:
       "Depending on your package, you receive upgraded food images, ready-to-upload files, store banners, drink handling and before-and-after preview examples.",
-  },
-  {
-    question: "What if I have a large menu?",
-    answer:
-      "For larger menus, multi-location stores or custom requirements, contact us for bulk or custom pricing.",
   },
   {
     question: "Do you guarantee more orders?",
@@ -408,7 +392,7 @@ export default function Page() {
             href="#sample"
             className="rounded-full border border-cyan-300/35 bg-cyan-400/8 px-5 py-3 text-[11px] font-black uppercase tracking-[0.08em] text-white shadow-[0_0_28px_rgba(34,211,238,0.20)] transition hover:border-orange-500/70 hover:bg-orange-500"
           >
-            Free Sample →
+            Get Free Sample →
           </a>
         </div>
       </header>
@@ -454,7 +438,7 @@ export default function Page() {
             </div>
 
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-              <OrangeButton href="#sample">Free Sample</OrangeButton>
+              <OrangeButton href="#sample">Get Free Sample</OrangeButton>
               <GhostButton href="#proof">See Transformations</GhostButton>
             </div>
           </div>
@@ -470,7 +454,7 @@ export default function Page() {
               Not fake food.
               <span className="block text-[#ff7a00]">Real food, upgraded.</span>
             </h2>
-            <p className="mt-6 max-w-xl text-lg leading-8 text-white/62">
+            <p className="mt-6 max-w-xl text-lg leading-8 text-white/72">
               We work from your actual food photos. The dish stays recognisable — it just looks cleaner, fresher and more professional online.
             </p>
             <ul className="mt-8 space-y-3">
@@ -543,7 +527,7 @@ export default function Page() {
               From phone photos
               <span className="block text-[#ff7a00]">to a store that looks established.</span>
             </h2>
-            <p className="mt-6 max-w-xl text-lg leading-8 text-white/62">
+            <p className="mt-6 max-w-xl text-lg leading-8 text-white/72">
               We can also create storefront banners from your own food images, so the whole store feels more consistent and professional.
             </p>
           </div>
@@ -614,13 +598,13 @@ export default function Page() {
               <span className="block">the first click.</span>
               <span className="block text-[#ff7a00]">Then your food does the rest.</span>
             </h2>
-            <p className="mx-auto mt-6 max-w-2xl text-lg leading-8 text-white/62">
+            <p className="mx-auto mt-6 max-w-2xl text-lg leading-8 text-white/72">
               On delivery apps, customers decide quickly. Before they read the full menu, your photos tell them whether the food feels fresh, safe and worth ordering.
             </p>
           </div>
 
           <div className="mt-12 grid gap-5 lg:grid-cols-[0.95fr_1.05fr]">
-            <div className="rounded-[34px] border border-cyan-300/24 bg-gradient-to-br from-cyan-400/[0.10] to-white/[0.035] p-7 shadow-[0_0_60px_rgba(34,211,238,0.10)]">
+            <div className="rounded-[34px] border border-cyan-300/24 bg-gradient-to-br from-cyan-400/[0.10] to-white/[0.035] p-7 shadow-[0_0_42px_rgba(34,211,238,0.06)]">
               <div className="text-xs font-black uppercase tracking-[0.14em] text-cyan-100">Owner takeaway</div>
               <p className="mt-4 text-3xl font-black uppercase leading-[0.94] tracking-[-0.055em] text-white sm:text-4xl">
                 Better photos do not just make food look nicer.
@@ -628,7 +612,7 @@ export default function Page() {
               </p>
             </div>
 
-            <div className="rounded-[34px] border border-cyan-300/24 bg-gradient-to-br from-white/[0.055] to-cyan-400/[0.08] p-7 shadow-[0_0_60px_rgba(34,211,238,0.10)]">
+            <div className="rounded-[34px] border border-cyan-300/24 bg-gradient-to-br from-white/[0.055] to-cyan-400/[0.08] p-7 shadow-[0_0_42px_rgba(34,211,238,0.06)]">
               <div className="text-xs font-black uppercase tracking-[0.14em] text-cyan-100">Delivery app reality</div>
               <p className="mt-4 text-3xl font-black uppercase leading-[0.94] tracking-[-0.055em] text-white sm:text-4xl">
                 Customers compare your photos before they compare your prices.
@@ -637,7 +621,7 @@ export default function Page() {
             </div>
           </div>
 
-          <div className="mt-10 rounded-[40px] border border-cyan-300/24 bg-gradient-to-br from-cyan-400/[0.08] via-white/[0.035] to-black/20 p-6 shadow-[0_0_90px_rgba(34,211,238,0.12),0_30px_110px_rgba(0,0,0,0.45)] sm:p-8">
+          <div className="mt-10 rounded-[40px] border border-cyan-300/24 bg-gradient-to-br from-cyan-400/[0.08] via-white/[0.035] to-black/20 p-6 shadow-[0_0_70px_rgba(34,211,238,0.08),0_30px_110px_rgba(0,0,0,0.45)] sm:p-8">
             <div className="flex flex-col justify-between gap-5 lg:flex-row lg:items-end">
               <div>
                 <div className="text-xs font-black uppercase tracking-[0.18em] text-cyan-100">
@@ -659,7 +643,6 @@ export default function Page() {
                 text="Princeton research found that people can form visual first impressions after very brief exposure. Online food ordering works the same way: customers make fast visual judgements before they read every detail."
                 source="Princeton"
                 sourceSub="Psychological Science"
-                href="https://pubmed.ncbi.nlm.nih.gov/16866745/"
               />
               <EvidenceCard
                 number="02"
@@ -667,7 +650,6 @@ export default function Page() {
                 text="Food marketing research has linked photo style with perceived food quality, experience value and purchase intention. Better presentation helps the food feel more desirable before the customer tastes it."
                 source="IJHM"
                 sourceSub="Hospitality research"
-                href="https://www.sciencedirect.com/science/article/abs/pii/S027843192200041X"
               />
               <EvidenceCard
                 number="03"
@@ -675,7 +657,6 @@ export default function Page() {
                 text="Uber Eats and DoorDash both publish merchant photo guidance covering lighting, framing, composition and accurate representation. That matters because your photos are part of the customer decision environment."
                 source="Uber Eats · DoorDash"
                 sourceSub="Merchant photo guidance"
-                href="https://merchants.ubereats.com/nz/en/restaurant-submitted-photos/"
               />
             </div>
           </div>
@@ -723,7 +704,7 @@ export default function Page() {
               </div>
             </div>
 
-            <div className="flex h-full flex-col rounded-[38px] border border-cyan-300/34 bg-gradient-to-b from-cyan-400/[0.10] to-white/[0.045] p-7 shadow-[0_0_80px_rgba(34,211,238,0.13),0_28px_95px_rgba(0,0,0,0.38)]">
+            <div className="flex h-full flex-col rounded-[38px] border border-cyan-300/34 bg-gradient-to-b from-cyan-400/[0.10] to-white/[0.045] p-7 shadow-[0_0_58px_rgba(34,211,238,0.08),0_28px_95px_rgba(0,0,0,0.38)]">
               <div className="flex min-h-[96px] items-start justify-between gap-4">
                 <div>
                   <div className="text-xs font-black uppercase tracking-[0.14em] text-cyan-100">Pathway two</div>
@@ -807,7 +788,7 @@ export default function Page() {
             {pricing.map((plan) => (
               <div
                 key={plan.name}
-                className={`relative flex h-full min-h-[640px] flex-col rounded-[34px] p-6 ${
+                className={`relative flex h-full flex-col rounded-[34px] p-6 ${
                   plan.highlight
                     ? "scale-[1.02] border border-cyan-300/55 bg-gradient-to-b from-cyan-400/[0.11] to-white/[0.045] shadow-[0_0_76px_rgba(34,211,238,0.20),0_0_32px_rgba(255,107,0,0.08)]"
                     : "border border-white/10 bg-white/[0.045]"
@@ -832,7 +813,7 @@ export default function Page() {
                 </div>
                 <a
                   href="#sample"
-                  className={`mt-5 flex min-h-[64px] w-full items-center justify-center rounded-full px-5 py-4 text-center text-[13px] font-black uppercase tracking-[0.04em] transition sm:whitespace-nowrap ${
+                  className={`mt-5 flex min-h-[64px] w-full items-center justify-center rounded-full px-5 py-4 text-center text-sm font-black uppercase tracking-[0.04em] transition ${
                     plan.highlight
                       ? "bg-gradient-to-r from-[#ff6b00] to-[#ff9a1f] text-white shadow-[0_0_35px_rgba(255,107,0,0.35)]"
                       : "border border-white/12 bg-white/[0.06] text-white hover:border-cyan-300/60"
@@ -841,11 +822,24 @@ export default function Page() {
                   {plan.button} →
                 </a>
                 <div className="my-6 h-px bg-white/10" />
-                <ul className="space-y-3">
+                <ul className="mt-auto space-y-3">
                   {plan.features.map((f) => (
                     <Check key={f}>{f}</Check>
                   ))}
                 </ul>
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-8 grid gap-4 md:grid-cols-3">
+            {[
+              ["DIY add-ons", "Drinks Pack $99 + GST. Header Pack $99 + GST."],
+              ["Managed includes more", "Store banners, drinks, Uber upload support and priority turnaround are included."],
+              ["Large menus", "Contact us for bulk or custom pricing."],
+            ].map(([title, text]) => (
+              <div key={title} className="h-full rounded-[28px] border border-white/10 bg-white/[0.045] p-6">
+                <h3 className="text-lg font-black uppercase tracking-[-0.02em]">{title}</h3>
+                <p className="mt-2 text-sm leading-6 text-white/55">{text}</p>
               </div>
             ))}
           </div>
@@ -885,18 +879,31 @@ export default function Page() {
             Start with 3 free watermarked images and see the difference before you commit.
           </p>
           <div className="relative mt-7 flex flex-col justify-center gap-3 sm:flex-row">
-            <OrangeButton href="#sample">Free Sample</OrangeButton>
+            <OrangeButton href="#sample">Get Free Sample</OrangeButton>
             <GhostButton href="#pricing">View Packages</GhostButton>
           </div>
         </div>
       </section>
 
-      <footer className="border-t border-white/10 bg-[#050505] px-5 py-8 sm:px-8 lg:px-10">
-        <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-5 text-sm text-white/45 sm:flex-row">
-          <Logo className="scale-[0.72] origin-left" />
-          <div>Delivery Ignite — premium restaurant visual upgrades. All prices exclude GST unless stated otherwise.</div>
-        </div>
-      </footer>
+      
+<footer className="border-t border-white/10 bg-black px-5 py-10 sm:px-8 lg:px-10">
+  <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-5 text-center sm:flex-row sm:text-left">
+    <div>
+      <div className="text-lg font-black uppercase tracking-[-0.04em] text-white">
+        Delivery Ignite
+      </div>
+      <div className="mt-1 text-sm text-white/42">
+        Premium restaurant visual upgrades built for delivery apps.
+      </div>
+    </div>
+
+    <div className="text-xs leading-6 text-white/38">
+      Melbourne, Australia<br />
+      All prices exclude GST unless stated otherwise.
+    </div>
+  </div>
+</footer>
+
     </main>
   );
 }
