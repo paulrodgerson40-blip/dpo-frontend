@@ -59,6 +59,8 @@ const pricing = [
       "Ready-to-upload image files",
       "Use anywhere, no restrictions",
       "You upload the finished images",
+      "Optional drinks pack +$99",
+      "Optional banner pack +$99",
     ],
   },
   {
@@ -72,6 +74,8 @@ const pricing = [
       "Ready-to-upload image files",
       "Larger menu coverage",
       "You upload the finished images",
+      "Optional drinks pack +$99",
+      "Optional banner pack +$99",
     ],
   },
   {
@@ -344,6 +348,11 @@ const faqs = [
     question: "What do I receive?",
     answer:
       "Depending on your package, you receive upgraded food images, ready-to-upload files, store banners, drink handling and before-and-after preview examples.",
+  },
+  {
+    question: "What if I have a large menu?",
+    answer:
+      "For larger menus, multi-location stores or custom requirements, contact us for bulk or custom pricing.",
   },
   {
     question: "Do you guarantee more orders?",
@@ -832,24 +841,11 @@ export default function Page() {
                   {plan.button} →
                 </a>
                 <div className="my-6 h-px bg-white/10" />
-                <ul className="mt-auto space-y-3">
+                <ul className="space-y-3">
                   {plan.features.map((f) => (
                     <Check key={f}>{f}</Check>
                   ))}
                 </ul>
-              </div>
-            ))}
-          </div>
-
-          <div className="mt-8 grid gap-4 md:grid-cols-3">
-            {[
-              ["DIY add-ons", "Drinks Pack $99 + GST. Header Pack $99 + GST."],
-              ["Managed includes more", "Store banners, drinks, Uber upload support and priority turnaround are included."],
-              ["Large menus", "Contact us for bulk or custom pricing."],
-            ].map(([title, text]) => (
-              <div key={title} className="h-full rounded-[28px] border border-white/10 bg-white/[0.045] p-6">
-                <h3 className="text-lg font-black uppercase tracking-[-0.02em]">{title}</h3>
-                <p className="mt-2 text-sm leading-6 text-white/55">{text}</p>
               </div>
             ))}
           </div>
