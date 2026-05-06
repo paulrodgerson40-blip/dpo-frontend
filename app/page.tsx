@@ -516,80 +516,79 @@ export default function Page() {
         </div>
       </section>
 
-      <section id="data" className="relative border-b border-white/10 bg-[#050505] px-5 py-20 sm:px-8 lg:px-10">
-        <div className="absolute left-[-260px] top-[-80px] h-[620px] w-[620px] rounded-full bg-orange-500/10 blur-3xl" />
-        <div className="absolute right-[-260px] bottom-[-120px] h-[520px] w-[520px] rounded-full bg-orange-500/8 blur-3xl" />
+      <section id="data" className="relative overflow-hidden border-b border-white/10 bg-[#050505] px-5 py-20 sm:px-8 lg:px-10">
+        <div className="absolute left-[-260px] top-[-120px] h-[620px] w-[620px] rounded-full bg-orange-500/10 blur-3xl" />
+        <div className="absolute right-[-260px] bottom-[-180px] h-[620px] w-[620px] rounded-full bg-orange-500/10 blur-3xl" />
 
-        <div className="mx-auto max-w-7xl">
-          <div className="grid gap-12 lg:grid-cols-[0.82fr_1.18fr] lg:items-start">
-            <div>
-              <SectionEyebrow>Why images sell</SectionEyebrow>
-              <h2 className="mt-5 max-w-[640px] text-5xl font-black uppercase leading-[0.86] tracking-[-0.075em] sm:text-6xl lg:text-7xl">
-                Your photos decide the first click.
-                <span className="block text-[#ff7a00]">Then your food does the rest.</span>
-              </h2>
-              <p className="mt-6 max-w-xl text-lg leading-8 text-white/62">
-                On delivery apps, customers cannot smell, taste or touch the food. The image becomes the first product signal: is it fresh, safe, generous, premium and worth ordering?
-              </p>
-
-              <div className="mt-8 rounded-[30px] border border-orange-500/24 bg-orange-500/[0.07] p-6 shadow-[0_0_55px_rgba(255,107,0,0.12)]">
-                <div className="text-xs font-black uppercase tracking-[0.14em] text-orange-200">Owner takeaway</div>
-                <p className="mt-3 text-[26px] font-black uppercase leading-[0.94] tracking-[-0.045em] text-white">
-                  Better photos do not just make food look nicer. They make the restaurant feel safer, cleaner, more professional and more valuable.
-                </p>
-              </div>
-            </div>
-
-            <div className="grid gap-5 sm:grid-cols-2">
-              {[
-                ["First-click signal", "Before price or description, the image is often the fastest way a customer judges whether the item is worth opening."],
-                ["Platform standards", "Uber Eats and DoorDash both push merchants toward clear, well-lit, accurate menu photos."],
-                ["Perceived quality", "Better food photography improves perceived freshness, value and trust before the customer orders."],
-                ["Scroll competition", "Restaurants are compared side-by-side in fast-moving feeds. Stronger photos help stop the scroll."],
-              ].map(([title, text]) => (
-                <div
-                  key={title}
-                  className="rounded-[30px] border border-white/10 bg-white/[0.055] p-6 shadow-[0_22px_80px_rgba(0,0,0,0.35)]"
-                >
-                  <div className="text-2xl font-black uppercase leading-[0.95] tracking-[-0.045em] text-[#ff7a00]">
-                    {title}
-                  </div>
-                  <p className="mt-4 text-sm leading-7 text-white/60">{text}</p>
-                </div>
-              ))}
-            </div>
+        <div className="relative mx-auto max-w-7xl">
+          <div className="mx-auto max-w-4xl text-center">
+            <SectionEyebrow>Why images sell</SectionEyebrow>
+            <h2 className="mt-5 text-5xl font-black uppercase leading-[0.86] tracking-[-0.075em] sm:text-6xl lg:text-7xl">
+              Your photos decide
+              <span className="block">the first click.</span>
+              <span className="block text-[#ff7a00]">Then your food does the rest.</span>
+            </h2>
+            <p className="mx-auto mt-6 max-w-2xl text-lg leading-8 text-white/62">
+              On delivery apps, customers cannot smell, taste or touch the food. Your image becomes the first signal of freshness, trust, value and whether the meal is worth ordering.
+            </p>
           </div>
 
-          <div className="mt-10 grid gap-6 lg:grid-cols-[0.95fr_1.05fr] lg:items-stretch">
-            <div className="rounded-[32px] border border-orange-500/22 bg-gradient-to-br from-orange-500/[0.12] to-white/[0.035] p-7 shadow-[0_0_60px_rgba(255,107,0,0.10)]">
+          <div className="mt-12 grid gap-5 lg:grid-cols-3">
+            {[
+              ["First-click signal", "Before price, description or add-ons, the photo is often the fastest way a customer decides whether to open the item."],
+              ["Perceived quality", "Cleaner lighting, stronger texture and consistent presentation make the restaurant feel more professional and trustworthy."],
+              ["Scroll competition", "Customers compare restaurants side-by-side in fast-moving feeds. Better photos help stop the scroll."],
+            ].map(([title, text]) => (
+              <div
+                key={title}
+                className="rounded-[34px] border border-white/10 bg-white/[0.055] p-7 shadow-[0_22px_80px_rgba(0,0,0,0.35)]"
+              >
+                <div className="text-2xl font-black uppercase leading-[0.95] tracking-[-0.045em] text-[#ff7a00]">
+                  {title}
+                </div>
+                <p className="mt-4 text-sm leading-7 text-white/62">{text}</p>
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-8 grid gap-5 lg:grid-cols-[0.95fr_1.05fr]">
+            <div className="rounded-[34px] border border-orange-500/24 bg-gradient-to-br from-orange-500/[0.12] to-white/[0.035] p-7 shadow-[0_0_60px_rgba(255,107,0,0.10)]">
+              <div className="text-xs font-black uppercase tracking-[0.14em] text-orange-200">Owner takeaway</div>
+              <p className="mt-4 text-3xl font-black uppercase leading-[0.94] tracking-[-0.055em] text-white sm:text-4xl">
+                Better photos do not just make food look nicer.
+                <span className="block text-[#ff7a00]">They make the restaurant feel safer, cleaner and more valuable.</span>
+              </p>
+            </div>
+
+            <div className="rounded-[34px] border border-orange-500/24 bg-gradient-to-br from-white/[0.055] to-orange-500/[0.09] p-7 shadow-[0_0_60px_rgba(255,107,0,0.10)]">
               <div className="text-xs font-black uppercase tracking-[0.14em] text-orange-200">Delivery app reality</div>
-              <p className="mt-3 text-3xl font-black uppercase leading-[0.92] tracking-[-0.055em] text-white sm:text-4xl">
+              <p className="mt-4 text-3xl font-black uppercase leading-[0.94] tracking-[-0.055em] text-white sm:text-4xl">
                 Your food is not only competing against similar food.
                 <span className="block text-[#ff7a00]">It is competing against better-looking photos.</span>
               </p>
             </div>
+          </div>
 
-            <div className="grid gap-4 sm:grid-cols-3">
-              {[
-                ["3 sec", "Customers judge fast."],
-                ["6 signals", "Lighting, clarity, texture, portion, freshness and trust."],
-                ["1 chance", "The first image decides whether they keep scrolling."],
-              ].map(([stat, text]) => (
-                <div
-                  key={stat}
-                  className="rounded-[26px] border border-white/10 bg-white/[0.045] p-5 shadow-[0_18px_60px_rgba(0,0,0,0.30)]"
-                >
-                  <div className="text-4xl font-black uppercase tracking-[-0.06em] text-[#ff7a00]">{stat}</div>
-                  <p className="mt-3 text-sm leading-6 text-white/58">{text}</p>
-                </div>
-              ))}
-            </div>
+          <div className="mt-8 grid gap-4 sm:grid-cols-3">
+            {[
+              ["3 sec", "Customers judge fast."],
+              ["6 signals", "Lighting, clarity, texture, portion, freshness and trust."],
+              ["1 chance", "The first image decides whether they keep scrolling."],
+            ].map(([stat, text]) => (
+              <div
+                key={stat}
+                className="rounded-[26px] border border-white/10 bg-white/[0.045] p-5 text-center shadow-[0_18px_60px_rgba(0,0,0,0.30)]"
+              >
+                <div className="text-4xl font-black uppercase tracking-[-0.06em] text-[#ff7a00]">{stat}</div>
+                <p className="mx-auto mt-3 max-w-[220px] text-sm leading-6 text-white/58">{text}</p>
+              </div>
+            ))}
           </div>
 
           <div className="mt-6 rounded-[26px] border border-white/10 bg-white/[0.035] px-5 py-4 text-[10px] leading-5 text-white/38 sm:text-xs">
             <p>
               <span className="font-black uppercase tracking-[0.10em] text-white/58">Evidence note: </span>
-              Based on publicly available Uber Eats merchant photo guidance, DoorDash merchant photo requirements, and hospitality/consumer-behaviour research connecting food photo style with perceived quality, trust and purchase intention. No sales uplift is guaranteed; the claim is that better visual presentation improves the customer decision environment.
+              Based on publicly available Uber Eats merchant photo guidance, DoorDash merchant photo requirements, and hospitality/consumer-behaviour research connecting food photo style with perceived quality, trust and purchase intention. No sales uplift is guaranteed; better visual presentation improves the customer decision environment.
             </p>
           </div>
         </div>
