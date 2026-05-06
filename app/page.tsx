@@ -125,7 +125,7 @@ function LocalImage({
 
 function Logo({ className = "" }: { className?: string }) {
   return (
-    <div className={`relative h-12 w-[205px] sm:h-14 sm:w-[245px] ${className}`}>
+    <div className={`relative h-20 w-[320px] sm:h-24 sm:w-[420px] ${className}`}>
       <Image
         src={ASSETS.logo}
         alt="Delivery Ignite"
@@ -283,7 +283,7 @@ export default function Page() {
 
       <header className="sticky top-0 z-50 border-b border-white/10 bg-black/76 backdrop-blur-2xl">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-3 sm:px-8 lg:px-10">
-          <Logo />
+          <Logo className="scale-125 origin-left" />
           <nav className="hidden items-center gap-8 text-xs font-black uppercase tracking-[0.13em] text-white/55 md:flex">
             <a href="#proof" className="transition hover:text-[#ff7a00]">Proof</a>
             <a href="#menu" className="transition hover:text-[#ff7a00]">Menu Upgrade</a>
