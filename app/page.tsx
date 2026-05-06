@@ -131,7 +131,7 @@ function Logo({ className = "" }: { className?: string }) {
         alt="Delivery Ignite"
         fill
         priority
-        sizes="260px"
+        sizes="520px"
         className="object-contain object-left"
       />
     </div>
@@ -230,13 +230,13 @@ function BeforeAfterCard({
     <div className="mx-3 w-[450px] shrink-0 rounded-[32px] border border-white/10 bg-white/[0.055] p-4 shadow-[0_24px_80px_rgba(0,0,0,0.38)] backdrop-blur">
       <div className="grid gap-3 sm:grid-cols-2">
         <div className="relative h-56 overflow-hidden rounded-2xl bg-black">
-          <LocalImage src={before} alt={`${title} before`} className="saturate-[0.84] contrast-[0.92]" sizes="240px" />
+          <LocalImage src={before} alt={`${title} before`} className="object-contain saturate-[0.84] contrast-[0.92]" sizes="240px" />
           <span className="absolute left-3 top-3 rounded-full bg-black/75 px-3 py-1 text-xs font-black">
             BEFORE
           </span>
         </div>
         <div className="relative h-56 overflow-hidden rounded-2xl bg-black shadow-[0_0_32px_rgba(255,107,0,0.22)]">
-          <LocalImage src={after} alt={`${title} after`} sizes="240px" />
+          <LocalImage src={after} alt={`${title} after`} className="object-contain" sizes="240px" />
           <span className="absolute right-3 top-3 rounded-full bg-gradient-to-r from-[#ff5a00] to-[#ff9d20] px-3 py-1 text-xs font-black">
             AFTER
           </span>
@@ -282,9 +282,9 @@ export default function Page() {
       `}</style>
 
       <header className="sticky top-0 z-50 border-b border-white/10 bg-black/76 backdrop-blur-2xl">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-3 sm:px-8 lg:px-10">
-          <Logo className="scale-[2.2] origin-left" />
-          <nav className="hidden items-center gap-8 text-xs font-black uppercase tracking-[0.13em] text-white/55 md:flex">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-5 sm:px-8 lg:px-10">
+          <Logo className="scale-[1.55] origin-left" />
+          <nav className="hidden items-center gap-7 text-xs font-black uppercase tracking-[0.13em] text-white/55 md:flex">
             <a href="#proof" className="transition hover:text-[#ff7a00]">Proof</a>
             <a href="#menu" className="transition hover:text-[#ff7a00]">Menu Upgrade</a>
             <a href="#data" className="transition hover:text-[#ff7a00]">Why it works</a>
@@ -307,7 +307,7 @@ export default function Page() {
             src={ASSETS.hero}
             alt="Premium burger hero image"
             priority
-            className="scale-[1.02] object-[62%_50%]"
+            className="scale-[0.96] object-[72%_50%]"
           />
           <div className="absolute inset-0 bg-gradient-to-r from-[#050505] via-[#050505]/52 to-transparent" />
           <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-transparent to-black/30" />
@@ -413,7 +413,7 @@ export default function Page() {
                   Before
                 </div>
                 <div className="relative h-[760px]">
-                  <LocalImage src={ASSETS.beforeMenu} alt="Before menu" className="object-top" sizes="650px" />
+                  <LocalImage src={ASSETS.beforeMenu} alt="Before menu" className="object-contain object-top" sizes="650px" />
                 </div>
               </div>
 
@@ -422,7 +422,7 @@ export default function Page() {
                   After
                 </div>
                 <div className="relative h-[760px]">
-                  <LocalImage src={ASSETS.afterMenu} alt="After menu" className="object-top" sizes="650px" />
+                  <LocalImage src={ASSETS.afterMenu} alt="After menu" className="object-contain object-top" sizes="650px" />
                 </div>
               </div>
             </div>
@@ -445,11 +445,11 @@ export default function Page() {
 
           <div className="grid gap-5">
             <div className="relative h-56 overflow-hidden rounded-[32px] border border-white/10 bg-black">
-              <LocalImage src={ASSETS.beforeBanner} alt="Before banner" />
+              <LocalImage src={ASSETS.beforeBanner} alt="Before banner" className="object-contain" />
               <span className="absolute left-5 top-5 rounded-full bg-black/75 px-4 py-2 text-xs font-black uppercase tracking-[0.08em]">Before</span>
             </div>
             <div className="relative h-56 overflow-hidden rounded-[32px] border border-orange-500/35 bg-black shadow-[0_0_70px_rgba(255,107,0,0.20)]">
-              <LocalImage src={ASSETS.afterBanner} alt="After banner" />
+              <LocalImage src={ASSETS.afterBanner} alt="After banner" className="object-contain" />
               <span className="absolute right-5 top-5 rounded-full bg-gradient-to-r from-[#ff5a00] to-[#ff9d20] px-4 py-2 text-xs font-black uppercase tracking-[0.08em]">After</span>
             </div>
           </div>
@@ -485,8 +485,8 @@ export default function Page() {
           <div>
             <SectionEyebrow>Why images sell</SectionEyebrow>
             <h2 className="mt-5 text-5xl font-black uppercase leading-[0.86] tracking-[-0.075em] sm:text-7xl">
-              Food photos are not decoration.
-              <span className="block text-[#ff7a00]">They are sales assets.</span>
+              Your photos decide the first click.
+              <span className="block text-[#ff7a00]">Then your food does the rest.</span>
             </h2>
             <p className="mt-6 max-w-xl text-lg leading-8 text-white/62">
               Delivery customers judge fast. Better images improve clarity, trust, appetite appeal and perceived quality before the customer even opens the item description.
@@ -582,7 +582,7 @@ export default function Page() {
               </h2>
             </div>
             <p className="max-w-md text-white/55">
-              Placeholder testimonials for layout only. Replace with real restaurant feedback once the first paid jobs are completed.
+              Temporary testimonials for layout. Replace with real restaurant names and feedback as completed jobs come in.
             </p>
           </div>
         </div>
