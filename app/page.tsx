@@ -122,11 +122,11 @@ export default function PremiumPricingPage() {
               </div>
               <div className="rounded-3xl border border-black/10 bg-white p-5 shadow-sm">
                 <div className="text-3xl font-black tracking-tight">$499</div>
-                <div className="mt-1 text-xs font-medium text-neutral-500">DIY from</div>
+                <div className="mt-1 text-xs font-medium text-neutral-500">DIY from + GST</div>
               </div>
               <div className="rounded-3xl border border-black/10 bg-white p-5 shadow-sm">
                 <div className="text-3xl font-black tracking-tight">$899</div>
-                <div className="mt-1 text-xs font-medium text-neutral-500">Managed from</div>
+                <div className="mt-1 text-xs font-medium text-neutral-500">Managed from + GST</div>
               </div>
             </div>
           </div>
@@ -375,6 +375,7 @@ export default function PremiumPricingPage() {
           <p className="mt-4 text-base leading-7 text-neutral-600">
             No confusing switch. Choose files only, or let us handle the Uber image upload for you.
           </p>
+          <p className="mt-3 text-sm font-bold text-neutral-500">All prices exclude GST unless stated otherwise.</p>
         </div>
 
         <div className="mt-10 grid gap-5 lg:grid-cols-4">
@@ -383,7 +384,7 @@ export default function PremiumPricingPage() {
             <p className="mt-3 min-h-[48px] text-sm leading-6 text-neutral-600">
               We enhance your images and deliver upload-ready files.
             </p>
-            <div className="mt-6 text-4xl font-black tracking-tight">$499</div>
+            <div className="mt-6 text-4xl font-black tracking-tight">$499 <span className="text-base font-black text-neutral-500">+ GST</span></div>
             <div className="mt-2 text-sm font-semibold text-neutral-500">Up to 20 images</div>
             <button className="mt-6 rounded-full border border-black/10 bg-white px-6 py-3 text-sm font-black">Start DIY →</button>
             <div className="my-6 h-px bg-neutral-100" />
@@ -401,7 +402,7 @@ export default function PremiumPricingPage() {
             <p className="mt-3 min-h-[48px] text-sm leading-6 text-neutral-600">
               For restaurants upgrading most of their menu visuals.
             </p>
-            <div className="mt-6 text-4xl font-black tracking-tight">$799</div>
+            <div className="mt-6 text-4xl font-black tracking-tight">$799 <span className="text-base font-black text-neutral-500">+ GST</span></div>
             <div className="mt-2 text-sm font-semibold text-neutral-500">Up to 50 images</div>
             <button className="mt-6 rounded-full bg-black px-6 py-3 text-sm font-black text-white">Choose Standard DIY →</button>
             <div className="my-6 h-px bg-neutral-100" />
@@ -418,7 +419,7 @@ export default function PremiumPricingPage() {
             <p className="mt-3 min-h-[48px] text-sm leading-6 text-neutral-600">
               We enhance your visuals and update your Uber Eats images.
             </p>
-            <div className="mt-6 text-4xl font-black tracking-tight">$899</div>
+            <div className="mt-6 text-4xl font-black tracking-tight">$899 <span className="text-base font-black text-neutral-500">+ GST</span></div>
             <div className="mt-2 text-sm font-semibold text-neutral-500">Up to 20 items</div>
             <button className="mt-6 rounded-full border border-black/10 bg-white px-6 py-3 text-sm font-black">Choose Managed →</button>
             <div className="my-6 h-px bg-neutral-100" />
@@ -437,7 +438,7 @@ export default function PremiumPricingPage() {
             <p className="mt-3 min-h-[48px] text-sm leading-6 text-white/65">
               The full done-for-you visual upgrade for serious restaurants.
             </p>
-            <div className="mt-6 text-4xl font-black tracking-tight">$1,299</div>
+            <div className="mt-6 text-4xl font-black tracking-tight">$1,299 <span className="text-base font-black text-white/55">+ GST</span></div>
             <div className="mt-2 text-sm font-semibold text-white/60">Up to 50 items</div>
             <button className="mt-6 rounded-full bg-[#06C167] px-6 py-3 text-sm font-black text-black">Choose Standard Managed →</button>
             <div className="my-6 h-px bg-white/10" />
@@ -451,10 +452,14 @@ export default function PremiumPricingPage() {
           </div>
         </div>
 
+        <div className="mt-6 rounded-3xl border border-black/10 bg-white p-5 text-center text-sm font-bold text-neutral-600 shadow-sm">
+          All advertised package prices are shown excluding GST. GST is added at checkout/invoice where applicable.
+        </div>
+
         <div className="mt-6 grid gap-4 md:grid-cols-3">
           <div className="rounded-[24px] border border-neutral-200 bg-white p-5 shadow-sm">
             <h3 className="font-black">DIY add-ons</h3>
-            <p className="mt-2 text-sm leading-6 text-neutral-600">Drinks Pack $99. Header Pack $99.</p>
+            <p className="mt-2 text-sm leading-6 text-neutral-600">Drinks Pack $99 + GST. Header Pack $99 + GST.</p>
           </div>
           <div className="rounded-[24px] border border-neutral-200 bg-white p-5 shadow-sm">
             <h3 className="font-black">Managed includes more</h3>
@@ -520,6 +525,7 @@ export default function PremiumPricingPage() {
             <p className="mt-4 text-neutral-600">Keep your menu current as you add new dishes. Managed clients receive priority updates.</p>
             <div className="mt-6 flex items-end gap-2">
               <span className="text-5xl font-black tracking-tight">$149</span>
+              <span className="pb-2 text-sm font-black text-neutral-500">+ GST</span>
               <span className="pb-2 text-neutral-500">/ month</span>
             </div>
             <p className="mt-2 font-bold text-[#06C167]">Cheaper than one-off updates</p>
@@ -546,11 +552,11 @@ export default function PremiumPricingPage() {
                   <p className="text-sm leading-6 text-neutral-600">You upload the completed files yourself.</p>
                   <div className="mt-5 grid gap-3">
                     <div className="rounded-3xl bg-white p-5 shadow-sm">
-                      <div className="text-4xl font-black">$99</div>
+                      <div className="text-4xl font-black">$99 <span className="text-sm font-black text-neutral-500">+ GST</span></div>
                       <div className="mt-1 text-sm font-semibold text-neutral-500">Up to 10 items</div>
                     </div>
                     <div className="rounded-3xl bg-white p-5 shadow-sm">
-                      <div className="text-4xl font-black">$179</div>
+                      <div className="text-4xl font-black">$179 <span className="text-sm font-black text-neutral-500">+ GST</span></div>
                       <div className="mt-1 text-sm font-semibold text-neutral-500">Up to 20 items</div>
                     </div>
                   </div>
@@ -562,11 +568,11 @@ export default function PremiumPricingPage() {
                   <p className="text-sm leading-6 text-white/65">We enhance and update the remaining Uber Eats images for you.</p>
                   <div className="mt-5 grid gap-3">
                     <div className="rounded-3xl bg-white/[0.08] p-5">
-                      <div className="text-4xl font-black">$199</div>
+                      <div className="text-4xl font-black">$199 <span className="text-sm font-black text-white/55">+ GST</span></div>
                       <div className="mt-1 text-sm font-semibold text-white/60">Up to 10 items</div>
                     </div>
                     <div className="rounded-3xl bg-white/[0.08] p-5">
-                      <div className="text-4xl font-black">$349</div>
+                      <div className="text-4xl font-black">$349 <span className="text-sm font-black text-white/55">+ GST</span></div>
                       <div className="mt-1 text-sm font-semibold text-white/60">Up to 20 items</div>
                     </div>
                   </div>
@@ -636,7 +642,7 @@ export default function PremiumPricingPage() {
       <footer className="border-t border-black/5 px-5 py-8 sm:px-8 lg:px-10">
         <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 text-sm text-neutral-500 sm:flex-row">
           <BrandLockup />
-          <div>Delivery Ignite — premium restaurant visual upgrades.</div>
+          <div>Delivery Ignite — premium restaurant visual upgrades. All prices exclude GST unless stated otherwise.</div>
         </div>
       </footer>
     </main>
