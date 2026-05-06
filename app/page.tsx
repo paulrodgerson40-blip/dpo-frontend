@@ -250,7 +250,7 @@ function EvidenceCard({
           ↗
         </div>
       </div>
-    </a>
+    </div>
   );
 }
 
