@@ -191,20 +191,6 @@ function Pill({ children }: { children: React.ReactNode }) {
   );
 }
 
-function HeroProof({ icon, title, sub }: { icon: string; title: string; sub: string }) {
-  return (
-    <div className="group text-center">
-      <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-[22px] border border-cyan-300/38 bg-cyan-400/8 text-3xl shadow-[0_0_35px_rgba(34,211,238,0.20)] transition group-hover:border-cyan-300 group-hover:bg-cyan-400/14 group-hover:shadow-[0_0_52px_rgba(34,211,238,0.24)]">
-        {icon}
-      </div>
-      <div className="mt-3 text-[12px] font-black uppercase leading-tight tracking-[0.05em] text-white">
-        {title}
-      </div>
-      <div className="mt-1 text-[11px] leading-4 text-white/45">{sub}</div>
-    </div>
-  );
-}
-
 function Check({ children }: { children: React.ReactNode }) {
   return (
     <li className="flex items-start gap-3 text-sm leading-6 text-white/72">
@@ -411,21 +397,6 @@ export default function Page() {
               <OrangeButton href="#sample">Get Free Sample</OrangeButton>
               <GhostButton href="#proof">See Transformations</GhostButton>
             </div>
-
-            <div className="mt-10 grid max-w-3xl grid-cols-2 gap-5 sm:grid-cols-4">
-              <HeroProof icon="📸" title="No Photoshoot" sub="Use existing images" />
-              <HeroProof icon="⚡" title="Fast Turnaround" sub="Preview first" />
-              <HeroProof icon="📈" title="More Clicks" sub="Better first impression" />
-              <HeroProof icon="🏆" title="Looks Established" sub="Cleaner online store" />
-            </div>
-          </div>
-
-          <div className="absolute bottom-14 right-6 hidden max-w-[230px] rounded-full border border-cyan-300/45 bg-black/78 p-5 text-center shadow-[0_0_48px_rgba(34,211,238,0.22)] backdrop-blur-xl lg:block">
-            <div className="text-lg font-black uppercase leading-tight text-white">
-              Same Food
-              <span className="block text-white/70">Better Photos</span>
-              <span className="block text-[#ff7a00]">More Orders</span>
-            </div>
           </div>
         </div>
       </section>
@@ -452,10 +423,6 @@ export default function Page() {
           <div className="relative h-[420px] overflow-hidden rounded-[42px] border border-white/12 bg-black shadow-[0_35px_130px_rgba(0,0,0,0.60),0_0_80px_rgba(34,211,238,0.12)]">
             <LocalImage src={ASSETS.spread} alt="Premium multi-cuisine food spread" className="scale-105" />
             <div className="absolute inset-0 bg-gradient-to-r from-black/55 via-transparent to-transparent" />
-            <div className="absolute bottom-6 left-6 rounded-2xl border border-cyan-300/28 bg-black/70 px-5 py-4 backdrop-blur">
-              <div className="text-xs font-black uppercase tracking-[0.12em] text-cyan-100">Multi-cuisine ready</div>
-              <div className="mt-1 text-2xl font-black uppercase tracking-[-0.04em]">Burger · Pizza · Sushi · Dessert</div>
-            </div>
           </div>
         </div>
       </section>
