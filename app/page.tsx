@@ -282,9 +282,9 @@ export default function Page() {
       `}</style>
 
       <header className="sticky top-0 z-50 border-b border-white/10 bg-black/76 backdrop-blur-2xl">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-5 sm:px-8 lg:px-10">
-          <Logo className="scale-[1.55] origin-left" />
-          <nav className="hidden items-center gap-7 text-xs font-black uppercase tracking-[0.13em] text-white/55 md:flex">
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-8 px-5 py-6 sm:px-8 lg:px-10">
+          <Logo className="scale-[2.15] origin-left" />
+          <nav className="hidden items-center gap-7 text-[11px] font-black uppercase tracking-[0.14em] text-white/55 md:flex">
             <a href="#proof" className="transition hover:text-[#ff7a00]">Proof</a>
             <a href="#menu" className="transition hover:text-[#ff7a00]">Menu Upgrade</a>
             <a href="#data" className="transition hover:text-[#ff7a00]">Why it works</a>
@@ -292,14 +292,14 @@ export default function Page() {
           </nav>
           <a
             href="#sample"
-            className="rounded-full border border-orange-500/45 bg-orange-500/15 px-5 py-3 text-xs font-black uppercase tracking-[0.08em] text-white shadow-[0_0_28px_rgba(255,107,0,0.24)] transition hover:bg-orange-500"
+            className="rounded-full border border-orange-500/45 bg-orange-500/15 px-5 py-3 text-[11px] font-black uppercase tracking-[0.08em] text-white shadow-[0_0_28px_rgba(255,107,0,0.24)] transition hover:bg-orange-500"
           >
             Get Free Sample →
           </a>
         </div>
       </header>
 
-      <section className="relative min-h-[880px] overflow-hidden border-b border-white/10">
+      <section className="relative min-h-[830px] overflow-hidden border-b border-white/10">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_73%_20%,rgba(255,107,0,0.43),transparent_30%),radial-gradient(circle_at_44%_78%,rgba(255,107,0,0.10),transparent_34%),linear-gradient(90deg,#050505_0%,#050505_35%,rgba(5,5,5,.80)_55%,rgba(5,5,5,.25)_100%)]" />
 
         <div className="absolute inset-y-0 right-0 w-full lg:w-[66%]">
@@ -307,7 +307,7 @@ export default function Page() {
             src={ASSETS.hero}
             alt="Premium burger hero image"
             priority
-            className="scale-[0.96] object-[72%_50%]"
+            className="scale-[0.92] object-[78%_50%]"
           />
           <div className="absolute inset-0 bg-gradient-to-r from-[#050505] via-[#050505]/52 to-transparent" />
           <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-transparent to-black/30" />
@@ -320,7 +320,7 @@ export default function Page() {
           <div className="max-w-[720px]">
             <SectionEyebrow>Free 3 image preview available</SectionEyebrow>
 
-            <h1 className="mt-8 text-[64px] font-black uppercase leading-[0.78] tracking-[-0.085em] sm:text-[92px] lg:text-[118px]">
+            <h1 className="mt-7 text-[64px] font-black uppercase leading-[0.78] tracking-[-0.085em] sm:text-[92px] lg:text-[118px]">
               Premium
               <span className="block">Images.</span>
               <span className="block bg-gradient-to-r from-[#ff5a00] via-[#ff7600] to-[#ffb24a] bg-clip-text text-transparent drop-shadow-[0_0_34px_rgba(255,107,0,0.22)]">
@@ -412,7 +412,7 @@ export default function Page() {
                 <div className="absolute left-4 top-4 z-10 rounded-full bg-black/75 px-4 py-2 text-xs font-black uppercase tracking-[0.08em] text-white">
                   Before
                 </div>
-                <div className="relative h-[760px]">
+                <div className="relative h-[700px]">
                   <LocalImage src={ASSETS.beforeMenu} alt="Before menu" className="object-contain object-top" sizes="650px" />
                 </div>
               </div>
@@ -421,7 +421,7 @@ export default function Page() {
                 <div className="absolute right-4 top-4 z-10 rounded-full bg-gradient-to-r from-[#ff5a00] to-[#ff9d20] px-4 py-2 text-xs font-black uppercase tracking-[0.08em] text-white">
                   After
                 </div>
-                <div className="relative h-[760px]">
+                <div className="relative h-[700px]">
                   <LocalImage src={ASSETS.afterMenu} alt="After menu" className="object-contain object-top" sizes="650px" />
                 </div>
               </div>
@@ -444,11 +444,11 @@ export default function Page() {
           </div>
 
           <div className="grid gap-5">
-            <div className="relative h-56 overflow-hidden rounded-[32px] border border-white/10 bg-black">
+            <div className="relative h-64 overflow-hidden rounded-[32px] border border-white/10 bg-black">
               <LocalImage src={ASSETS.beforeBanner} alt="Before banner" className="object-contain" />
               <span className="absolute left-5 top-5 rounded-full bg-black/75 px-4 py-2 text-xs font-black uppercase tracking-[0.08em]">Before</span>
             </div>
-            <div className="relative h-56 overflow-hidden rounded-[32px] border border-orange-500/35 bg-black shadow-[0_0_70px_rgba(255,107,0,0.20)]">
+            <div className="relative h-64 overflow-hidden rounded-[32px] border border-orange-500/35 bg-black shadow-[0_0_70px_rgba(255,107,0,0.20)]">
               <LocalImage src={ASSETS.afterBanner} alt="After banner" className="object-contain" />
               <span className="absolute right-5 top-5 rounded-full bg-gradient-to-r from-[#ff5a00] to-[#ff9d20] px-4 py-2 text-xs font-black uppercase tracking-[0.08em]">After</span>
             </div>
@@ -682,7 +682,7 @@ export default function Page() {
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(255,107,0,0.25),transparent_36%)]" />
         <div className="relative mx-auto max-w-4xl overflow-hidden rounded-[44px] border border-orange-500/28 bg-white/[0.055] p-9 shadow-[0_0_96px_rgba(255,107,0,0.18)] backdrop-blur-xl sm:p-14">
           <div className="relative flex justify-center">
-            <Logo className="scale-110" />
+            <Logo className="scale-[0.88]" />
           </div>
           <h2 className="relative mt-8 text-5xl font-black uppercase leading-[0.86] tracking-[-0.075em] sm:text-7xl">
             Ready to <span className="text-[#ff7a00]">ignite</span> your orders?
@@ -699,7 +699,7 @@ export default function Page() {
 
       <footer className="border-t border-white/10 bg-[#050505] px-5 py-8 sm:px-8 lg:px-10">
         <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-5 text-sm text-white/45 sm:flex-row">
-          <Logo />
+          <Logo className="scale-[0.72] origin-left" />
           <div>Delivery Ignite — premium restaurant visual upgrades. All prices exclude GST unless stated otherwise.</div>
         </div>
       </footer>
