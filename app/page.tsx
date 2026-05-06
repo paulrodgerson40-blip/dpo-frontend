@@ -59,23 +59,23 @@ const pricing = [
       "Ready-to-upload image files",
       "Use anywhere, no restrictions",
       "You upload the finished images",
-      "Optional drinks pack +$99",
-      "Optional banner pack +$99",
+      "Drinks pack +$99 + GST",
+      "Banner pack +$99 + GST",
     ],
   },
   {
     name: "Standard DIY",
     price: "$799",
     detail: "Up to 50 images",
-    button: "Choose Standard DIY",
+    button: "Choose DIY",
     badge: "Best DIY",
     features: [
       "Professional food image upgrade",
       "Ready-to-upload image files",
       "Larger menu coverage",
       "You upload the finished images",
-      "Optional drinks pack +$99",
-      "Optional banner pack +$99",
+      "Drinks pack +$99 + GST",
+      "Banner pack +$99 + GST",
     ],
   },
   {
@@ -95,7 +95,7 @@ const pricing = [
     name: "Standard Managed",
     price: "$1,299",
     detail: "Up to 50 items",
-    button: "Choose Standard Managed",
+    button: "Choose Managed",
     badge: "Most Popular",
     highlight: true,
     features: [
@@ -197,7 +197,7 @@ function Pill({ children }: { children: React.ReactNode }) {
 
 function Check({ children }: { children: React.ReactNode }) {
   return (
-    <li className="flex items-start gap-3 text-sm leading-6 text-white/72">
+    <li className="flex min-h-[28px] items-start gap-3 text-sm leading-6 text-white/72">
       <span className="mt-1 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-cyan-400/12 text-xs font-black text-cyan-200">
         ✓
       </span>
@@ -807,7 +807,7 @@ export default function Page() {
             {pricing.map((plan) => (
               <div
                 key={plan.name}
-                className={`relative flex h-full flex-col rounded-[34px] p-6 ${
+                className={`relative flex h-full min-h-[640px] flex-col rounded-[34px] p-6 ${
                   plan.highlight
                     ? "scale-[1.02] border border-cyan-300/55 bg-gradient-to-b from-cyan-400/[0.11] to-white/[0.045] shadow-[0_0_76px_rgba(34,211,238,0.20),0_0_32px_rgba(255,107,0,0.08)]"
                     : "border border-white/10 bg-white/[0.045]"
@@ -832,7 +832,7 @@ export default function Page() {
                 </div>
                 <a
                   href="#sample"
-                  className={`mt-5 flex min-h-[64px] w-full items-center justify-center rounded-full px-5 py-4 text-center text-sm font-black uppercase tracking-[0.04em] transition ${
+                  className={`mt-5 flex min-h-[64px] w-full items-center justify-center rounded-full px-5 py-4 text-center text-[13px] font-black uppercase tracking-[0.04em] transition sm:whitespace-nowrap ${
                     plan.highlight
                       ? "bg-gradient-to-r from-[#ff6b00] to-[#ff9a1f] text-white shadow-[0_0_35px_rgba(255,107,0,0.35)]"
                       : "border border-white/12 bg-white/[0.06] text-white hover:border-cyan-300/60"
