@@ -166,7 +166,7 @@ function OrangeButton({
       <span className="absolute inset-y-0 -left-1/2 w-1/2 skew-x-[-18deg] bg-white/20 opacity-0 transition duration-500 group-hover:left-[130%] group-hover:opacity-100" />
       <span className="relative">{children}</span>
       <span className="relative ml-2 transition group-hover:translate-x-1">→</span>
-    </div>
+    </a>
   );
 }
 
@@ -183,7 +183,7 @@ function GhostButton({
       className="inline-flex items-center justify-center rounded-full border border-white/16 bg-white/[0.07] px-7 py-4 text-sm font-black uppercase tracking-[0.05em] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.12)] backdrop-blur transition duration-300 hover:border-cyan-300/70 hover:bg-cyan-400/10"
     >
       {children}
-    </div>
+    </a>
   );
 }
 
