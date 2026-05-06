@@ -394,7 +394,7 @@ export default function Page() {
 
       <section id="menu" className="relative border-b border-white/10 bg-[#080808] px-5 py-20 sm:px-8 lg:px-10">
         <div className="absolute right-[-260px] top-10 h-[560px] w-[560px] rounded-full bg-orange-500/12 blur-3xl" />
-        <div className="mx-auto max-w-7xl">
+        <div className="mx-auto max-w-[1500px]">
           <div className="mx-auto max-w-3xl text-center">
             <SectionEyebrow>Full menu transformation</SectionEyebrow>
             <h2 className="mt-5 text-5xl font-black uppercase leading-[0.86] tracking-[-0.075em] sm:text-7xl">
@@ -406,23 +406,23 @@ export default function Page() {
             </p>
           </div>
 
-          <div className="mt-12 overflow-hidden rounded-[42px] border border-white/12 bg-white/[0.045] p-4 shadow-[0_35px_130px_rgba(0,0,0,0.64)]">
-            <div className="grid gap-4 lg:grid-cols-2">
-              <div className="relative overflow-hidden rounded-[30px] bg-white">
-                <div className="absolute left-4 top-4 z-10 rounded-full bg-black/75 px-4 py-2 text-xs font-black uppercase tracking-[0.08em] text-white">
+          <div className="mt-12 overflow-hidden rounded-[42px] border border-white/12 bg-white/[0.045] p-3 shadow-[0_35px_130px_rgba(0,0,0,0.64)] sm:p-4">
+            <div className="grid gap-4 xl:grid-cols-2">
+              <div className="relative overflow-hidden rounded-[30px] border border-white/10 bg-white shadow-[0_18px_70px_rgba(0,0,0,0.35)]">
+                <div className="absolute left-4 top-4 z-10 rounded-full bg-black/78 px-4 py-2 text-xs font-black uppercase tracking-[0.08em] text-white shadow-[0_10px_30px_rgba(0,0,0,0.35)]">
                   Before
                 </div>
-                <div className="relative h-[700px]">
-                  <LocalImage src={ASSETS.beforeMenu} alt="Before menu" className="object-contain object-top" sizes="650px" />
+                <div className="relative h-[620px] sm:h-[760px] lg:h-[900px] xl:h-[980px]">
+                  <LocalImage src={ASSETS.beforeMenu} alt="Before menu" className="object-contain object-top" sizes="(min-width: 1280px) 620px, 94vw" />
                 </div>
               </div>
 
-              <div className="relative overflow-hidden rounded-[30px] bg-white shadow-[0_0_60px_rgba(255,107,0,0.20)]">
-                <div className="absolute right-4 top-4 z-10 rounded-full bg-gradient-to-r from-[#ff5a00] to-[#ff9d20] px-4 py-2 text-xs font-black uppercase tracking-[0.08em] text-white">
+              <div className="relative overflow-hidden rounded-[30px] border border-orange-500/30 bg-white shadow-[0_0_70px_rgba(255,107,0,0.22),0_18px_70px_rgba(0,0,0,0.35)]">
+                <div className="absolute right-4 top-4 z-10 rounded-full bg-gradient-to-r from-[#ff5a00] to-[#ff9d20] px-4 py-2 text-xs font-black uppercase tracking-[0.08em] text-white shadow-[0_10px_30px_rgba(255,107,0,0.35)]">
                   After
                 </div>
-                <div className="relative h-[700px]">
-                  <LocalImage src={ASSETS.afterMenu} alt="After menu" className="object-contain object-top" sizes="650px" />
+                <div className="relative h-[620px] sm:h-[760px] lg:h-[900px] xl:h-[980px]">
+                  <LocalImage src={ASSETS.afterMenu} alt="After menu" className="object-contain object-top" sizes="(min-width: 1280px) 620px, 94vw" />
                 </div>
               </div>
             </div>
