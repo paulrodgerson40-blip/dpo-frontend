@@ -39,6 +39,7 @@ const transformations = [
     before: img("befored.png"),
     after: img("afterd.png"),
     note: "Same Pizza. Premium food photography.",  
+  },
   {
     title: "Parma Upgrade",
     before: img("beforee.png"),
