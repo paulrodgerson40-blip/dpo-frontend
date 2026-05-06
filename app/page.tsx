@@ -210,6 +210,49 @@ function SectionEyebrow({ children }: { children: React.ReactNode }) {
   );
 }
 
+
+function EvidenceCard({
+  number,
+  title,
+  text,
+  source,
+  href,
+}: {
+  number: string;
+  title: string;
+  text: string;
+  source: string;
+  href: string;
+}) {
+  return (
+    <div className="rounded-[30px] border border-white/10 bg-black/28 p-6 shadow-[0_22px_80px_rgba(0,0,0,0.34)] transition duration-300 hover:border-cyan-300/35 hover:bg-white/[0.055]">
+      <div className="flex items-start gap-4">
+        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-cyan-300/35 bg-cyan-400/8 text-lg font-black text-cyan-100 shadow-[0_0_24px_rgba(34,211,238,0.14)]">
+          {number}
+        </div>
+        <div>
+          <h3 className="text-xl font-black uppercase leading-[0.95] tracking-[-0.04em] text-white">
+            {title}
+          </h3>
+          <p className="mt-4 text-sm leading-7 text-white/62">{text}</p>
+        </div>
+      </div>
+      <div className="mt-6 h-px bg-white/10" />
+      <div className="mt-4 flex flex-col gap-2 text-sm sm:flex-row sm:items-center sm:justify-between">
+        <span className="font-black uppercase tracking-[0.10em] text-cyan-100">Source</span>
+        <a
+          href={href}
+          target="_blank"
+          rel="noreferrer"
+          className="font-bold text-white/72 underline-offset-4 transition hover:text-[#ff7a00] hover:underline"
+        >
+          {source}
+        </a>
+      </div>
+    </div>
+  );
+}
+
 function BeforeAfterCard({
   title,
   before,
@@ -559,25 +602,7 @@ export default function Page() {
             </p>
           </div>
 
-          <div className="mt-12 grid gap-5 lg:grid-cols-3">
-            {[
-              ["First impression", "Before customers compare every detail, the photo is usually what makes them stop and look."],
-              ["Looks more trustworthy", "Cleaner photos can make the whole restaurant feel more professional, organised and safe to order from."],
-              ["Stops the scroll", "Your food is competing beside hundreds of other photos. Better images give customers a reason to pause."],
-            ].map(([title, text]) => (
-              <div
-                key={title}
-                className="rounded-[34px] border border-white/10 bg-white/[0.055] p-7 shadow-[0_22px_80px_rgba(0,0,0,0.35)]"
-              >
-                <div className="text-2xl font-black uppercase leading-[0.95] tracking-[-0.045em] text-[#ff7a00]">
-                  {title}
-                </div>
-                <p className="mt-4 text-sm leading-7 text-white/62">{text}</p>
-              </div>
-            ))}
-          </div>
-
-          <div className="mt-8 grid gap-5 lg:grid-cols-[0.95fr_1.05fr]">
+          <div className="mt-12 grid gap-5 lg:grid-cols-[0.95fr_1.05fr]">
             <div className="rounded-[34px] border border-cyan-300/24 bg-gradient-to-br from-cyan-400/[0.10] to-white/[0.035] p-7 shadow-[0_0_60px_rgba(34,211,238,0.10)]">
               <div className="text-xs font-black uppercase tracking-[0.14em] text-cyan-100">Owner takeaway</div>
               <p className="mt-4 text-3xl font-black uppercase leading-[0.94] tracking-[-0.055em] text-white sm:text-4xl">
@@ -595,27 +620,49 @@ export default function Page() {
             </div>
           </div>
 
-          <div className="mt-8 grid gap-4 sm:grid-cols-3">
-            {[
-              ["Fast", "Customers decide quickly."],
-              ["Clear", "A cleaner menu feels easier to trust."],
-              ["Real", "Same food, better first impression."],
-            ].map(([stat, text]) => (
-              <div
-                key={stat}
-                className="rounded-[26px] border border-white/10 bg-white/[0.045] p-5 text-center shadow-[0_18px_60px_rgba(0,0,0,0.30)]"
-              >
-                <div className="text-4xl font-black uppercase tracking-[-0.06em] text-[#ff7a00]">{stat}</div>
-                <p className="mx-auto mt-3 max-w-[220px] text-sm leading-6 text-white/58">{text}</p>
+          <div className="mt-10 rounded-[40px] border border-cyan-300/24 bg-gradient-to-br from-cyan-400/[0.08] via-white/[0.035] to-black/20 p-6 shadow-[0_0_90px_rgba(34,211,238,0.12),0_30px_110px_rgba(0,0,0,0.45)] sm:p-8">
+            <div className="flex flex-col justify-between gap-5 lg:flex-row lg:items-end">
+              <div>
+                <div className="text-xs font-black uppercase tracking-[0.18em] text-cyan-100">
+                  Backed by real customer behaviour
+                </div>
+                <h3 className="mt-4 max-w-3xl text-4xl font-black uppercase leading-[0.88] tracking-[-0.065em] text-white sm:text-5xl">
+                  Why better photos make a real difference.
+                </h3>
               </div>
-            ))}
-          </div>
+              <p className="max-w-md text-sm leading-7 text-white/58">
+                Real research and platform guidance point to the same thing: customers judge quickly, visuals shape trust, and food photos need to look clear, accurate and appetising.
+              </p>
+            </div>
 
-          <div className="mt-6 rounded-[26px] border border-white/10 bg-white/[0.035] px-5 py-4 text-[10px] leading-5 text-white/38 sm:text-xs">
-            <p>
-              <span className="font-black uppercase tracking-[0.10em] text-white/58">Evidence note: </span>
-              Better photos cannot guarantee more sales, but they do improve the first thing customers judge on delivery apps: how good, fresh and trustworthy your food looks.
-            </p>
+            <div className="mt-8 grid gap-5 lg:grid-cols-3">
+              <EvidenceCard
+                number="01"
+                title="People judge visuals fast."
+                text="Princeton research found that people can form visual first impressions after very brief exposure. Online food ordering works the same way: customers make fast visual judgements before they read every detail."
+                source="Princeton / Psychological Science"
+                href="https://pubmed.ncbi.nlm.nih.gov/16866745/"
+              />
+              <EvidenceCard
+                number="02"
+                title="Food photos affect perceived quality."
+                text="Food marketing research has linked photo style with perceived food quality, experience value and purchase intention. Better presentation helps the food feel more desirable before the customer tastes it."
+                source="International Journal of Hospitality Management"
+                href="https://www.sciencedirect.com/science/article/abs/pii/S027843192200041X"
+              />
+              <EvidenceCard
+                number="03"
+                title="Platforms care about photo quality."
+                text="Uber Eats and DoorDash both publish merchant photo guidance covering lighting, framing, composition and accurate representation. That matters because your photos are part of the customer decision environment."
+                source="Uber Eats & DoorDash photo guidance"
+                href="https://merchants.ubereats.com/nz/en/restaurant-submitted-photos/"
+              />
+            </div>
+
+            <div className="mt-6 rounded-[26px] border border-white/10 bg-black/24 px-5 py-4 text-xs leading-6 text-white/44">
+              <span className="font-black uppercase tracking-[0.10em] text-cyan-100">Important to know: </span>
+              Better photos cannot guarantee more sales. They improve the first impression customers use when deciding whether your food looks fresh, safe, trustworthy and worth ordering.
+            </div>
           </div>
         </div>
       </section>
