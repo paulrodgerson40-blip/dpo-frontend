@@ -216,40 +216,48 @@ function EvidenceCard({
   title,
   text,
   source,
+  sourceSub,
   href,
 }: {
   number: string;
   title: string;
   text: string;
   source: string;
+  sourceSub: string;
   href: string;
 }) {
   return (
-    <div className="rounded-[30px] border border-white/10 bg-black/28 p-6 shadow-[0_22px_80px_rgba(0,0,0,0.34)] transition duration-300 hover:border-cyan-300/35 hover:bg-white/[0.055]">
-      <div className="flex items-start gap-4">
+    <a
+      href={href}
+      target="_blank"
+      rel="noreferrer"
+      className="group flex h-full min-h-[330px] flex-col rounded-[30px] border border-white/10 bg-black/28 p-6 shadow-[0_22px_80px_rgba(0,0,0,0.34)] transition duration-300 hover:border-cyan-300/35 hover:bg-white/[0.055]"
+    >
+      <div className="flex min-h-[74px] items-start gap-4">
         <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-cyan-300/35 bg-cyan-400/8 text-lg font-black text-cyan-100 shadow-[0_0_24px_rgba(34,211,238,0.14)]">
           {number}
         </div>
+        <h3 className="text-xl font-black uppercase leading-[0.95] tracking-[-0.04em] text-white">
+          {title}
+        </h3>
+      </div>
+
+      <p className="mt-5 min-h-[126px] text-sm leading-7 text-white/62">{text}</p>
+
+      <div className="mt-auto h-px bg-white/10" />
+
+      <div className="mt-5 flex min-h-[58px] items-center justify-between gap-4">
         <div>
-          <h3 className="text-xl font-black uppercase leading-[0.95] tracking-[-0.04em] text-white">
-            {title}
-          </h3>
-          <p className="mt-4 text-sm leading-7 text-white/62">{text}</p>
+          <div className="text-lg font-black uppercase leading-none tracking-[-0.04em] text-white transition group-hover:text-[#ff7a00]">
+            {source}
+          </div>
+          <div className="mt-1 text-xs font-bold leading-5 text-cyan-100/75">{sourceSub}</div>
+        </div>
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-cyan-300/25 bg-cyan-400/8 text-cyan-100 transition group-hover:border-orange-400/60 group-hover:text-[#ff7a00]">
+          ↗
         </div>
       </div>
-      <div className="mt-6 h-px bg-white/10" />
-      <div className="mt-4 flex flex-col gap-2 text-sm sm:flex-row sm:items-center sm:justify-between">
-        <span className="font-black uppercase tracking-[0.10em] text-cyan-100">Source</span>
-        <a
-          href={href}
-          target="_blank"
-          rel="noreferrer"
-          className="font-bold text-white/72 underline-offset-4 transition hover:text-[#ff7a00] hover:underline"
-        >
-          {source}
-        </a>
-      </div>
-    </div>
+    </a>
   );
 }
 
@@ -640,28 +648,26 @@ export default function Page() {
                 number="01"
                 title="People judge visuals fast."
                 text="Princeton research found that people can form visual first impressions after very brief exposure. Online food ordering works the same way: customers make fast visual judgements before they read every detail."
-                source="Princeton / Psychological Science"
+                source="Princeton"
+                sourceSub="Psychological Science"
                 href="https://pubmed.ncbi.nlm.nih.gov/16866745/"
               />
               <EvidenceCard
                 number="02"
                 title="Food photos affect perceived quality."
                 text="Food marketing research has linked photo style with perceived food quality, experience value and purchase intention. Better presentation helps the food feel more desirable before the customer tastes it."
-                source="International Journal of Hospitality Management"
+                source="IJHM"
+                sourceSub="Hospitality research"
                 href="https://www.sciencedirect.com/science/article/abs/pii/S027843192200041X"
               />
               <EvidenceCard
                 number="03"
                 title="Platforms care about photo quality."
                 text="Uber Eats and DoorDash both publish merchant photo guidance covering lighting, framing, composition and accurate representation. That matters because your photos are part of the customer decision environment."
-                source="Uber Eats & DoorDash photo guidance"
+                source="Uber Eats · DoorDash"
+                sourceSub="Merchant photo guidance"
                 href="https://merchants.ubereats.com/nz/en/restaurant-submitted-photos/"
               />
-            </div>
-
-            <div className="mt-6 rounded-[26px] border border-white/10 bg-black/24 px-5 py-4 text-xs leading-6 text-white/44">
-              <span className="font-black uppercase tracking-[0.10em] text-cyan-100">Important to know: </span>
-              Better photos cannot guarantee more sales. They improve the first impression customers use when deciding whether your food looks fresh, safe, trustworthy and worth ordering.
             </div>
           </div>
         </div>
@@ -680,8 +686,8 @@ export default function Page() {
           </div>
 
           <div className="mt-12 grid gap-6 lg:grid-cols-2">
-            <div className="rounded-[38px] border border-white/10 bg-white/[0.045] p-7 shadow-[0_28px_95px_rgba(0,0,0,0.38)]">
-              <div className="flex items-center justify-between gap-4">
+            <div className="flex h-full flex-col rounded-[38px] border border-white/10 bg-white/[0.045] p-7 shadow-[0_28px_95px_rgba(0,0,0,0.38)]">
+              <div className="flex min-h-[96px] items-start justify-between gap-4">
                 <div>
                   <div className="text-xs font-black uppercase tracking-[0.14em] text-cyan-100">Pathway one</div>
                   <h3 className="mt-3 text-4xl font-black uppercase leading-[0.9] tracking-[-0.06em] text-white">
@@ -691,13 +697,13 @@ export default function Page() {
                 <div className="rounded-full border border-white/12 bg-black/45 px-4 py-2 text-xs font-black uppercase tracking-[0.08em] text-white/65">Fastest</div>
               </div>
 
-              <div className="mt-7 grid gap-4">
+              <div className="mt-7 grid flex-1 gap-4">
                 {[
                   ["1", "You send the images", "Send your current menu photos or share the files you want improved."],
                   ["2", "We upgrade the photos", "We clean up the look, improve the presentation and keep the food realistic."],
                   ["3", "You get the finished files", "Download your new images and use them on delivery apps, your website or socials."],
                 ].map(([num, title, text]) => (
-                  <div key={num} className="flex gap-4 rounded-[26px] border border-white/10 bg-black/28 p-5">
+                  <div key={num} className="flex min-h-[118px] items-center gap-4 rounded-[26px] border border-white/10 bg-black/28 p-5">
                     <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-cyan-300/55 text-2xl font-black text-cyan-200 shadow-[0_0_26px_rgba(34,211,238,0.18)]">{num}</div>
                     <div>
                       <h4 className="text-lg font-black uppercase tracking-[-0.02em] text-white">{title}</h4>
@@ -708,8 +714,8 @@ export default function Page() {
               </div>
             </div>
 
-            <div className="rounded-[38px] border border-cyan-300/34 bg-gradient-to-b from-cyan-400/[0.10] to-white/[0.045] p-7 shadow-[0_0_80px_rgba(34,211,238,0.13),0_28px_95px_rgba(0,0,0,0.38)]">
-              <div className="flex items-center justify-between gap-4">
+            <div className="flex h-full flex-col rounded-[38px] border border-cyan-300/34 bg-gradient-to-b from-cyan-400/[0.10] to-white/[0.045] p-7 shadow-[0_0_80px_rgba(34,211,238,0.13),0_28px_95px_rgba(0,0,0,0.38)]">
+              <div className="flex min-h-[96px] items-start justify-between gap-4">
                 <div>
                   <div className="text-xs font-black uppercase tracking-[0.14em] text-cyan-100">Pathway two</div>
                   <h3 className="mt-3 text-4xl font-black uppercase leading-[0.9] tracking-[-0.06em] text-white">
@@ -719,13 +725,13 @@ export default function Page() {
                 <div className="rounded-full bg-gradient-to-r from-[#ff5a00] to-[#ff9d20] px-4 py-2 text-xs font-black uppercase tracking-[0.08em] shadow-[0_0_18px_rgba(34,211,238,0.18)] text-white shadow-[0_0_28px_rgba(255,107,0,0.26)]">Easiest</div>
               </div>
 
-              <div className="mt-7 grid gap-4">
+              <div className="mt-7 grid flex-1 gap-4">
                 {[
                   ["1", "Send us your store link", "Share your Uber Eats or DoorDash store link. We review the menu and work out what needs upgrading."],
                   ["2", "We build the package", "Food images, drinks and store banners are prepared in one consistent style."],
                   ["3", "We help with upload", "You get the finished package, with Uber Eats upload support included in managed plans."],
                 ].map(([num, title, text]) => (
-                  <div key={num} className="flex gap-4 rounded-[26px] border border-cyan-300/18 bg-black/30 p-5">
+                  <div key={num} className="flex min-h-[118px] items-center gap-4 rounded-[26px] border border-cyan-300/18 bg-black/30 p-5">
                     <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-cyan-300/60 text-2xl font-black text-cyan-200 shadow-[0_0_30px_rgba(34,211,238,0.20)]">{num}</div>
                     <div>
                       <h4 className="text-lg font-black uppercase tracking-[-0.02em] text-white">{title}</h4>
@@ -792,28 +798,32 @@ export default function Page() {
             {pricing.map((plan) => (
               <div
                 key={plan.name}
-                className={`relative rounded-[34px] p-6 ${
+                className={`relative flex h-full flex-col rounded-[34px] p-6 ${
                   plan.highlight
                     ? "scale-[1.02] border border-cyan-300/55 bg-gradient-to-b from-cyan-400/[0.11] to-white/[0.045] shadow-[0_0_76px_rgba(34,211,238,0.20),0_0_32px_rgba(255,107,0,0.08)]"
                     : "border border-white/10 bg-white/[0.045]"
                 }`}
               >
-                {plan.badge && (
-                  <div className="mb-4 w-fit rounded-full bg-gradient-to-r from-[#ff6b00] to-[#ff9a1f] px-3 py-1 text-xs font-black uppercase tracking-[0.08em] text-white shadow-[0_0_18px_rgba(34,211,238,0.14)]">
-                    {plan.badge}
-                  </div>
-                )}
-                <h3 className="text-2xl font-black tracking-[-0.03em] text-white">{plan.name}</h3>
-                <p className="mt-4 min-h-[44px] text-sm leading-6 text-white/55">
+                <div className="mb-4 flex h-7 items-start">
+                  {plan.badge && (
+                    <div className="w-fit rounded-full bg-gradient-to-r from-[#ff6b00] to-[#ff9a1f] px-3 py-1 text-xs font-black uppercase tracking-[0.08em] text-white shadow-[0_0_18px_rgba(34,211,238,0.14)]">
+                      {plan.badge}
+                    </div>
+                  )}
+                </div>
+                <h3 className="min-h-[34px] text-2xl font-black tracking-[-0.03em] text-white">{plan.name}</h3>
+                <p className="mt-4 min-h-[78px] text-sm leading-6 text-white/55">
                   For restaurants that want their menu to look cleaner, more professional and more worth ordering.
                 </p>
-                <div className="mt-6 text-5xl font-black tracking-[-0.05em]">
-                  {plan.price} <span className="text-base text-white/45">+ GST</span>
+                <div className="mt-5 min-h-[78px]">
+                  <div className="text-5xl font-black tracking-[-0.05em]">
+                    {plan.price} <span className="text-base text-white/45">+ GST</span>
+                  </div>
+                  <div className="mt-2 text-sm font-bold text-white/50">{plan.detail}</div>
                 </div>
-                <div className="mt-2 text-sm font-bold text-white/50">{plan.detail}</div>
                 <a
                   href="#sample"
-                  className={`mt-6 inline-flex w-full justify-center rounded-full px-5 py-4 text-sm font-black uppercase tracking-[0.04em] transition ${
+                  className={`mt-5 flex min-h-[64px] w-full items-center justify-center rounded-full px-5 py-4 text-center text-sm font-black uppercase tracking-[0.04em] transition ${
                     plan.highlight
                       ? "bg-gradient-to-r from-[#ff6b00] to-[#ff9a1f] text-white shadow-[0_0_35px_rgba(255,107,0,0.35)]"
                       : "border border-white/12 bg-white/[0.06] text-white hover:border-cyan-300/60"
@@ -822,7 +832,7 @@ export default function Page() {
                   {plan.button} →
                 </a>
                 <div className="my-6 h-px bg-white/10" />
-                <ul className="space-y-3">
+                <ul className="mt-auto space-y-3">
                   {plan.features.map((f) => (
                     <Check key={f}>{f}</Check>
                   ))}
@@ -837,7 +847,7 @@ export default function Page() {
               ["Managed includes more", "Store banners, drinks, Uber upload support and priority turnaround are included."],
               ["Large menus", "Contact us for bulk or custom pricing."],
             ].map(([title, text]) => (
-              <div key={title} className="rounded-[28px] border border-white/10 bg-white/[0.045] p-6">
+              <div key={title} className="h-full rounded-[28px] border border-white/10 bg-white/[0.045] p-6">
                 <h3 className="text-lg font-black uppercase tracking-[-0.02em]">{title}</h3>
                 <p className="mt-2 text-sm leading-6 text-white/55">{text}</p>
               </div>
