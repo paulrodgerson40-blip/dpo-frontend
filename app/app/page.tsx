@@ -4,6 +4,29 @@ import { useEffect, useMemo, useState } from "react";
 
 const BACKEND_URL = "https://170.64.209.149.sslip.io";
 
+const BRAND = {
+  bg: "#050505",
+  panel: "rgba(255,255,255,0.055)",
+  border: "rgba(255,255,255,0.12)",
+  borderStrong: "rgba(255,122,0,0.38)",
+  orange: "#ff7a00",
+  orange2: "#ff9d20",
+  text: "#ffffff",
+  muted: "rgba(255,255,255,0.62)",
+  faint: "rgba(255,255,255,0.42)",
+  input: "rgba(255,255,255,0.075)",
+};
+
+const appShellStyle: React.CSSProperties = {
+  minHeight: "100vh",
+  background:
+    "radial-gradient(circle at 10% 0%, rgba(255,107,0,0.16), transparent 28%), radial-gradient(circle at 90% 12%, rgba(255,122,0,0.13), transparent 30%), linear-gradient(180deg, #050505 0%, #090909 48%, #050505 100%)",
+  padding: "34px 20px 56px",
+  fontFamily:
+    'Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+  color: BRAND.text,
+};
+
 type RestaurantMode = "new" | "existing";
 type ActiveTab = "originals" | "compare" | "enhanced" | "samples" | "banners";
 type UploadType = "menu";
@@ -1002,15 +1025,7 @@ Type BANNER to confirm.`);
   if (workspaceMode === "drinks") {
     return (
       <main
-        style={{
-          minHeight: "100vh",
-          background:
-            "radial-gradient(circle at top left, rgba(99,102,241,0.16), transparent 34%), linear-gradient(180deg, #f8fafc 0%, #eef2f7 100%)",
-          padding: "34px 20px 56px",
-          fontFamily:
-            'Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
-          color: "#0f172a",
-        }}
+        style={appShellStyle}
       >
         {previewImage && (
           <PreviewModal
@@ -1030,15 +1045,7 @@ Type BANNER to confirm.`);
 
   return (
     <main
-      style={{
-        minHeight: "100vh",
-        background:
-          "radial-gradient(circle at top left, rgba(99,102,241,0.16), transparent 34%), linear-gradient(180deg, #f8fafc 0%, #eef2f7 100%)",
-        padding: "34px 20px 56px",
-        fontFamily:
-          'Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
-        color: "#0f172a",
-      }}
+      style={appShellStyle}
     >
       {workingLabel && <ProgressOverlay label={workingLabel} progress={progress} details={progressDetails} />}
 
@@ -1135,7 +1142,7 @@ Type BANNER to confirm.`);
                 type="file"
                 multiple
                 onChange={handleFiles}
-                style={{ ...inputStyle, padding: 12, background: "#f8fafc" }}
+                style={{ ...inputStyle, padding: 12, background: BRAND.input }}
               />
               <HelpText>
                 Upload anything for now. Files are accepted as-is and the backend auto-renames them to avoid duplicate filename conflicts.
@@ -1151,7 +1158,7 @@ Type BANNER to confirm.`);
                       {f.name}
                     </div>
                   ))}
-                  {files.length > 6 && <div style={{ color: "#64748b", fontSize: 13 }}>+ {files.length - 6} more</div>}
+                  {files.length > 6 && <div style={{ color: BRAND.muted, fontSize: 13 }}>+ {files.length - 6} more</div>}
                 </div>
               </div>
             )}
@@ -1186,7 +1193,7 @@ Type BANNER to confirm.`);
                   <h2 style={{ ...sectionTitle, marginTop: 4 }}>
                     {activeRestaurantName || "No restaurant selected"}
                   </h2>
-                  <p style={{ margin: "6px 0 0", color: "#64748b" }}>
+                  <p style={{ margin: "6px 0 0", color: BRAND.muted }}>
                     {activeRestaurantSlug
                       ? `Library folder: ${activeRestaurantSlug}`
                       : "Create or select a restaurant to manage its images."}
@@ -1351,26 +1358,18 @@ function WorkspaceSwitch({ active, onChange }: { active: WorkspaceMode; onChange
         display: "flex",
         gap: 10,
         margin: "0 0 20px",
-        background: "rgba(255,255,255,0.74)",
-        border: "1px solid rgba(226,232,240,0.95)",
-        borderRadius: 22,
+        background: "rgba(255,255,255,0.055)",
+        border: `1px solid ${BRAND.border}`,
+        borderRadius: 24,
         padding: 8,
-        boxShadow: "0 12px 30px rgba(15,23,42,0.06)",
+        boxShadow: "0 18px 50px rgba(0,0,0,0.28)",
         width: "fit-content",
       }}
     >
-      <button
-        type="button"
-        onClick={() => onChange("restaurants")}
-        style={workspaceButton(active === "restaurants")}
-      >
+      <button type="button" onClick={() => onChange("restaurants")} style={workspaceButton(active === "restaurants")}>
         Restaurant Library
       </button>
-      <button
-        type="button"
-        onClick={() => onChange("drinks")}
-        style={workspaceButton(active === "drinks")}
-      >
+      <button type="button" onClick={() => onChange("drinks")} style={workspaceButton(active === "drinks")}>
         Global Drinks Library
       </button>
     </div>
@@ -1689,7 +1688,7 @@ function DrinksLibrary({ onPreview }: { onPreview: (img: PreviewImage) => void }
           <div>
             <Kicker>Global drinks library</Kicker>
             <h2 style={{ ...sectionTitle, marginTop: 4 }}>Reusable drink assets</h2>
-            <p style={{ margin: "6px 0 0", color: "#64748b", maxWidth: 720 }}>
+            <p style={{ margin: "6px 0 0", color: BRAND.muted, maxWidth: 720 }}>
               Upload drink screenshots or product images once, enhance them with the beverage prompt, then download selected files whenever needed.
             </p>
           </div>
@@ -1710,7 +1709,7 @@ function DrinksLibrary({ onPreview }: { onPreview: (img: PreviewImage) => void }
               type="file"
               multiple
               onChange={handleFiles}
-              style={{ ...inputStyle, padding: 12, background: "#f8fafc" }}
+              style={{ ...inputStyle, padding: 12, background: BRAND.input }}
             />
             <HelpText>These files go to the global drinks library, not a restaurant folder.</HelpText>
           </div>
@@ -1726,7 +1725,7 @@ function DrinksLibrary({ onPreview }: { onPreview: (img: PreviewImage) => void }
               {files.slice(0, 6).map((f, idx) => (
                 <div key={`${f.name}-${f.size}-${f.lastModified}-${idx}`} style={fileChip}>{f.name}</div>
               ))}
-              {files.length > 6 && <div style={{ color: "#64748b", fontSize: 13 }}>+ {files.length - 6} more</div>}
+              {files.length > 6 && <div style={{ color: BRAND.muted, fontSize: 13 }}>+ {files.length - 6} more</div>}
             </div>
           </div>
         )}
@@ -1792,12 +1791,14 @@ function Hero({ modeTitle, modeSubtitle }: { modeTitle: string; modeSubtitle: st
   return (
     <div
       style={{
-        background: "linear-gradient(135deg, #0f172a 0%, #1e1b4b 52%, #312e81 100%)",
+        background:
+          "radial-gradient(circle at 78% 18%, rgba(255,122,0,0.28), transparent 32%), linear-gradient(135deg, #050505 0%, #111111 54%, #1a0d03 100%)",
         color: "white",
-        borderRadius: 30,
+        borderRadius: 34,
         padding: 34,
         marginBottom: 22,
-        boxShadow: "0 28px 70px rgba(15,23,42,0.28)",
+        boxShadow: "0 28px 90px rgba(0,0,0,0.55), 0 0 70px rgba(255,107,0,0.12)",
+        border: `1px solid ${BRAND.border}`,
         position: "relative",
         overflow: "hidden",
       }}
@@ -1805,41 +1806,52 @@ function Hero({ modeTitle, modeSubtitle }: { modeTitle: string; modeSubtitle: st
       <div
         style={{
           position: "absolute",
-          width: 260,
-          height: 260,
+          width: 340,
+          height: 340,
           borderRadius: 999,
-          background: "rgba(59,130,246,0.24)",
-          right: -70,
-          top: -100,
-          filter: "blur(2px)",
+          background: "rgba(255,107,0,0.18)",
+          right: -110,
+          top: -130,
+          filter: "blur(18px)",
+        }}
+      />
+      <div
+        style={{
+          position: "absolute",
+          inset: 0,
+          opacity: 0.08,
+          backgroundImage:
+            "linear-gradient(rgba(255,255,255,.10) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.10) 1px, transparent 1px)",
+          backgroundSize: "64px 64px",
         }}
       />
       <div style={{ position: "relative", display: "flex", justifyContent: "space-between", gap: 24, alignItems: "center" }}>
         <div>
-          <div style={{ color: "#93c5fd", fontWeight: 900, letterSpacing: 1.2, textTransform: "uppercase", fontSize: 13 }}>
-            Delivery Platform Optimization
+          <div style={{ color: "#ffbd75", fontWeight: 950, letterSpacing: 1.4, textTransform: "uppercase", fontSize: 12 }}>
+            Delivery Ignite Backend
           </div>
-          <h1 style={{ margin: "10px 0 8px", fontSize: 42, lineHeight: 1.05 }}>
+          <h1 style={{ margin: "10px 0 8px", fontSize: 46, lineHeight: 0.95, letterSpacing: "-0.055em", textTransform: "uppercase", fontWeight: 950 }}>
             Restaurant Image Library
           </h1>
-          <p style={{ margin: 0, color: "#dbeafe", fontSize: 17, maxWidth: 720 }}>
-            Manage original images, compare old vs new, enhance menu assets, create samples, and generate composed 16:9 banners from enhanced dishes.
+          <p style={{ margin: 0, color: BRAND.muted, fontSize: 16, maxWidth: 760, lineHeight: 1.6 }}>
+            Manage originals, compare old vs new, enhance menu assets, create watermarked samples, and generate premium 16:9 banners from enhanced dishes.
           </p>
         </div>
 
         <div
           style={{
-            background: "rgba(255,255,255,0.10)",
-            border: "1px solid rgba(255,255,255,0.18)",
-            borderRadius: 22,
+            background: "rgba(255,255,255,0.075)",
+            border: `1px solid ${BRAND.borderStrong}`,
+            borderRadius: 24,
             padding: 18,
-            minWidth: 210,
-            backdropFilter: "blur(12px)",
+            minWidth: 230,
+            backdropFilter: "blur(14px)",
+            boxShadow: "0 0 42px rgba(255,107,0,0.12)",
           }}
         >
-          <div style={{ fontSize: 13, color: "#bfdbfe", fontWeight: 800 }}>Current mode</div>
-          <div style={{ marginTop: 8, fontSize: 24, fontWeight: 950 }}>{modeTitle}</div>
-          <div style={{ marginTop: 4, color: "#dbeafe", fontSize: 13 }}>{modeSubtitle}</div>
+          <div style={{ fontSize: 12, color: "#ffbd75", fontWeight: 950, textTransform: "uppercase", letterSpacing: 0.9 }}>Current mode</div>
+          <div style={{ marginTop: 8, fontSize: 24, fontWeight: 950, color: "white" }}>{modeTitle}</div>
+          <div style={{ marginTop: 4, color: BRAND.muted, fontSize: 13 }}>{modeSubtitle}</div>
         </div>
       </div>
     </div>
@@ -1852,34 +1864,34 @@ function ProgressOverlay({ label, progress, details }: { label: string; progress
       style={{
         position: "fixed",
         inset: 0,
-        background: "rgba(15,23,42,0.46)",
-        backdropFilter: "blur(8px)",
+        background: "rgba(0,0,0,0.72)",
+        backdropFilter: "blur(10px)",
         zIndex: 50,
         display: "grid",
         placeItems: "center",
         padding: 24,
       }}
     >
-      <div style={{ width: "min(460px, 100%)", background: "white", borderRadius: 26, padding: 26, boxShadow: "0 30px 80px rgba(0,0,0,.28)" }}>
+      <div style={{ width: "min(480px, 100%)", background: "#101010", color: "white", border: `1px solid ${BRAND.borderStrong}`, borderRadius: 28, padding: 26, boxShadow: "0 30px 90px rgba(0,0,0,.65), 0 0 60px rgba(255,107,0,.18)" }}>
         <div style={{ display: "flex", gap: 14, alignItems: "center" }}>
           <div style={spinnerStyle} />
           <div>
             <div style={{ fontWeight: 950, fontSize: 19 }}>{label}</div>
             {details?.total ? (
-              <div style={{ color: "#64748b", marginTop: 4 }}>
+              <div style={{ color: BRAND.muted, marginTop: 4 }}>
                 Processed: <b>{details.processed || 0}</b> / <b>{details.total}</b>
                 {typeof details.processed === "number" ? ` • Remaining: ${Math.max(details.total - details.processed, 0)}` : ""}
                 {details.current ? ` • Current: ${details.current}` : ""}
               </div>
             ) : (
-              <div style={{ color: "#64748b", marginTop: 4 }}>Please keep this page open.</div>
+              <div style={{ color: BRAND.muted, marginTop: 4 }}>Please keep this page open.</div>
             )}
           </div>
         </div>
-        <div style={{ marginTop: 18, background: "#e2e8f0", height: 12, borderRadius: 999, overflow: "hidden" }}>
-          <div style={{ width: `${progress}%`, height: "100%", background: "linear-gradient(135deg,#4f46e5,#111827)", transition: "width .4s ease" }} />
+        <div style={{ marginTop: 18, background: "rgba(255,255,255,0.12)", height: 12, borderRadius: 999, overflow: "hidden" }}>
+          <div style={{ width: `${progress}%`, height: "100%", background: "linear-gradient(90deg,#ff5a00,#ff9d20)", transition: "width .4s ease" }} />
         </div>
-        <div style={{ marginTop: 8, textAlign: "right", fontWeight: 900, color: "#475569" }}>{progress}%</div>
+        <div style={{ marginTop: 8, textAlign: "right", fontWeight: 900, color: "#ffbd75" }}>{progress}%</div>
       </div>
     </div>
   );
@@ -1907,7 +1919,7 @@ function PreviewModal({ image, onClose }: { image: PreviewImage; onClose: () => 
           </div>
           <button onClick={onClose} style={{ ...ghostButton, width: 110 }}>Close</button>
         </div>
-        <div style={{ background: "#0f172a", borderRadius: 22, overflow: "hidden", maxHeight: "82vh" }}>
+        <div style={{ background: "#050505", borderRadius: 22, overflow: "hidden", maxHeight: "82vh" }}>
           <img src={image.url} alt={image.filename} style={{ width: "100%", height: "100%", maxHeight: "82vh", objectFit: "contain", display: "block" }} />
         </div>
       </div>
@@ -1919,12 +1931,13 @@ function Panel({ children }: { children: React.ReactNode }) {
   return (
     <section
       style={{
-        background: "rgba(255,255,255,0.88)",
-        border: "1px solid rgba(226,232,240,0.95)",
-        borderRadius: 26,
+        background: BRAND.panel,
+        border: `1px solid ${BRAND.border}`,
+        borderRadius: 28,
         padding: 24,
-        boxShadow: "0 16px 40px rgba(15,23,42,0.08)",
-        backdropFilter: "blur(14px)",
+        boxShadow: "0 18px 70px rgba(0,0,0,0.34)",
+        backdropFilter: "blur(16px)",
+        color: BRAND.text,
       }}
     >
       {children}
@@ -1934,18 +1947,18 @@ function Panel({ children }: { children: React.ReactNode }) {
 
 function Kicker({ children }: { children: React.ReactNode }) {
   return (
-    <div style={{ fontSize: 12, color: "#6366f1", fontWeight: 950, textTransform: "uppercase", letterSpacing: 0.9 }}>
+    <div style={{ display: "inline-flex", border: `1px solid ${BRAND.borderStrong}`, borderRadius: 999, background: "rgba(255,122,0,0.10)", padding: "6px 10px", fontSize: 11, color: "#ffbd75", fontWeight: 950, textTransform: "uppercase", letterSpacing: 0.9 }}>
       {children}
     </div>
   );
 }
 
 function Label({ children }: { children: React.ReactNode }) {
-  return <label style={{ display: "block", fontSize: 13, color: "#334155", fontWeight: 900, marginBottom: 8 }}>{children}</label>;
+  return <label style={{ display: "block", fontSize: 13, color: "rgba(255,255,255,0.78)", fontWeight: 900, marginBottom: 8 }}>{children}</label>;
 }
 
 function HelpText({ children }: { children: React.ReactNode }) {
-  return <div style={{ marginTop: 7, color: "#64748b", fontSize: 12.5, lineHeight: 1.35 }}>{children}</div>;
+  return <div style={{ marginTop: 7, color: BRAND.faint, fontSize: 12.5, lineHeight: 1.45 }}>{children}</div>;
 }
 
 function SegmentedControl({
@@ -1958,7 +1971,7 @@ function SegmentedControl({
   onChange: (value: string) => void;
 }) {
   return (
-    <div style={{ display: "grid", gridTemplateColumns: `repeat(${options.length}, 1fr)`, gap: 6, background: "#e2e8f0", padding: 5, borderRadius: 16 }}>
+    <div style={{ display: "grid", gridTemplateColumns: `repeat(${options.length}, 1fr)`, gap: 6, background: "rgba(255,255,255,0.07)", padding: 5, borderRadius: 18, border: `1px solid ${BRAND.border}` }}>
       {options.map((option) => {
         const active = value === option.value;
         return (
@@ -1966,14 +1979,14 @@ function SegmentedControl({
             key={option.value}
             onClick={() => onChange(option.value)}
             style={{
-              border: 0,
-              borderRadius: 12,
+              border: active ? `1px solid ${BRAND.borderStrong}` : "1px solid transparent",
+              borderRadius: 14,
               padding: "10px 12px",
-              background: active ? "white" : "transparent",
-              color: active ? "#0f172a" : "#64748b",
-              fontWeight: 900,
+              background: active ? "linear-gradient(90deg,#ff5a00,#ff9d20)" : "transparent",
+              color: active ? "white" : BRAND.muted,
+              fontWeight: 950,
               cursor: "pointer",
-              boxShadow: active ? "0 6px 16px rgba(15,23,42,0.10)" : "none",
+              boxShadow: active ? "0 10px 26px rgba(255,107,0,0.22)" : "none",
             }}
           >
             {option.label}
@@ -2002,13 +2015,14 @@ function Tabs({ active, setActive }: { active: ActiveTab; setActive: (tab: Activ
             key={tab.id}
             onClick={() => setActive(tab.id)}
             style={{
-              border: isActive ? "1px solid #4f46e5" : "1px solid #e2e8f0",
-              background: isActive ? "#eef2ff" : "white",
-              color: isActive ? "#3730a3" : "#475569",
+              border: isActive ? `1px solid ${BRAND.borderStrong}` : `1px solid ${BRAND.border}`,
+              background: isActive ? "linear-gradient(90deg,#ff5a00,#ff9d20)" : "rgba(255,255,255,0.055)",
+              color: isActive ? "white" : BRAND.muted,
               borderRadius: 999,
               padding: "9px 13px",
-              fontWeight: 900,
+              fontWeight: 950,
               cursor: "pointer",
+              boxShadow: isActive ? "0 10px 24px rgba(255,107,0,0.20)" : "none",
             }}
           >
             {tab.label}
@@ -2056,10 +2070,10 @@ function BatchActionBar({
     <div
       style={{
         marginTop: 16,
-        border: "1px solid #e2e8f0",
+        border: `1px solid ${BRAND.border}`,
         borderRadius: 18,
         padding: 12,
-        background: "#f8fafc",
+        background: "rgba(255,255,255,0.045)",
         display: "flex",
         justifyContent: "space-between",
         gap: 12,
@@ -2160,9 +2174,9 @@ function ImageGrid({
       <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "end" }}>
         <div>
           <h3 style={{ margin: 0, fontSize: 20 }}>{title}</h3>
-          <p style={{ margin: "6px 0 0", color: "#64748b", lineHeight: 1.45 }}>{subtitle}</p>
+          <p style={{ margin: "6px 0 0", color: BRAND.muted, lineHeight: 1.45 }}>{subtitle}</p>
         </div>
-        <div style={{ color: "#64748b", fontWeight: 900 }}>{images.length} file(s)</div>
+        <div style={{ color: BRAND.muted, fontWeight: 900 }}>{images.length} file(s)</div>
       </div>
 
       {images.length === 0 ? (
@@ -2185,7 +2199,7 @@ function ImageGrid({
               <div
                 key={`${folder}-${img.filename}-${img.url || ""}`}
                 style={{
-                  background: "white",
+                  background: "rgba(255,255,255,0.065)",
                   border: selected ? "2px solid #4f46e5" : "1px solid #e2e8f0",
                   borderRadius: 20,
                   padding: selected ? 11 : 12,
@@ -2279,7 +2293,7 @@ function ImageGrid({
                       overflow: "hidden",
                       textOverflow: "ellipsis",
                       cursor: onRename ? "text" : "default",
-                      color: "#0f172a",
+                      color: "white",
                     }}
                     title="Click to rename"
                   >
@@ -2341,11 +2355,11 @@ function CompareGrid({
       <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "end" }}>
         <div>
           <h3 style={{ margin: 0, fontSize: 20 }}>Comparison</h3>
-          <p style={{ margin: "6px 0 0", color: "#64748b", lineHeight: 1.45 }}>
+          <p style={{ margin: "6px 0 0", color: BRAND.muted, lineHeight: 1.45 }}>
             Compare original menu images against enhanced outputs. Banners are created separately from exactly 3 selected enhanced dishes.
           </p>
         </div>
-        <div style={{ color: "#64748b", fontWeight: 900 }}>{matched.length} menu pair(s)</div>
+        <div style={{ color: BRAND.muted, fontWeight: 900 }}>{matched.length} menu pair(s)</div>
       </div>
 
       {!hasAnyComparisonAssets ? (
@@ -2363,7 +2377,7 @@ function CompareGrid({
               <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "center", marginBottom: 14, flexWrap: "wrap" }}>
                 <div>
                   <div style={{ fontWeight: 950, fontSize: 18 }}>Banner</div>
-                  <div style={{ marginTop: 4, color: "#64748b", fontSize: 13 }}>
+                  <div style={{ marginTop: 4, color: BRAND.muted, fontSize: 13 }}>
                     Final 16:9 banner created from selected enhanced dishes.
                   </div>
                 </div>
@@ -2375,7 +2389,7 @@ function CompareGrid({
                     key={banner.filename}
                     type="button"
                     onClick={() => onPreview({ title: "Banner", url: fullImageUrl(banner.url), filename: banner.filename })}
-                    style={{ border: "1px solid #e2e8f0", borderRadius: 18, overflow: "hidden", background: "#0f172a", padding: 0, cursor: "zoom-in" }}
+                    style={{ border: `1px solid ${BRAND.border}`, borderRadius: 18, overflow: "hidden", background: "#050505", padding: 0, cursor: "zoom-in" }}
                   >
                     <img src={fullImageUrl(banner.url)} alt={banner.filename} style={{ width: "100%", aspectRatio: "16 / 9", objectFit: "cover", display: "block" }} />
                   </button>
@@ -2388,7 +2402,7 @@ function CompareGrid({
             <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "center", marginBottom: 14, flexWrap: "wrap" }}>
               <div>
                 <div style={{ fontWeight: 950, fontSize: 18 }}>Menu image comparison</div>
-                <div style={{ marginTop: 4, color: "#64748b", fontSize: 13 }}>
+                <div style={{ marginTop: 4, color: BRAND.muted, fontSize: 13 }}>
                   Original on the left, enhanced on the right.
                 </div>
               </div>
@@ -2443,8 +2457,8 @@ function SideBySideImage({
   const url = fullImageUrl(image?.url);
 
   return (
-    <div style={{ background: "white", border: "1px solid #e2e8f0", borderRadius: 20, padding: 12, boxShadow: "0 10px 24px rgba(15,23,42,0.05)" }}>
-      <div style={{ marginBottom: 10, fontWeight: 950, color: "#334155" }}>{label}</div>
+    <div style={{ background: "rgba(255,255,255,0.065)", border: `1px solid ${BRAND.border}`, borderRadius: 20, padding: 12, boxShadow: "0 10px 24px rgba(15,23,42,0.05)" }}>
+      <div style={{ marginBottom: 10, fontWeight: 950, color: "rgba(255,255,255,0.78)" }}>{label}</div>
       {image && url ? (
         <button
           type="button"
@@ -2454,7 +2468,7 @@ function SideBySideImage({
             height: wide ? 230 : 180,
             borderRadius: 16,
             overflow: "hidden",
-            background: "#f8fafc",
+            background: "rgba(255,255,255,0.045)",
             border: 0,
             padding: 0,
             cursor: "zoom-in",
@@ -2463,11 +2477,11 @@ function SideBySideImage({
           <img src={url} alt={image.filename} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
         </button>
       ) : (
-        <div style={{ height: wide ? 230 : 180, border: "1px dashed #cbd5e1", borderRadius: 16, display: "grid", placeItems: "center", color: "#64748b", fontWeight: 850, textAlign: "center", padding: 16 }}>
+        <div style={{ height: wide ? 230 : 180, border: `1px dashed ${BRAND.border}`, borderRadius: 16, display: "grid", placeItems: "center", color: BRAND.muted, fontWeight: 850, textAlign: "center", padding: 16 }}>
           {emptyText}
         </div>
       )}
-      {image && <div style={{ marginTop: 10, fontWeight: 850, fontSize: 13, color: "#475569", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{image.filename}</div>}
+      {image && <div style={{ marginTop: 10, fontWeight: 850, fontSize: 13, color: BRAND.muted, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{image.filename}</div>}
     </div>
   );
 }
@@ -2478,11 +2492,11 @@ function CompareImage({ label, url, filename, onPreview }: { label: string; url:
       type="button"
       onClick={() => onPreview({ title: label, url, filename })}
       style={{
-        border: "1px solid #e2e8f0",
+        border: `1px solid ${BRAND.border}`,
         borderRadius: 18,
         padding: 0,
         overflow: "hidden",
-        background: "#f8fafc",
+        background: "rgba(255,255,255,0.045)",
         cursor: "zoom-in",
         minHeight: 230,
         position: "relative",
@@ -2501,13 +2515,13 @@ function EmptyBox({ children }: { children: React.ReactNode }) {
     <div
       style={{
         marginTop: 16,
-        border: "1px dashed #cbd5e1",
+        border: `1px dashed ${BRAND.border}`,
         borderRadius: 22,
         padding: 28,
-        background: "#f8fafc",
-        color: "#64748b",
+        background: "rgba(255,255,255,0.04)",
+        color: BRAND.muted,
         textAlign: "center",
-        fontWeight: 800,
+        fontWeight: 850,
       }}
     >
       {children}
@@ -2518,25 +2532,25 @@ function EmptyBox({ children }: { children: React.ReactNode }) {
 function Metric({ label, value, tone = "neutral" }: { label: string; value: string; tone?: "neutral" | "good" | "warn" }) {
   const toneStyle =
     tone === "good"
-      ? { border: "#bbf7d0", bg: "#f0fdf4", value: "#166534" }
+      ? { border: "rgba(34,197,94,0.42)", bg: "rgba(34,197,94,0.10)", value: "#86efac" }
       : tone === "warn"
-        ? { border: "#fed7aa", bg: "#fff7ed", value: "#c2410c" }
-        : { border: "#e2e8f0", bg: "#f8fafc", value: "#0f172a" };
+        ? { border: "rgba(255,122,0,0.52)", bg: "rgba(255,122,0,0.12)", value: BRAND.orange }
+        : { border: BRAND.border, bg: "rgba(255,255,255,0.055)", value: "white" };
 
   return (
-    <div style={{ background: toneStyle.bg, border: `1px solid ${toneStyle.border}`, borderRadius: 16, padding: "10px 12px", minWidth: 92 }}>
-      <div style={{ fontSize: 11, color: "#64748b", fontWeight: 900, textTransform: "uppercase" }}>{label}</div>
-      <div style={{ fontSize: 16, fontWeight: 950, marginTop: 3, color: toneStyle.value }}>{value}</div>
+    <div style={{ background: toneStyle.bg, border: `1px solid ${toneStyle.border}`, borderRadius: 18, padding: "10px 12px", minWidth: 92 }}>
+      <div style={{ fontSize: 11, color: BRAND.faint, fontWeight: 950, textTransform: "uppercase" }}>{label}</div>
+      <div style={{ fontSize: 17, fontWeight: 950, marginTop: 3, color: toneStyle.value }}>{value}</div>
     </div>
   );
 }
 
 function WorkflowStep({ number, title, text }: { number: string; title: string; text: string }) {
   return (
-    <div style={{ border: "1px solid #e2e8f0", borderRadius: 20, padding: 16, background: "#f8fafc" }}>
-      <div style={{ color: "#4f46e5", fontWeight: 950 }}>{number}</div>
-      <div style={{ marginTop: 7, fontWeight: 950 }}>{title}</div>
-      <div style={{ marginTop: 5, color: "#64748b", lineHeight: 1.45, fontSize: 13 }}>{text}</div>
+    <div style={{ border: `1px solid ${BRAND.border}`, borderRadius: 22, padding: 16, background: "rgba(255,255,255,0.045)", boxShadow: "0 14px 40px rgba(0,0,0,0.22)" }}>
+      <div style={{ color: BRAND.orange, fontWeight: 950 }}>{number}</div>
+      <div style={{ marginTop: 7, fontWeight: 950, color: "white" }}>{title}</div>
+      <div style={{ marginTop: 5, color: BRAND.muted, lineHeight: 1.45, fontSize: 13 }}>{text}</div>
     </div>
   );
 }
@@ -2544,13 +2558,13 @@ function WorkflowStep({ number, title, text }: { number: string; title: string; 
 function StatusPill({ text, tone }: { text: string; tone: "good" | "bad" | "neutral" }) {
   const styles =
     tone === "good"
-      ? { bg: "#dcfce7", color: "#166534" }
+      ? { bg: "rgba(34,197,94,0.14)", color: "#86efac", border: "rgba(34,197,94,0.36)" }
       : tone === "bad"
-        ? { bg: "#fee2e2", color: "#991b1b" }
-        : { bg: "#eef2ff", color: "#3730a3" };
+        ? { bg: "rgba(239,68,68,0.14)", color: "#fca5a5", border: "rgba(239,68,68,0.36)" }
+        : { bg: "rgba(255,122,0,0.12)", color: "#ffbd75", border: BRAND.borderStrong };
 
   return (
-    <div style={{ background: styles.bg, color: styles.color, borderRadius: 999, padding: "8px 12px", fontWeight: 950, fontSize: 12 }}>
+    <div style={{ background: styles.bg, color: styles.color, border: `1px solid ${styles.border}`, borderRadius: 999, padding: "8px 12px", fontWeight: 950, fontSize: 12 }}>
       {text}
     </div>
   );
@@ -2561,10 +2575,11 @@ function Notice({ children, tone }: { children: React.ReactNode; tone: "good" | 
     <div
       style={{
         marginTop: 16,
-        borderRadius: 16,
+        borderRadius: 18,
         padding: 14,
-        background: tone === "good" ? "#ecfdf5" : "#fef2f2",
-        color: tone === "good" ? "#166534" : "#991b1b",
+        border: tone === "good" ? "1px solid rgba(34,197,94,0.34)" : "1px solid rgba(239,68,68,0.34)",
+        background: tone === "good" ? "rgba(34,197,94,0.10)" : "rgba(239,68,68,0.10)",
+        color: tone === "good" ? "#86efac" : "#fca5a5",
         fontWeight: 850,
         lineHeight: 1.4,
       }}
@@ -2575,67 +2590,71 @@ function Notice({ children, tone }: { children: React.ReactNode; tone: "good" | 
 }
 
 function Divider() {
-  return <div style={{ height: 1, background: "#e2e8f0", margin: "22px 0" }} />;
+  return <div style={{ height: 1, background: BRAND.border, margin: "22px 0" }} />;
 }
-
 
 function workspaceButton(active: boolean): React.CSSProperties {
   return {
-    border: active ? "1px solid #4f46e5" : "1px solid transparent",
-    background: active ? "#eef2ff" : "transparent",
-    color: active ? "#3730a3" : "#475569",
-    borderRadius: 16,
+    border: active ? `1px solid ${BRAND.borderStrong}` : "1px solid transparent",
+    background: active ? "linear-gradient(90deg,#ff5a00,#ff9d20)" : "transparent",
+    color: active ? "white" : BRAND.muted,
+    borderRadius: 18,
     padding: "11px 14px",
     fontWeight: 950,
     cursor: "pointer",
-    boxShadow: active ? "0 8px 18px rgba(79,70,229,0.12)" : "none",
+    boxShadow: active ? "0 10px 24px rgba(255,107,0,0.22)" : "none",
   };
 }
 
 function tabButton(active: boolean): React.CSSProperties {
   return {
-    border: active ? "1px solid #4f46e5" : "1px solid #e2e8f0",
-    background: active ? "#eef2ff" : "white",
-    color: active ? "#3730a3" : "#475569",
+    border: active ? `1px solid ${BRAND.borderStrong}` : `1px solid ${BRAND.border}`,
+    background: active ? "linear-gradient(90deg,#ff5a00,#ff9d20)" : "rgba(255,255,255,0.055)",
+    color: active ? "white" : BRAND.muted,
     borderRadius: 999,
     padding: "9px 13px",
-    fontWeight: 900,
+    fontWeight: 950,
     cursor: "pointer",
   };
 }
 
 const sectionTitle: React.CSSProperties = {
-  margin: "4px 0 0",
-  fontSize: 22,
-  lineHeight: 1.15,
+  margin: "8px 0 0",
+  fontSize: 23,
+  lineHeight: 1.05,
+  letterSpacing: "-0.035em",
+  textTransform: "uppercase",
+  fontWeight: 950,
+  color: "white",
 };
 
 const inputStyle: React.CSSProperties = {
   width: "100%",
   boxSizing: "border-box",
   padding: "13px 14px",
-  borderRadius: 14,
-  border: "1px solid #cbd5e1",
-  background: "white",
-  color: "#0f172a",
+  borderRadius: 16,
+  border: `1px solid ${BRAND.border}`,
+  background: BRAND.input,
+  color: "white",
   fontSize: 15,
   outline: "none",
 };
 
 const selectedFilesBox: React.CSSProperties = {
   marginTop: 14,
-  border: "1px solid #e2e8f0",
-  background: "#f8fafc",
-  borderRadius: 16,
+  border: `1px solid ${BRAND.border}`,
+  background: "rgba(255,255,255,0.045)",
+  borderRadius: 18,
   padding: 14,
+  color: "white",
 };
 
 const fileChip: React.CSSProperties = {
-  border: "1px solid #e2e8f0",
-  background: "white",
-  borderRadius: 10,
+  border: `1px solid ${BRAND.border}`,
+  background: "rgba(0,0,0,0.24)",
+  borderRadius: 12,
   padding: "7px 9px",
-  color: "#475569",
+  color: BRAND.muted,
   fontSize: 12.5,
   overflow: "hidden",
   textOverflow: "ellipsis",
@@ -2645,22 +2664,22 @@ const fileChip: React.CSSProperties = {
 function primaryButton(disabled: boolean): React.CSSProperties {
   return {
     border: 0,
-    borderRadius: 14,
+    borderRadius: 16,
     padding: "13px 16px",
-    background: disabled ? "#94a3b8" : "linear-gradient(135deg, #111827, #312e81)",
+    background: disabled ? "rgba(148,163,184,0.45)" : "linear-gradient(90deg, #ff5a00, #ff9d20)",
     color: "white",
     fontWeight: 950,
     cursor: disabled ? "not-allowed" : "pointer",
-    boxShadow: disabled ? "none" : "0 12px 24px rgba(49,46,129,0.22)",
+    boxShadow: disabled ? "none" : "0 14px 30px rgba(255,107,0,0.26)",
   };
 }
 
 function successButton(disabled: boolean): React.CSSProperties {
   return {
     border: 0,
-    borderRadius: 14,
+    borderRadius: 16,
     padding: "13px 16px",
-    background: disabled ? "#94a3b8" : "linear-gradient(135deg, #16a34a, #15803d)",
+    background: disabled ? "rgba(148,163,184,0.45)" : "linear-gradient(135deg, #16a34a, #22c55e)",
     color: "white",
     fontWeight: 950,
     cursor: disabled ? "not-allowed" : "pointer",
@@ -2671,9 +2690,9 @@ function successButton(disabled: boolean): React.CSSProperties {
 function dangerButton(disabled: boolean): React.CSSProperties {
   return {
     border: 0,
-    borderRadius: 14,
+    borderRadius: 16,
     padding: "12px 16px",
-    background: disabled ? "#cbd5e1" : "linear-gradient(135deg, #dc2626, #991b1b)",
+    background: disabled ? "rgba(148,163,184,0.35)" : "linear-gradient(135deg, #dc2626, #991b1b)",
     color: "white",
     fontWeight: 950,
     cursor: disabled ? "not-allowed" : "pointer",
@@ -2682,11 +2701,11 @@ function dangerButton(disabled: boolean): React.CSSProperties {
 
 function miniButton(disabled: boolean): React.CSSProperties {
   return {
-    border: "1px solid #cbd5e1",
+    border: `1px solid ${BRAND.border}`,
     borderRadius: 999,
     padding: "9px 13px",
-    background: disabled ? "#f1f5f9" : "white",
-    color: disabled ? "#94a3b8" : "#334155",
+    background: disabled ? "rgba(255,255,255,0.035)" : "rgba(255,255,255,0.065)",
+    color: disabled ? BRAND.faint : "white",
     fontWeight: 900,
     cursor: disabled ? "not-allowed" : "pointer",
   };
@@ -2697,58 +2716,58 @@ function miniDarkButton(disabled: boolean): React.CSSProperties {
     border: 0,
     borderRadius: 999,
     padding: "9px 13px",
-    background: disabled ? "#94a3b8" : "#111827",
+    background: disabled ? "rgba(148,163,184,0.45)" : "linear-gradient(90deg,#ff5a00,#ff9d20)",
     color: "white",
-    fontWeight: 900,
+    fontWeight: 950,
     cursor: disabled ? "not-allowed" : "pointer",
   };
 }
 
 const ghostButton: React.CSSProperties = {
-  border: "1px solid #cbd5e1",
-  borderRadius: 14,
+  border: `1px solid ${BRAND.border}`,
+  borderRadius: 16,
   padding: "12px 16px",
-  background: "white",
-  color: "#334155",
+  background: "rgba(255,255,255,0.055)",
+  color: "white",
   fontWeight: 950,
   cursor: "pointer",
 };
 
 const cardButton: React.CSSProperties = {
   width: "100%",
-  border: "1px solid #e2e8f0",
-  background: "#f8fafc",
-  borderRadius: 12,
+  border: `1px solid ${BRAND.border}`,
+  background: "rgba(255,255,255,0.055)",
+  borderRadius: 14,
   padding: "9px 10px",
   fontWeight: 900,
-  color: "#475569",
+  color: BRAND.muted,
   cursor: "pointer",
 };
 
 const cardButtonDark: React.CSSProperties = {
   ...cardButton,
-  background: "#111827",
+  background: "linear-gradient(90deg,#ff5a00,#ff9d20)",
   color: "white",
-  border: "1px solid #111827",
+  border: `1px solid ${BRAND.borderStrong}`,
 };
 
 const cardButtonDanger: React.CSSProperties = {
   width: "100%",
-  border: "1px solid #fecaca",
-  background: "#fef2f2",
-  borderRadius: 12,
+  border: "1px solid rgba(239,68,68,0.34)",
+  background: "rgba(239,68,68,0.10)",
+  borderRadius: 14,
   padding: "9px 10px",
   fontWeight: 900,
-  color: "#991b1b",
+  color: "#fca5a5",
   cursor: "pointer",
 };
 
 const comparisonSectionBox: React.CSSProperties = {
   marginTop: 18,
-  border: "1px solid #e2e8f0",
+  border: `1px solid ${BRAND.border}`,
   borderRadius: 22,
   padding: 16,
-  background: "#f8fafc",
+  background: "rgba(255,255,255,0.045)",
 };
 
 const headerComparisonGrid: React.CSSProperties = {
@@ -2807,7 +2826,7 @@ const unmatchedGrid: React.CSSProperties = {
 
 const unmatchedItem: React.CSSProperties = {
   border: "1px solid #fed7aa",
-  background: "white",
+  background: "rgba(255,255,255,0.065)",
   borderRadius: 14,
   padding: 8,
   display: "flex",
@@ -2822,7 +2841,7 @@ const unmatchedThumbWrap: React.CSSProperties = {
   height: 46,
   borderRadius: 10,
   overflow: "hidden",
-  background: "#f8fafc",
+  background: "rgba(255,255,255,0.045)",
   flex: "0 0 auto",
 };
 
@@ -2864,6 +2883,6 @@ const spinnerStyle: React.CSSProperties = {
   height: 34,
   borderRadius: 999,
   border: "4px solid #e2e8f0",
-  borderTopColor: "#4f46e5",
+  borderTopColor: BRAND.orange,
   animation: "spin 0.9s linear infinite",
 };
