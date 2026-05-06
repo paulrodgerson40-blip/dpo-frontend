@@ -117,6 +117,9 @@ function LocalImage({
   priority?: boolean;
   sizes?: string;
 }) {
+  const hasObjectFit = /\bobject-(cover|contain|fill|none|scale-down)\b/.test(className);
+  const finalClassName = `${hasObjectFit ? "" : "object-cover"} ${className}`.trim();
+
   return (
     <Image
       src={src}
@@ -124,7 +127,7 @@ function LocalImage({
       fill
       priority={priority}
       sizes={sizes}
-      className={`object-cover ${className}`}
+      className={finalClassName}
     />
   );
 }
@@ -412,14 +415,19 @@ export default function Page() {
             </p>
           </div>
 
-          <div className="mt-12 overflow-hidden rounded-[42px] border border-white/12 bg-white/[0.045] p-3 shadow-[0_35px_130px_rgba(0,0,0,0.64)] sm:p-4">
+          <div className="mx-auto mt-12 max-w-[1380px] overflow-hidden rounded-[42px] border border-white/12 bg-white/[0.045] p-3 shadow-[0_35px_130px_rgba(0,0,0,0.64)] sm:p-4">
             <div className="grid gap-4 xl:grid-cols-2">
               <div className="relative overflow-hidden rounded-[30px] border border-white/10 bg-white shadow-[0_18px_70px_rgba(0,0,0,0.35)]">
                 <div className="absolute left-4 top-4 z-10 rounded-full bg-black/78 px-4 py-2 text-xs font-black uppercase tracking-[0.08em] text-white shadow-[0_10px_30px_rgba(0,0,0,0.35)]">
                   Before
                 </div>
-                <div className="relative h-[620px] sm:h-[760px] lg:h-[900px] xl:h-[980px]">
-                  <LocalImage src={ASSETS.beforeMenu} alt="Before menu" className="object-contain object-top" sizes="(min-width: 1280px) 620px, 94vw" />
+                <div className="relative aspect-[1081/1137] w-full">
+                  <LocalImage
+                    src={ASSETS.beforeMenu}
+                    alt="Before menu"
+                    className="object-contain object-center"
+                    sizes="(min-width: 1280px) 670px, 94vw"
+                  />
                 </div>
               </div>
 
@@ -427,8 +435,13 @@ export default function Page() {
                 <div className="absolute right-4 top-4 z-10 rounded-full bg-gradient-to-r from-[#ff5a00] to-[#ff9d20] px-4 py-2 text-xs font-black uppercase tracking-[0.08em] text-white shadow-[0_10px_30px_rgba(255,107,0,0.35)]">
                   After
                 </div>
-                <div className="relative h-[620px] sm:h-[760px] lg:h-[900px] xl:h-[980px]">
-                  <LocalImage src={ASSETS.afterMenu} alt="After menu" className="object-contain object-top" sizes="(min-width: 1280px) 620px, 94vw" />
+                <div className="relative aspect-[1081/1137] w-full">
+                  <LocalImage
+                    src={ASSETS.afterMenu}
+                    alt="After menu"
+                    className="object-contain object-center"
+                    sizes="(min-width: 1280px) 670px, 94vw"
+                  />
                 </div>
               </div>
             </div>
