@@ -283,7 +283,7 @@ export default function Page() {
 
       <header className="sticky top-0 z-50 border-b border-white/10 bg-black/76 backdrop-blur-2xl">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-3 sm:px-8 lg:px-10">
-          <Logo className="scale-125 origin-left" />
+          <Logo className="scale-[2.2] origin-left" />
           <nav className="hidden items-center gap-8 text-xs font-black uppercase tracking-[0.13em] text-white/55 md:flex">
             <a href="#proof" className="transition hover:text-[#ff7a00]">Proof</a>
             <a href="#menu" className="transition hover:text-[#ff7a00]">Menu Upgrade</a>
@@ -319,10 +319,6 @@ export default function Page() {
         <div className="relative z-10 mx-auto max-w-7xl px-5 py-16 sm:px-8 lg:px-10 lg:py-20">
           <div className="max-w-[720px]">
             <SectionEyebrow>Free 3 image preview available</SectionEyebrow>
-
-            <div className="mt-8">
-              <Logo className="scale-110 origin-left" />
-            </div>
 
             <h1 className="mt-8 text-[64px] font-black uppercase leading-[0.78] tracking-[-0.085em] sm:text-[92px] lg:text-[118px]">
               Premium
