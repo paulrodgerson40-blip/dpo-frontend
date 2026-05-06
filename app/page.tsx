@@ -390,7 +390,7 @@ export default function Page() {
               <Pill>Uber Eats</Pill>
               <Pill>DoorDash</Pill>
               <Pill>Websites</Pill>
-              <Pill>Franchise assets</Pill>
+              <Pill>Socials</Pill>
             </div>
 
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
