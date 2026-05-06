@@ -2183,7 +2183,7 @@ function ImageGrid({
         >
           {images.map((img) => {
             const url = fullImageUrl(img.url);
-            const displayUrl = fullImageUrl(img.thumb_url || img.url);
+            const displayUrl = fullImageUrl(img.url);
             const selected = selectedKeys?.has(imageSelectKey(folder, img.filename)) || false;
             return (
               <div
@@ -2244,13 +2244,6 @@ function ImageGrid({
                     <img
                       src={displayUrl}
                       alt={img.filename}
-                      onError={(e) => {
-                        const target = e.currentTarget;
-                        const fallback = fullImageUrl(img.url);
-                        if (fallback && target.src !== fallback) {
-                          target.src = fallback;
-                        }
-                      }}
                       style={{
                         width: "100%",
                         height: "100%",
@@ -2388,18 +2381,7 @@ function CompareGrid({
                     onClick={() => onPreview({ title: "Banner", url: fullImageUrl(banner.url), filename: banner.filename })}
                     style={{ border: "1px solid #e2e8f0", borderRadius: 18, overflow: "hidden", background: "#0f172a", padding: 0, cursor: "zoom-in" }}
                   >
-                    <img
-                      src={fullImageUrl(banner.thumb_url || banner.url)}
-                      alt={banner.filename}
-                      onError={(e) => {
-                        const target = e.currentTarget;
-                        const fallback = fullImageUrl(banner.url);
-                        if (fallback && target.src !== fallback) {
-                          target.src = fallback;
-                        }
-                      }}
-                      style={{ width: "100%", aspectRatio: "16 / 9", objectFit: "cover", display: "block" }}
-                    />
+                    <img src={fullImageUrl(banner.url)} alt={banner.filename} style={{ width: "100%", aspectRatio: "16 / 9", objectFit: "cover", display: "block" }} />
                   </button>
                 ))}
               </div>
@@ -2463,7 +2445,7 @@ function SideBySideImage({
   wide?: boolean;
 }) {
   const url = fullImageUrl(image?.url);
-  const displayUrl = fullImageUrl(image?.thumb_url || image?.url);
+  const displayUrl = fullImageUrl(image?.url);
 
   return (
     <div style={{ background: "white", border: "1px solid #e2e8f0", borderRadius: 20, padding: 12, boxShadow: "0 10px 24px rgba(15,23,42,0.05)" }}>
@@ -2483,18 +2465,7 @@ function SideBySideImage({
             cursor: "zoom-in",
           }}
         >
-          <img
-            src={displayUrl}
-            alt={image.filename}
-            onError={(e) => {
-              const target = e.currentTarget;
-              const fallback = fullImageUrl(image.url);
-              if (fallback && target.src !== fallback) {
-                target.src = fallback;
-              }
-            }}
-            style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
-          />
+          <img src={displayUrl} alt={image.filename} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
         </button>
       ) : (
         <div style={{ height: wide ? 230 : 180, border: "1px dashed #cbd5e1", borderRadius: 16, display: "grid", placeItems: "center", color: "#64748b", fontWeight: 850, textAlign: "center", padding: 16 }}>
