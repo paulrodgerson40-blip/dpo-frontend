@@ -17,34 +17,34 @@ const ASSETS = {
 
 const transformations = [
   {
-    title: "Parma Upgrade",
+    title: "Sushi Upgrade",
     before: img("beforee.png"),
     after: img("aftere.png"),
-    note: "Same Parma. Premium food photography.",
-  },
-  {
-    title: "Sushi Upgrade",
-    before: img("beforeb.png"),
-    after: img("afterb.png"),
-    note: "Same Sushi. Premium presentation.",
+    note: "Same rolls. Premium food photography.",
   },
   {
     title: "Burger Upgrade",
-    before: img("beforec.png"),
-    after: img("afterc.png"),
-    note: "Same Burger. Cleaner conversion image.",
+    before: img("beforeb.png"),
+    after: img("afterb.png"),
+    note: "Same burger. Premium presentation.",
   },
   {
     title: "Pizza Upgrade",
-    before: img("befored.png"),
-    after: img("afterd.png"),
-    note: "Same Pizza. Better appetite appeal.",
+    before: img("beforec.png"),
+    after: img("afterc.png"),
+    note: "Same pizza. Cleaner conversion image.",
   },
   {
-    title: "Spring Rolls Upgrade",
+    title: "Spring Roll Upgrade",
+    before: img("befored.png"),
+    after: img("afterd.png"),
+    note: "Same product. Better appetite appeal.",
+  },
+  {
+    title: "Parma Upgrade",
     before: img("beforeA.png"),
     after: img("aftera.png"),
-    note: "Same Spring Rolls. Higher perceived quality.",
+    note: "Same dish. Higher perceived quality.",
   },
 ];
 
@@ -773,19 +773,16 @@ export default function Page() {
         </div>
       </section>
 
-      <section id="sample" className="relative overflow-hidden border-t border-white/10 bg-black px-5 py-20 text-center sm:px-8 lg:px-10">
+      <section id="sample" className="relative overflow-hidden border-t border-white/10 bg-black px-5 py-14 text-center sm:px-8 lg:px-10">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(255,107,0,0.25),transparent_36%)]" />
-        <div className="relative mx-auto max-w-4xl overflow-hidden rounded-[44px] border border-orange-500/28 bg-white/[0.055] p-9 shadow-[0_0_96px_rgba(255,107,0,0.18)] backdrop-blur-xl sm:p-14">
-          <div className="relative flex justify-center">
-            <Logo className="scale-[0.88]" />
-          </div>
-          <h2 className="relative mt-8 text-5xl font-black uppercase leading-[0.86] tracking-[-0.075em] sm:text-7xl">
+        <div className="relative mx-auto max-w-3xl overflow-hidden rounded-[38px] border border-orange-500/28 bg-white/[0.055] p-8 shadow-[0_0_78px_rgba(255,107,0,0.16)] backdrop-blur-xl sm:p-10">
+          <h2 className="relative text-5xl font-black uppercase leading-[0.86] tracking-[-0.075em] sm:text-6xl">
             Ready to <span className="text-[#ff7a00]">ignite</span> your orders?
           </h2>
-          <p className="relative mx-auto mt-6 max-w-xl text-white/60">
+          <p className="relative mx-auto mt-5 max-w-xl text-white/60">
             Start with 3 free watermarked images. See the upgrade before you commit.
           </p>
-          <div className="relative mt-8 flex flex-col justify-center gap-3 sm:flex-row">
+          <div className="relative mt-7 flex flex-col justify-center gap-3 sm:flex-row">
             <OrangeButton href="#sample">Get Free Sample</OrangeButton>
             <GhostButton href="#pricing">View Packages</GhostButton>
           </div>
