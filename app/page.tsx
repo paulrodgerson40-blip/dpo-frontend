@@ -553,7 +553,31 @@ export default function Page() {
           </div>
         </div>
 
-        <div className="mx-auto mt-10 max-w-7xl rounded-[26px] border border-white/10 bg-white/[0.035] px-5 py-4 text-[10px] leading-5 text-white/38 sm:text-xs">
+        <div className="mx-auto mt-10 grid max-w-7xl gap-4 lg:grid-cols-[0.95fr_1.05fr]">
+          <div className="rounded-[30px] border border-orange-500/22 bg-gradient-to-br from-orange-500/[0.12] to-white/[0.035] p-6 shadow-[0_0_60px_rgba(255,107,0,0.10)]">
+            <div className="text-xs font-black uppercase tracking-[0.14em] text-orange-200">Delivery app reality</div>
+            <p className="mt-3 text-3xl font-black uppercase leading-[0.9] tracking-[-0.055em] text-white sm:text-4xl">
+              Your food is not only competing against similar food.
+              <span className="block text-[#ff7a00]">It is competing against better-looking photos.</span>
+            </p>
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {[
+              ["3 sec", "Visual judgement starts before the menu copy does."],
+              ["6 signals", "Lighting, clarity, texture, portion, freshness and trust."],
+              ["2 platforms", "Uber Eats and DoorDash both enforce photo quality."],
+              ["1 product", "Online, the image becomes the first version of the food."],
+            ].map(([stat, text]) => (
+              <div key={stat} className="rounded-[26px] border border-white/10 bg-white/[0.045] p-5 shadow-[0_18px_60px_rgba(0,0,0,0.30)]">
+                <div className="text-4xl font-black uppercase tracking-[-0.06em] text-[#ff7a00]">{stat}</div>
+                <p className="mt-3 text-sm leading-6 text-white/58">{text}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="mx-auto mt-6 max-w-7xl rounded-[26px] border border-white/10 bg-white/[0.035] px-5 py-4 text-[10px] leading-5 text-white/38 sm:text-xs">
           <p>
             <span className="font-black uppercase tracking-[0.10em] text-white/58">Evidence note: </span>
             Based on publicly available Uber Eats merchant and user-submitted photo guidance, DoorDash merchant photo requirements and menu photography guidance, and hospitality/consumer-behaviour research connecting food photo style with perceived food quality, experiential value, trust and purchase intention. No sales uplift is guaranteed; the claim is that better visual presentation improves the customer decision environment.
@@ -563,23 +587,72 @@ export default function Page() {
 
       <section className="border-y border-white/10 bg-[#0b0b0b] px-5 py-20 sm:px-8 lg:px-10">
         <div className="mx-auto max-w-7xl">
-          <h2 className="text-center text-5xl font-black uppercase tracking-[-0.06em] sm:text-6xl">
-            How it <span className="text-[#ff7a00]">works</span>
-          </h2>
-          <div className="mt-10 grid gap-5 lg:grid-cols-3">
-            {[
-              ["1", "Send us your store link", "Share your Uber Eats or DoorDash store link. We extract your existing menu images."],
-              ["2", "We enhance everything", "Your photos are transformed into premium, high-converting visuals that match your food."],
-              ["3", "Receive your package", "Get enhanced images, banners, headers, and all files ready to upload."],
-            ].map(([num, title, text]) => (
-              <div key={num} className="rounded-[34px] border border-white/10 bg-white/[0.045] p-7 shadow-[0_24px_84px_rgba(0,0,0,0.30)]">
-                <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-orange-500/55 text-3xl font-black text-[#ff7a00] shadow-[0_0_35px_rgba(255,107,0,0.22)]">
-                  {num}
+          <div className="mx-auto max-w-3xl text-center">
+            <SectionEyebrow>Two ways to work</SectionEyebrow>
+            <h2 className="mt-5 text-5xl font-black uppercase leading-[0.86] tracking-[-0.075em] sm:text-7xl">
+              How it <span className="text-[#ff7a00]">works</span>
+            </h2>
+            <p className="mx-auto mt-5 max-w-2xl text-white/55">
+              Choose the simple DIY file package, or the managed path where we handle the image upload work for you.
+            </p>
+          </div>
+
+          <div className="mt-12 grid gap-6 lg:grid-cols-2">
+            <div className="rounded-[38px] border border-white/10 bg-white/[0.045] p-7 shadow-[0_28px_95px_rgba(0,0,0,0.38)]">
+              <div className="flex items-center justify-between gap-4">
+                <div>
+                  <div className="text-xs font-black uppercase tracking-[0.14em] text-orange-200">Pathway one</div>
+                  <h3 className="mt-3 text-4xl font-black uppercase leading-[0.9] tracking-[-0.06em] text-white">
+                    DIY <span className="text-[#ff7a00]">files only</span>
+                  </h3>
                 </div>
-                <h3 className="mt-6 text-xl font-black uppercase tracking-[-0.02em]">{title}</h3>
-                <p className="mt-3 text-sm leading-7 text-white/58">{text}</p>
+                <div className="rounded-full border border-white/12 bg-black/45 px-4 py-2 text-xs font-black uppercase tracking-[0.08em] text-white/65">Fastest</div>
               </div>
-            ))}
+
+              <div className="mt-7 grid gap-4">
+                {[
+                  ["1", "You send the images", "Upload your current menu photos or share the files you want improved."],
+                  ["2", "We enhance the set", "Food images are upgraded for lighting, texture, contrast and consistent presentation."],
+                  ["3", "You receive final files", "Download ready-to-upload images and use them anywhere, with no restrictions."],
+                ].map(([num, title, text]) => (
+                  <div key={num} className="flex gap-4 rounded-[26px] border border-white/10 bg-black/28 p-5">
+                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-orange-500/55 text-2xl font-black text-[#ff7a00] shadow-[0_0_26px_rgba(255,107,0,0.18)]">{num}</div>
+                    <div>
+                      <h4 className="text-lg font-black uppercase tracking-[-0.02em] text-white">{title}</h4>
+                      <p className="mt-1 text-sm leading-6 text-white/56">{text}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="rounded-[38px] border border-orange-500/34 bg-gradient-to-b from-orange-500/[0.16] to-white/[0.045] p-7 shadow-[0_0_80px_rgba(255,107,0,0.18),0_28px_95px_rgba(0,0,0,0.38)]">
+              <div className="flex items-center justify-between gap-4">
+                <div>
+                  <div className="text-xs font-black uppercase tracking-[0.14em] text-orange-200">Pathway two</div>
+                  <h3 className="mt-3 text-4xl font-black uppercase leading-[0.9] tracking-[-0.06em] text-white">
+                    Managed <span className="text-[#ff7a00]">done for you</span>
+                  </h3>
+                </div>
+                <div className="rounded-full bg-gradient-to-r from-[#ff5a00] to-[#ff9d20] px-4 py-2 text-xs font-black uppercase tracking-[0.08em] text-white shadow-[0_0_28px_rgba(255,107,0,0.26)]">Easiest</div>
+              </div>
+
+              <div className="mt-7 grid gap-4">
+                {[
+                  ["1", "Send us your store link", "Share your Uber Eats or DoorDash store. We map the menu, images and priority items."],
+                  ["2", "We create the package", "Food images, drinks, banners and headers are prepared in a consistent premium style."],
+                  ["3", "We support upload", "You receive the finished package, with Uber Eats image upload included in managed plans."],
+                ].map(([num, title, text]) => (
+                  <div key={num} className="flex gap-4 rounded-[26px] border border-orange-500/18 bg-black/30 p-5">
+                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-orange-500/70 text-2xl font-black text-[#ff7a00] shadow-[0_0_30px_rgba(255,107,0,0.24)]">{num}</div>
+                    <div>
+                      <h4 className="text-lg font-black uppercase tracking-[-0.02em] text-white">{title}</h4>
+                      <p className="mt-1 text-sm leading-6 text-white/58">{text}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
       </section>
