@@ -411,7 +411,7 @@ export default function Page() {
       <header className="sticky top-0 z-50 border-b border-white/10 bg-black/76 backdrop-blur-2xl">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-8 px-5 py-6 sm:px-8 lg:px-10">
           <Logo className="scale-[2.15] origin-left" />
-          <nav className="hidden items-center gap-7 text-[11px] font-black uppercase tracking-[0.14em] text-white/55 md:flex">
+          <nav className="hidden items-center gap-10 text-[11px] font-black uppercase tracking-[0.14em] text-white/55 md:flex">
             <a href="#proof" className="transition hover:text-[#ff7a00]">Proof</a>
             <a href="#menu" className="transition hover:text-[#ff7a00]">Menu Upgrade</a>
             <a href="#data" className="transition hover:text-[#ff7a00]">Why it works</a>
@@ -428,7 +428,7 @@ export default function Page() {
       </header>
 
       <section className="relative min-h-[830px] overflow-hidden border-b border-white/10">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_73%_20%,rgba(255,107,0,0.28),transparent_30%),radial-gradient(circle_at_44%_78%,rgba(34,211,238,0.08),transparent_34%),linear-gradient(90deg,#050505_0%,#050505_35%,rgba(5,5,5,.80)_55%,rgba(5,5,5,.25)_100%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_73%_20%,rgba(255,107,0,0.22),transparent_30%),radial-gradient(circle_at_44%_78%,rgba(34,211,238,0.07),transparent_34%),linear-gradient(90deg,#050505_0%,#050505_35%,rgba(5,5,5,.80)_55%,rgba(5,5,5,.25)_100%)]" />
 
         <div className="absolute inset-y-0 right-0 w-full lg:w-[66%]">
           <LocalImage
@@ -818,7 +818,7 @@ export default function Page() {
             {pricing.map((plan) => (
               <div
                 key={plan.name}
-                className={`relative flex h-full min-h-[640px] flex-col rounded-[34px] p-6 ${
+                className={`relative flex h-full min-h-[640px] flex-col rounded-[34px] p-6 transition duration-300 hover:-translate-y-1 ${
                   plan.highlight
                     ? "scale-[1.02] border border-cyan-300/55 bg-gradient-to-b from-cyan-400/[0.11] to-white/[0.045] shadow-[0_0_76px_rgba(34,211,238,0.20),0_0_32px_rgba(255,107,0,0.08)]"
                     : "border border-white/10 bg-white/[0.045]"
@@ -878,7 +878,7 @@ export default function Page() {
                 <span className="block text-[#ff7a00]">We’ll show you what it could look like.</span>
               </h2>
               <p className="mt-6 max-w-2xl text-lg leading-8 text-white/72">
-                Email your Uber Eats link, DoorDash link or a few current menu photos. We can start with 3 free watermarked samples so you can see the upgrade before committing.
+                Email your Uber Eats link, DoorDash link or a few current menu photos. We can start with 3 free watermarked samples so you can see the difference before committing.
               </p>
 
               <div className="mt-8 flex flex-col gap-3 sm:flex-row">
@@ -897,7 +897,7 @@ export default function Page() {
 
               <div className="mt-8 grid gap-3 sm:grid-cols-3">
                 {[
-                  "Send store link or photos",
+                  "Send store links or photos",
                   "Phone photos are fine",
                   "Usually reply same day",
                 ].map((item) => (
