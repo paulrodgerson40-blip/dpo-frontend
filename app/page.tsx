@@ -313,6 +313,11 @@ const faqs = [
       "Yes. We work from your actual menu photos and improve the presentation while keeping the food recognisable and realistic.",
   },
   {
+    question: "Why can't I just use AI myself?",
+    answer:
+      "You can, but getting consistent, realistic and delivery-app-ready results is usually harder than it looks. Most AI tools can change the dish, make food look fake, create inconsistent lighting or produce images that do not match the rest of the menu. Delivery Ignite is built around keeping your actual food recognisable while improving presentation, lighting, atmosphere, sizing and consistency across the whole menu.",
+  },
+  {
     question: "Do I need a professional photoshoot?",
     answer:
       "No. Most restaurants send normal phone photos. We upgrade what you already have, so you can improve your menu without organising a full shoot.",
@@ -328,9 +333,24 @@ const faqs = [
       "Yes. Files are prepared for delivery apps, websites and social media. Managed packages also include Uber Eats upload support.",
   },
   {
+    question: "Do I own the final images?",
+    answer:
+      "Yes. Once completed, the finished images are yours to use on Uber Eats, DoorDash, your website, social media and other restaurant marketing material.",
+  },
+  {
+    question: "Can you match my restaurant style?",
+    answer:
+      "Yes. A pizza shop, burger store, sushi bar, Chinese restaurant, cafe and dessert store should not all look the same. We style the final images to suit the cuisine, brand feel and delivery-platform presentation.",
+  },
+  {
     question: "What if my current photos are poor quality?",
     answer:
       "That is completely normal. Many restaurants start with basic phone photos, mixed lighting or inconsistent menu images. That is exactly what this service is designed to improve.",
+  },
+  {
+    question: "What if my menu has drinks too?",
+    answer:
+      "Drinks can be included. DIY packages can add a drinks pack, and managed packages include drinks and simple items so the whole storefront feels more consistent.",
   },
   {
     question: "How long does it usually take?",
