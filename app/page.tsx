@@ -412,9 +412,9 @@ export default function Page() {
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-8 px-5 py-6 sm:px-8 lg:px-10">
           <Logo className="scale-[2.15] origin-left" />
           <nav className="hidden items-center gap-10 text-[11px] font-black uppercase tracking-[0.14em] text-white/55 md:flex">
-            <a href="#proof" className="transition hover:text-[#ff7a00]">Proof</a>
-            <a href="#menu" className="transition hover:text-[#ff7a00]">Menu Upgrade</a>
-            <a href="#data" className="transition hover:text-[#ff7a00]">Why it works</a>
+            <a href="#transformations" className="transition hover:text-[#ff7a00]">Proof</a>
+            <a href="#menu-upgrade" className="transition hover:text-[#ff7a00]">Menu Upgrade</a>
+            <a href="#why-it-works" className="transition hover:text-[#ff7a00]">Why it works</a>
             <a href="#pricing" className="transition hover:text-[#ff7a00]">Pricing</a>
             <a href="#faq" className="transition hover:text-[#ff7a00]">FAQ</a>
           </nav>
@@ -469,7 +469,7 @@ export default function Page() {
 
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
               <OrangeButton href="#sample">Free Sample</OrangeButton>
-              <GhostButton href="#proof">See Transformations</GhostButton>
+              <GhostButton href="#transformations">See Transformations</GhostButton>
             </div>
           </div>
         </div>
