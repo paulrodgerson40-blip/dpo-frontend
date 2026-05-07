@@ -943,9 +943,21 @@ export default function Page() {
     </div>
 
     <div>
-      <div className="text-xs font-black uppercase tracking-[0.14em] text-cyan-100">Contact</div>
-<div className="mt-2 text-xs text-white/38">Melbourne, Australia</div>
-    </div>
+  <div className="text-xs font-black uppercase tracking-[0.14em] text-cyan-100">
+    Contact
+  </div>
+
+  <div className="mt-2 flex flex-col gap-2 text-xs text-white/50">
+    <div>Melbourne, Australia</div>
+
+    <a
+      href="mailto:sales@deliveryignite.com.au"
+      className="transition hover:text-[#00e7ff]"
+    >
+      sales@deliveryignite.com.au
+    </a>
+  </div>
+</div>
 
     <div>
       <div className="text-xs font-black uppercase tracking-[0.14em] text-cyan-100">Quick links</div>
