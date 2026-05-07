@@ -2458,7 +2458,7 @@ function CompareGrid({
                 <div>
                   <div style={{ fontWeight: 950, fontSize: 18 }}>Top sample comparisons</div>
                   <div style={{ marginTop: 4, color: "#64748b", fontSize: 13 }}>
-                    Sample 1–3: prepared original on the left, watermarked enhanced sample on the right.
+                    Sample 1–3: one stitched comparison card per sample, with prepared original on the left and watermarked enhanced sample on the right.
                   </div>
                 </div>
                 <div style={matchedPill}>{sampleMatches.length} sample pair(s)</div>
@@ -2470,16 +2470,17 @@ function CompareGrid({
                   if (!sample) return null;
 
                   return (
-                    <div key={`sample-${orig.filename}`} style={comparisonSectionBox}>
-                      <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "center", marginBottom: 12 }}>
-                        <div style={{ fontWeight: 950 }}>Sample {index + 1} — {orig.filename}</div>
-                        <div style={matchedPill}>Watermarked</div>
-                      </div>
-                      <div style={headerComparisonGrid}>
-                        <SideBySideImage label="Original" image={orig} emptyText="No prepared original image." title={`Sample ${index + 1} Original`} onPreview={onPreview} />
-                        <SideBySideImage label="Watermarked enhanced" image={sample} emptyText="No sample image." title={`Sample ${index + 1} Watermarked`} onPreview={onPreview} />
-                      </div>
-                    </div>
+                    <StitchedComparisonCard
+                      key={`sample-${orig.filename}`}
+                      title={`Sample ${index + 1} — ${orig.filename}`}
+                      badge="Watermarked"
+                      leftLabel="Original"
+                      rightLabel="Watermarked enhanced"
+                      left={orig}
+                      right={sample}
+                      outputFilename={`sample_${index + 1}_${orig.filename.replace(/\.[^.]+$/, "")}_comparison.png`}
+                      onPreview={onPreview}
+                    />
                   );
                 })}
               </div>
@@ -2517,7 +2518,7 @@ function CompareGrid({
               <div>
                 <div style={{ fontWeight: 950, fontSize: 18 }}>Menu image comparison</div>
                 <div style={{ marginTop: 4, color: "#64748b", fontSize: 13 }}>
-                  Prepared original and enhanced output are stitched together in each comparison card.
+                  Each card shows one stitched comparison view and includes a download button for a joined PNG file.
                 </div>
               </div>
               <div style={matchedPill}>{matched.length} matched</div>
@@ -2532,16 +2533,17 @@ function CompareGrid({
                   if (!enhanced) return null;
 
                   return (
-                    <div key={orig.filename} style={comparisonSectionBox}>
-                      <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "center", marginBottom: 12 }}>
-                        <div style={{ fontWeight: 950 }}>{orig.filename}</div>
-                        <div style={matchedPill}>Matched</div>
-                      </div>
-                      <div style={headerComparisonGrid}>
-                        <SideBySideImage label="Original" image={orig} emptyText="No original image." title="Original" onPreview={onPreview} />
-                        <SideBySideImage label="Enhanced" image={enhanced} emptyText="No enhanced image." title="Enhanced" onPreview={onPreview} />
-                      </div>
-                    </div>
+                    <StitchedComparisonCard
+                      key={orig.filename}
+                      title={orig.filename}
+                      badge="Matched"
+                      leftLabel="Original"
+                      rightLabel="Enhanced"
+                      left={orig}
+                      right={enhanced}
+                      outputFilename={`${orig.filename.replace(/\.[^.]+$/, "")}_comparison.png`}
+                      onPreview={onPreview}
+                    />
                   );
                 })}
               </div>
@@ -2549,6 +2551,194 @@ function CompareGrid({
           </div>
         </>
       )}
+    </div>
+  );
+}
+
+
+async function loadCanvasImage(url: string): Promise<HTMLImageElement> {
+  const res = await fetch(url, { cache: "no-store" });
+  if (!res.ok) throw new Error("Could not load image for comparison download");
+  const blob = await res.blob();
+  const objectUrl = URL.createObjectURL(blob);
+
+  return await new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => {
+      URL.revokeObjectURL(objectUrl);
+      resolve(img);
+    };
+    img.onerror = () => {
+      URL.revokeObjectURL(objectUrl);
+      reject(new Error("Could not render comparison image"));
+    };
+    img.src = objectUrl;
+  });
+}
+
+function drawImageContain(ctx: CanvasRenderingContext2D, img: HTMLImageElement, x: number, y: number, w: number, h: number) {
+  const scale = Math.min(w / img.width, h / img.height);
+  const drawW = img.width * scale;
+  const drawH = img.height * scale;
+  const dx = x + (w - drawW) / 2;
+  const dy = y + (h - drawH) / 2;
+  ctx.drawImage(img, dx, dy, drawW, drawH);
+}
+
+async function downloadStitchedComparison({
+  leftUrl,
+  rightUrl,
+  filename,
+  title,
+  leftLabel,
+  rightLabel,
+}: {
+  leftUrl: string;
+  rightUrl: string;
+  filename: string;
+  title: string;
+  leftLabel: string;
+  rightLabel: string;
+}) {
+  const [leftImg, rightImg] = await Promise.all([loadCanvasImage(leftUrl), loadCanvasImage(rightUrl)]);
+
+  const canvas = document.createElement("canvas");
+  canvas.width = 1800;
+  canvas.height = 1060;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) throw new Error("Canvas not supported");
+
+  ctx.fillStyle = "#f8fafc";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  ctx.fillStyle = "#0f172a";
+  ctx.font = "800 42px Arial, sans-serif";
+  ctx.fillText(title, 70, 72);
+
+  const cardY = 120;
+  const cardW = 800;
+  const cardH = 840;
+  const gap = 60;
+  const leftX = 70;
+  const rightX = leftX + cardW + gap;
+
+  function drawPanel(x: number, label: string, img: HTMLImageElement) {
+    ctx.fillStyle = "#ffffff";
+    ctx.strokeStyle = "#dbe3ef";
+    ctx.lineWidth = 4;
+    ctx.beginPath();
+    ctx.roundRect(x, cardY, cardW, cardH, 30);
+    ctx.fill();
+    ctx.stroke();
+
+    ctx.fillStyle = "#334155";
+    ctx.font = "800 34px Arial, sans-serif";
+    ctx.fillText(label, x + 34, cardY + 56);
+
+    ctx.fillStyle = "#f1f5f9";
+    ctx.beginPath();
+    ctx.roundRect(x + 34, cardY + 90, cardW - 68, cardH - 130, 24);
+    ctx.fill();
+
+    drawImageContain(ctx, img, x + 34, cardY + 90, cardW - 68, cardH - 130);
+  }
+
+  drawPanel(leftX, leftLabel, leftImg);
+  drawPanel(rightX, rightLabel, rightImg);
+
+  const blob = await new Promise<Blob>((resolve, reject) => {
+    canvas.toBlob((b) => (b ? resolve(b) : reject(new Error("Could not create comparison image"))), "image/png", 0.95);
+  });
+
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+
+function StitchedComparisonCard({
+  title,
+  badge,
+  leftLabel,
+  rightLabel,
+  left,
+  right,
+  outputFilename,
+  onPreview,
+}: {
+  title: string;
+  badge: string;
+  leftLabel: string;
+  rightLabel: string;
+  left: LibraryImage;
+  right: LibraryImage;
+  outputFilename: string;
+  onPreview: (img: PreviewImage) => void;
+}) {
+  const [downloading, setDownloading] = useState(false);
+  const leftUrl = fullImageUrl(left.url);
+  const rightUrl = fullImageUrl(right.url);
+
+  async function handleDownload() {
+    if (!leftUrl || !rightUrl) return;
+    setDownloading(true);
+    try {
+      await downloadStitchedComparison({
+        leftUrl,
+        rightUrl,
+        filename: outputFilename,
+        title,
+        leftLabel,
+        rightLabel,
+      });
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "Could not download stitched comparison");
+    } finally {
+      setDownloading(false);
+    }
+  }
+
+  return (
+    <div style={comparisonSectionBox}>
+      <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "center", marginBottom: 12, flexWrap: "wrap" }}>
+        <div style={{ fontWeight: 950 }}>{title}</div>
+        <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
+          <div style={matchedPill}>{badge}</div>
+          <button type="button" onClick={handleDownload} disabled={downloading} style={miniDarkButton(downloading)}>
+            {downloading ? "Creating..." : "Download stitched file"}
+          </button>
+        </div>
+      </div>
+
+      <button
+        type="button"
+        onClick={() => onPreview({ title: `${title} stitched comparison`, url: rightUrl, filename: outputFilename })}
+        style={{
+          width: "100%",
+          border: "1px solid #e2e8f0",
+          borderRadius: 20,
+          background: "white",
+          padding: 12,
+          cursor: "zoom-in",
+          display: "grid",
+          gridTemplateColumns: "1fr 1fr",
+          gap: 12,
+          overflow: "hidden",
+        }}
+      >
+        <div>
+          <div style={{ marginBottom: 8, fontWeight: 950, color: "#334155", textAlign: "left" }}>{leftLabel}</div>
+          <img src={leftUrl} alt={left.filename} style={{ width: "100%", height: 230, objectFit: "contain", background: "#f8fafc", borderRadius: 14, display: "block" }} />
+        </div>
+        <div>
+          <div style={{ marginBottom: 8, fontWeight: 950, color: "#334155", textAlign: "left" }}>{rightLabel}</div>
+          <img src={rightUrl} alt={right.filename} style={{ width: "100%", height: 230, objectFit: "contain", background: "#f8fafc", borderRadius: 14, display: "block" }} />
+        </div>
+      </button>
     </div>
   );
 }
