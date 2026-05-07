@@ -874,15 +874,15 @@ export default function Page() {
             <div className="max-w-3xl">
               <SectionEyebrow>Contact us</SectionEyebrow>
               <h2 className="mt-5 text-5xl font-black uppercase leading-[0.86] tracking-[-0.075em] sm:text-7xl">
-                Send your menu.
-                <span className="block text-[#ff7a00]">We’ll show you what it could look like.</span>
+                Send us your restaurant name.
+                <span className="block text-[#ff7a00]">We’ll show you what’s possible.</span>
               </h2>
               <p className="mt-6 max-w-2xl text-lg leading-8 text-white/72">
-                Email your Uber Eats link, DoorDash link or a few current menu photos. We can start with 3 free watermarked samples so you can see the difference before committing.
+                Tell us your restaurant name and which platform you use — Uber Eats, DoorDash or both — and we’ll create 3 enhanced sample photos so you can see how much stronger your menu could look before spending a dollar.
               </p>
 
               <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-                <OrangeButton href="mailto:sales@deliveryignite.com.au?subject=Free%20Sample%20Request%20-%20Delivery%20Ignite">
+                <OrangeButton href="mailto:sales@deliveryignite.com.au?subject=Free%203%20Photo%20Sample%20-%20Delivery%20Ignite">
                   Email Sales
                 </OrangeButton>
                 <GhostButton href="#pricing">View Packages</GhostButton>
@@ -897,9 +897,9 @@ export default function Page() {
 
               <div className="mt-8 grid gap-3 sm:grid-cols-3">
                 {[
-                  "Send store links or photos",
+                  "Just send your store name",
                   "Phone photos are fine",
-                  "Usually reply same day",
+                  "Fast turnaround",
                 ].map((item) => (
                   <div
                     key={item}
@@ -946,7 +946,7 @@ export default function Page() {
             Start with 3 free watermarked images and see the difference before you commit.
           </p>
           <div className="relative mt-7 flex flex-col justify-center gap-3 sm:flex-row">
-            <OrangeButton href="mailto:sales@deliveryignite.com.au?subject=Free%20Sample%20Request%20-%20Delivery%20Ignite">Free Sample</OrangeButton>
+            <OrangeButton href="mailto:sales@deliveryignite.com.au?subject=Free%203%20Photo%20Sample%20-%20Delivery%20Ignite">Free Sample</OrangeButton>
             <GhostButton href="#pricing">View Packages</GhostButton>
           </div>
         </div>
