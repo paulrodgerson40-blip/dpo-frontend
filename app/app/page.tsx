@@ -5,7 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 const BACKEND_URL = "https://170.64.209.149.sslip.io";
 
 type RestaurantMode = "new" | "existing";
-type ActiveTab = "originals" | "compare" | "enhanced" | "samples" | "banners";
+type ActiveTab = "originals" | "prepared" | "compare" | "enhanced" | "samples" | "banners";
 type UploadType = "menu";
 type WorkspaceMode = "restaurants" | "drinks";
 type DrinksTab = "originals" | "enhanced";
@@ -52,6 +52,7 @@ type PreviewImage = {
 
 const TAB_LABELS: Record<ActiveTab, string> = {
   originals: "Original",
+  prepared: "Prepared",
   compare: "Comparison",
   enhanced: "Enhanced",
   samples: "Samples",
@@ -60,7 +61,8 @@ const TAB_LABELS: Record<ActiveTab, string> = {
 
 const IMAGE_FOLDERS: Record<ActiveTab, string> = {
   originals: "originals_approved",
-  compare: "originals_approved",
+  prepared: "original_prepared",
+  compare: "original_prepared",
   enhanced: "enhanced",
   samples: "samples",
   banners: "banners",
@@ -119,6 +121,7 @@ export default function Home() {
   const [activeTab, setActiveTab] = useState<ActiveTab>("originals");
 
   const [originalImages, setOriginalImages] = useState<LibraryImage[]>([]);
+  const [preparedImages, setPreparedImages] = useState<LibraryImage[]>([]);
   const [enhancedImages, setEnhancedImages] = useState<LibraryImage[]>([]);
   const [sampleImages, setSampleImages] = useState<LibraryImage[]>([]);
   const [bannerImages, setBannerImages] = useState<LibraryImage[]>([]);
@@ -170,6 +173,7 @@ export default function Home() {
       const folders = data.folders || {};
 
       setOriginalImages(normaliseLibraryImages(folders.originals || folders.originals_approved));
+      setPreparedImages(normaliseLibraryImages(folders.original_prepared || folders.prepared));
       setEnhancedImages(normaliseLibraryImages(folders.enhanced));
       setSampleImages(normaliseLibraryImages(folders.samples));
       setBannerImages(normaliseLibraryImages(folders.banners));
@@ -178,6 +182,7 @@ export default function Home() {
       setStatus("Library loaded");
     } catch {
       setOriginalImages([]);
+      setPreparedImages([]);
       setEnhancedImages([]);
       setSampleImages([]);
       setBannerImages([]);
@@ -243,13 +248,16 @@ export default function Home() {
     return map;
   }, [enhancedImages]);
 
-  const matchedOriginalImages = useMemo(() => {
-    return originalImages.filter((img) => enhancedByFilename.has(img.filename));
-  }, [originalImages, enhancedByFilename]);
+  const matchedPreparedImages = useMemo(() => {
+    return preparedImages.filter((img) => enhancedByFilename.has(img.filename));
+  }, [preparedImages, enhancedByFilename]);
 
-  const unmatchedOriginalImages = useMemo(() => {
-    return originalImages.filter((img) => !enhancedByFilename.has(img.filename));
-  }, [originalImages, enhancedByFilename]);
+  const unmatchedPreparedImages = useMemo(() => {
+    return preparedImages.filter((img) => !enhancedByFilename.has(img.filename));
+  }, [preparedImages, enhancedByFilename]);
+
+  const matchedOriginalImages = matchedPreparedImages;
+  const unmatchedOriginalImages = unmatchedPreparedImages;
 
 
   function clearRestaurantScopedState() {
@@ -260,6 +268,7 @@ export default function Home() {
     setLastJobId("");
     setLastUploadedFiles([]);
     setOriginalImages([]);
+    setPreparedImages([]);
     setEnhancedImages([]);
     setSampleImages([]);
     setBannerImages([]);
@@ -537,14 +546,53 @@ export default function Home() {
     }
   }
 
+  async function prepareAllOriginals() {
+    if (!activeRestaurantSlug) return;
+
+    const check = window.prompt("Prepare all approved screenshots into cropped food-only originals?\n\nType PREPARE to confirm.");
+    if (check !== "PREPARE") return;
+
+    setLoading(true);
+    setWorkingLabel("Preparing cropped food-only originals...");
+    setError("");
+    setMessage("");
+    setStatus("Preparing originals...");
+
+    try {
+      const res = await fetch(`${BACKEND_URL}/api/dpo/restaurants/${encodeURIComponent(activeRestaurantSlug)}/prepare`, {
+        method: "POST",
+      });
+
+      const data = await res.json();
+
+      if (!res.ok || data.ok === false || data.success === false) {
+        throw new Error(data.detail || data.error || "Prepare originals failed");
+      }
+
+      setProgress(100);
+      await refreshRestaurantLibrary(activeRestaurantSlug);
+      setActiveTab("prepared");
+      setStatus("Prepared");
+      setMessage(`Prepared ${data.prepared_count || data.count || data.files?.length || 0} food-only original image(s).`);
+    } catch (err) {
+      setStatus("Prepare failed");
+      setError(err instanceof Error ? err.message : "Prepare originals failed");
+    } finally {
+      setLoading(false);
+      setWorkingLabel("");
+      setProgress(0);
+      setProgressDetails(undefined);
+    }
+  }
+
   async function enhanceAllOriginals() {
     if (!activeRestaurantSlug) return;
 
-    const check = window.prompt("Enhance all original images?\n\nType ENHANCE ALL to confirm.");
+    const check = window.prompt("Enhance all prepared images?\n\nType ENHANCE ALL to confirm.");
     if (check !== "ENHANCE ALL") return;
 
     setLoading(true);
-    setWorkingLabel("Running Phase B on all originals...");
+    setWorkingLabel("Running Phase B on prepared originals...");
     setError("");
     setMessage("");
     setStatus("Phase B running...");
@@ -564,7 +612,7 @@ export default function Home() {
       await refreshRestaurantLibrary(activeRestaurantSlug);
       setActiveTab("enhanced");
       setStatus("Phase B complete");
-      setMessage(`Enhanced ${data.count || data.processed?.length || 0} original image(s).`);
+      setMessage(`Enhanced ${data.count || data.processed?.length || 0} prepared image(s).`);
     } catch (err) {
       setStatus("Phase B failed");
       setError(err instanceof Error ? err.message : "Enhance all failed");
@@ -705,6 +753,9 @@ export default function Home() {
   }
 
   const activeBatch = useMemo(() => {
+    if (activeTab === "prepared") {
+      return { images: preparedImages, folder: "original_prepared", canEnhance: true, enhanceKind: "menu" as const };
+    }
     if (activeTab === "enhanced") {
       return { images: enhancedImages, folder: "enhanced", canEnhance: false, enhanceKind: "none" as const };
     }
@@ -714,8 +765,8 @@ export default function Home() {
     if (activeTab === "banners") {
       return { images: bannerImages, folder: "banners", canEnhance: false, enhanceKind: "none" as const };
     }
-    return { images: originalImages, folder: "originals_approved", canEnhance: activeTab === "originals", enhanceKind: "menu" as const };
-  }, [activeTab, originalImages, enhancedImages, sampleImages, bannerImages]);
+    return { images: originalImages, folder: "originals_approved", canEnhance: false, enhanceKind: "none" as const };
+  }, [activeTab, originalImages, preparedImages, enhancedImages, sampleImages, bannerImages]);
 
   const selectedImages = useMemo(() => {
     return activeBatch.images.filter((img) => selectedImageKeys.has(imageSelectKey(activeBatch.folder, img.filename)));
@@ -963,28 +1014,37 @@ Type BANNER to confirm.`);
       };
     }
 
-    if (originalImages.length > 0 && enhancedImages.length === 0) {
+    if (originalImages.length > 0 && preparedImages.length === 0) {
       return {
         title: "Phase A",
-        subtitle: "Originals ready → enhance next",
-        badge: "Phase A active",
+        subtitle: "Original screenshots ready → prepare next",
+        badge: "Prepare needed",
         tone: "neutral" as const,
       };
     }
 
-    if (unmatchedOriginalImages.length > 0) {
+    if (preparedImages.length > 0 && enhancedImages.length === 0) {
+      return {
+        title: "Prepared",
+        subtitle: "Food-only originals ready → enhance next",
+        badge: "Prepared ready",
+        tone: "good" as const,
+      };
+    }
+
+    if (unmatchedPreparedImages.length > 0) {
       return {
         title: "Phase B Partial",
-        subtitle: `${matchedOriginalImages.length} matched / ${unmatchedOriginalImages.length} missing`,
+        subtitle: `${matchedPreparedImages.length} matched / ${unmatchedPreparedImages.length} missing`,
         badge: "Phase B incomplete",
         tone: "bad" as const,
       };
     }
 
-    if (originalImages.length > 0 && enhancedImages.length > 0) {
+    if (preparedImages.length > 0 && enhancedImages.length > 0) {
       return {
         title: "Phase B Complete",
-        subtitle: "Original → Enhanced matched",
+        subtitle: "Prepared → Enhanced matched",
         badge: "Phase B complete",
         tone: "good" as const,
       };
@@ -997,7 +1057,7 @@ Type BANNER to confirm.`);
       badge: "Ready",
       tone: "good" as const,
     };
-  }, [activeRestaurantSlug, originalImages.length, enhancedImages.length, unmatchedOriginalImages.length, matchedOriginalImages.length]);
+  }, [activeRestaurantSlug, originalImages.length, preparedImages.length, enhancedImages.length, unmatchedPreparedImages.length, matchedPreparedImages.length]);
 
   if (workspaceMode === "drinks") {
     return (
@@ -1195,6 +1255,7 @@ Type BANNER to confirm.`);
 
                 <div style={{ display: "flex", gap: 10, flexWrap: "wrap", justifyContent: "flex-end" }}>
                   <Metric label="Original" value={String(originalImages.length)} />
+                  <Metric label="Prepared" value={String(preparedImages.length)} tone={preparedImages.length > 0 ? "good" : "neutral"} />
                   <Metric label="Enhanced" value={String(enhancedImages.length)} />
                   <Metric label="Samples" value={String(sampleImages.length)} tone={sampleImages.length > 0 ? "good" : "neutral"} />
                   <Metric label="Missing" value={String(unmatchedOriginalImages.length)} tone={unmatchedOriginalImages.length > 0 ? "warn" : "good"} />
@@ -1208,8 +1269,11 @@ Type BANNER to confirm.`);
                   <button onClick={downloadAllRestaurantFiles} disabled={!activeRestaurantSlug} style={miniButton(!activeRestaurantSlug)}>
                     Download all restaurant files
                   </button>
-                  <button onClick={enhanceAllOriginals} disabled={loading || !activeRestaurantSlug || originalImages.length === 0} style={miniDarkButton(loading || !activeRestaurantSlug || originalImages.length === 0)}>
-                    Phase B: Enhance all originals
+                  <button onClick={prepareAllOriginals} disabled={loading || !activeRestaurantSlug || originalImages.length === 0} style={miniButton(loading || !activeRestaurantSlug || originalImages.length === 0)}>
+                    Prepare All
+                  </button>
+                  <button onClick={enhanceAllOriginals} disabled={loading || !activeRestaurantSlug || preparedImages.length === 0} style={miniDarkButton(loading || !activeRestaurantSlug || preparedImages.length === 0)}>
+                    Phase B: Enhance prepared
                   </button>
                 </div>
               </div>
@@ -1236,7 +1300,7 @@ Type BANNER to confirm.`);
               {activeTab === "originals" && (
                 <ImageGrid
                   title="Original"
-                  subtitle="Approved Phase A source images. These are the source of truth for menu-item enhancement."
+                  subtitle="Approved Phase A screenshots/originals. Rename these first, then click Prepare All to crop the food-only source images."
                   images={originalImages}
                   emptyText={emptyLibraryText}
                   folder="originals_approved"
@@ -1244,6 +1308,23 @@ Type BANNER to confirm.`);
                   onPreview={setPreviewImage}
                   onDownload={downloadImage}
                   onDelete={(img) => deleteImage(img, "originals_approved")}
+                  selectedKeys={selectedImageKeys}
+                  onToggleSelected={toggleImageSelected}
+                  onRename={renameImage}
+                />
+              )}
+
+              {activeTab === "prepared" && (
+                <ImageGrid
+                  title="Original Prepared"
+                  subtitle="Food-only cropped images created from approved screenshots. Phase B enhancement runs from this folder only."
+                  images={preparedImages}
+                  emptyText="No prepared images yet. Go to Original and click Prepare All after renaming/approval."
+                  folder="original_prepared"
+                  restaurantSlug={activeRestaurantSlug}
+                  onPreview={setPreviewImage}
+                  onDownload={downloadImage}
+                  onDelete={(img) => deleteImage(img, "original_prepared")}
                   onEnhance={enhanceImage}
                   showEnhance
                   enhanceLabel="Enhance"
@@ -1255,7 +1336,7 @@ Type BANNER to confirm.`);
 
               {activeTab === "compare" && (
                 <CompareGrid
-                  originals={originalImages}
+                  originals={preparedImages.length > 0 ? preparedImages : originalImages}
                   enhancedByFilename={enhancedByFilename}
                   banners={bannerImages}
                   restaurantSlug={activeRestaurantSlug}
@@ -1329,11 +1410,12 @@ Type BANNER to confirm.`);
               </div>
 
               <div style={workflowGrid}>
-                <WorkflowStep number="01" title="Original" text="Upload and approve source images. Files are auto-renamed to avoid duplicate conflicts." />
-                <WorkflowStep number="02" title="Comparison" text="Review original and enhanced menu images before publishing." />
-                <WorkflowStep number="03" title="Enhanced" text="Generate menu-item outputs with the square food-photo prompt." />
-                <WorkflowStep number="04" title="Samples" text="Create watermarked sales previews from selected enhanced images." />
-                <WorkflowStep number="05" title="Banners" text="Select exactly 3 enhanced menu images to create a composed 16:9 banner." />
+                <WorkflowStep number="01" title="Original" text="Upload and approve full screenshots/originals. Rename dishes here while the menu context is still visible." />
+                <WorkflowStep number="02" title="Prepared" text="Click Prepare All to crop clean food-only images into original_prepared using the locked Uber modal crop." />
+                <WorkflowStep number="03" title="Enhanced" text="Generate menu-item outputs from prepared images only, keeping screenshots out of Phase B." />
+                <WorkflowStep number="04" title="Comparison" text="Review prepared source images against enhanced outputs before publishing." />
+                <WorkflowStep number="05" title="Samples" text="Create watermarked sales previews from selected enhanced images." />
+                <WorkflowStep number="06" title="Banners" text="Select exactly 3 enhanced menu images to create a composed 16:9 banner." />
               </div>
             </Panel>
           </div>
@@ -1823,7 +1905,7 @@ function Hero({ modeTitle, modeSubtitle }: { modeTitle: string; modeSubtitle: st
             Restaurant Image Library
           </h1>
           <p style={{ margin: 0, color: "#dbeafe", fontSize: 17, maxWidth: 720 }}>
-            Manage original images, compare old vs new, enhance menu assets, create samples, and generate composed 16:9 banners from enhanced dishes.
+            Manage screenshots, prepare clean food-only originals, compare old vs new, enhance menu assets, create samples, and generate composed 16:9 banners from enhanced dishes.
           </p>
         </div>
 
@@ -1987,6 +2069,7 @@ function SegmentedControl({
 function Tabs({ active, setActive }: { active: ActiveTab; setActive: (tab: ActiveTab) => void }) {
   const tabs: { id: ActiveTab; label: string }[] = [
     { id: "originals", label: "Original" },
+    { id: "prepared", label: "Prepared" },
     { id: "enhanced", label: "Enhanced" },
     { id: "samples", label: "Samples" },
     { id: "banners", label: "Banners" },
