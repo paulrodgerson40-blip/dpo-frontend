@@ -887,15 +887,7 @@ export default function Page() {
                 </OrangeButton>
                 <GhostButton href="#pricing">View Packages</GhostButton>
               </div>
-
-              <a
-                href="mailto:sales@deliveryignite.com.au"
-                className="mt-7 inline-flex break-all text-lg font-black tracking-[-0.02em] text-cyan-100 underline decoration-cyan-300/30 underline-offset-8 transition hover:text-[#ff7a00] hover:decoration-orange-400/50"
-              >
-                sales@deliveryignite.com.au
-              </a>
-
-              <div className="mt-8 grid gap-3 sm:grid-cols-3">
+<div className="mt-8 grid gap-3 sm:grid-cols-3">
                 {[
                   "Just send your store name",
                   "Phone photos are fine",
@@ -966,10 +958,7 @@ export default function Page() {
 
     <div>
       <div className="text-xs font-black uppercase tracking-[0.14em] text-cyan-100">Contact</div>
-      <a href="mailto:sales@deliveryignite.com.au" className="mt-3 block text-sm font-bold text-white/62 transition hover:text-[#ff7a00]">
-        sales@deliveryignite.com.au
-      </a>
-      <div className="mt-2 text-xs text-white/38">Melbourne, Australia</div>
+<div className="mt-2 text-xs text-white/38">Melbourne, Australia</div>
     </div>
 
     <div>
