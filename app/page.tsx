@@ -414,8 +414,9 @@ export default function Page() {
           <nav className="hidden items-center gap-10 text-[11px] font-black uppercase tracking-[0.14em] text-white/55 md:flex">
             <a href="#proof" className="transition hover:text-[#ff7a00]">Proof</a>
             <a href="#menu" className="transition hover:text-[#ff7a00]">Menu Upgrade</a>
-            <a href="#data" className="transition hover:text-[#ff7a00]">Why it works</a>
+            <a href="#data" className="transition hover:text-[#ff7a00]">Why It Works</a>
             <a href="#pricing" className="transition hover:text-[#ff7a00]">Pricing</a>
+            <a href="#contact" className="transition hover:text-[#ff7a00]">Contact</a>
             <a href="#faq" className="transition hover:text-[#ff7a00]">FAQ</a>
           </nav>
           <a
