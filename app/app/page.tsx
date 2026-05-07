@@ -2607,13 +2607,14 @@ async function downloadStitchedComparison({
   canvas.height = 1060;
   const ctx = canvas.getContext("2d");
   if (!ctx) throw new Error("Canvas not supported");
+  const safeCtx = ctx;
 
-  ctx.fillStyle = "#f8fafc";
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  safeCtx.fillStyle = "#f8fafc";
+  safeCtx.fillRect(0, 0, canvas.width, canvas.height);
 
-  ctx.fillStyle = "#0f172a";
-  ctx.font = "800 42px Arial, sans-serif";
-  ctx.fillText(title, 70, 72);
+  safeCtx.fillStyle = "#0f172a";
+  safeCtx.font = "800 42px Arial, sans-serif";
+  safeCtx.fillText(title, 70, 72);
 
   const cardY = 120;
   const cardW = 800;
@@ -2623,24 +2624,24 @@ async function downloadStitchedComparison({
   const rightX = leftX + cardW + gap;
 
   function drawPanel(x: number, label: string, img: HTMLImageElement) {
-    ctx.fillStyle = "#ffffff";
-    ctx.strokeStyle = "#dbe3ef";
-    ctx.lineWidth = 4;
-    ctx.beginPath();
-    ctx.roundRect(x, cardY, cardW, cardH, 30);
-    ctx.fill();
-    ctx.stroke();
+    safeCtx.fillStyle = "#ffffff";
+    safeCtx.strokeStyle = "#dbe3ef";
+    safeCtx.lineWidth = 4;
+    safeCtx.beginPath();
+    safeCtx.roundRect(x, cardY, cardW, cardH, 30);
+    safeCtx.fill();
+    safeCtx.stroke();
 
-    ctx.fillStyle = "#334155";
-    ctx.font = "800 34px Arial, sans-serif";
-    ctx.fillText(label, x + 34, cardY + 56);
+    safeCtx.fillStyle = "#334155";
+    safeCtx.font = "800 34px Arial, sans-serif";
+    safeCtx.fillText(label, x + 34, cardY + 56);
 
-    ctx.fillStyle = "#f1f5f9";
-    ctx.beginPath();
-    ctx.roundRect(x + 34, cardY + 90, cardW - 68, cardH - 130, 24);
-    ctx.fill();
+    safeCtx.fillStyle = "#f1f5f9";
+    safeCtx.beginPath();
+    safeCtx.roundRect(x + 34, cardY + 90, cardW - 68, cardH - 130, 24);
+    safeCtx.fill();
 
-    drawImageContain(ctx, img, x + 34, cardY + 90, cardW - 68, cardH - 130);
+    drawImageContain(safeCtx, img, x + 34, cardY + 90, cardW - 68, cardH - 130);
   }
 
   drawPanel(leftX, leftLabel, leftImg);
