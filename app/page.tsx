@@ -921,7 +921,7 @@ export default function Page() {
             Ready to make your menu <span className="text-[#ff7a00]">look worth ordering?</span>
           </h2>
           <p className="relative mx-auto mt-5 max-w-xl text-white/60">
-            Start with 3 free watermarked images and see the difference before you commit.
+            Start with 3 free sample images and see the difference before you commit.
           </p>
           <div className="relative mt-7 flex flex-col justify-center gap-3 sm:flex-row">
             <OrangeButton href="mailto:sales@deliveryignite.com.au?subject=Free%203%20Photo%20Sample%20-%20Delivery%20Ignite">Free Sample</OrangeButton>
