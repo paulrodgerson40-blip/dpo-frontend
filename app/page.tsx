@@ -411,12 +411,12 @@ export default function Page() {
       <header className="sticky top-0 z-50 border-b border-white/10 bg-black/76 backdrop-blur-2xl">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-8 px-5 py-6 sm:px-8 lg:px-10">
           <Logo className="scale-[2.15] origin-left" />
-          <nav className="hidden items-center gap-10 text-[11px] font-black uppercase tracking-[0.14em] text-white/55 md:flex">
-            <a href="#transformations" className="transition hover:text-[#ff7a00]">Proof</a>
-            <a href="#menu-upgrade" className="transition hover:text-[#ff7a00]">Menu Upgrade</a>
-            <a href="#why-it-works" className="transition hover:text-[#ff7a00]">Why it works</a>
-            <a href="#pricing" className="transition hover:text-[#ff7a00]">Pricing</a>
-            <a href="#faq" className="transition hover:text-[#ff7a00]">FAQ</a>
+          <nav className="hidden items-center gap-7 text-[10px] font-black uppercase tracking-[0.12em] text-white/55 md:flex lg:gap-8">
+            <a href="#proof" className="cursor-pointer transition duration-200 hover:text-[#ff7a00]">Proof</a>
+            <a href="#menu-upgrade" className="cursor-pointer transition duration-200 hover:text-[#ff7a00]">Menu Upgrade</a>
+            <a href="#why-it-works" className="cursor-pointer transition duration-200 hover:text-[#ff7a00]">Why It Works</a>
+            <a href="#pricing" className="cursor-pointer transition duration-200 hover:text-[#ff7a00]">Pricing</a>
+            <a href="#faq" className="cursor-pointer transition duration-200 hover:text-[#ff7a00]">FAQ</a>
           </nav>
           <a
             href="#sample"
@@ -427,7 +427,7 @@ export default function Page() {
         </div>
       </header>
 
-      <section className="relative min-h-[830px] overflow-hidden border-b border-white/10">
+      <section id="why-it-works" id="menu-upgrade" className="relative min-h-[830px] overflow-hidden border-b border-white/10">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_73%_20%,rgba(255,107,0,0.22),transparent_30%),radial-gradient(circle_at_44%_78%,rgba(34,211,238,0.07),transparent_34%),linear-gradient(90deg,#050505_0%,#050505_35%,rgba(5,5,5,.80)_55%,rgba(5,5,5,.25)_100%)]" />
 
         <div className="absolute inset-y-0 right-0 w-full lg:w-[66%]">
@@ -469,7 +469,7 @@ export default function Page() {
 
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
               <OrangeButton href="#sample">Free Sample</OrangeButton>
-              <GhostButton href="#transformations">See Transformations</GhostButton>
+              <GhostButton href="#proof">See Transformations</GhostButton>
             </div>
           </div>
         </div>
