@@ -293,21 +293,6 @@ function BeforeAfterCard({
 
 
 
-function ContactCard({
-  title,
-  text,
-}: {
-  title: string;
-  text: string;
-}) {
-  return (
-    <div className="rounded-[28px] border border-white/10 bg-black/26 p-6 shadow-[0_18px_60px_rgba(0,0,0,0.30)]">
-      <div className="text-sm font-black uppercase tracking-[0.12em] text-cyan-100">{title}</div>
-      <p className="mt-3 text-sm leading-7 text-white/62">{text}</p>
-    </div>
-  );
-}
-
 function FAQItem({ question, answer }: { question: string; answer: string }) {
   return (
     <details className="group rounded-[28px] border border-white/10 bg-white/[0.045] p-6 shadow-[0_18px_60px_rgba(0,0,0,0.28)] open:border-cyan-300/35 open:bg-cyan-400/[0.06]">
@@ -431,12 +416,11 @@ export default function Page() {
             <a href="#menu" className="transition hover:text-[#ff7a00]">Menu Upgrade</a>
             <a href="#data" className="transition hover:text-[#ff7a00]">Why it works</a>
             <a href="#pricing" className="transition hover:text-[#ff7a00]">Pricing</a>
-            <a href="#contact" className="transition hover:text-[#ff7a00]">Contact</a>
             <a href="#faq" className="transition hover:text-[#ff7a00]">FAQ</a>
           </nav>
           <a
             href="#sample"
-            className="rounded-full border border-cyan-300/35 bg-cyan-400/8 px-5 py-3 text-[11px] font-black uppercase tracking-[0.08em] text-white shadow-[0_0_28px_rgba(34,211,238,0.20)] transition hover:border-orange-500/70 hover:bg-orange-500"
+            className="whitespace-nowrap rounded-full border border-cyan-300/35 bg-cyan-400/8 px-5 py-3 text-[11px] font-black uppercase tracking-[0.08em] text-white shadow-[0_0_28px_rgba(34,211,238,0.20)] transition hover:border-orange-500/70 hover:bg-orange-500"
           >
             Free Sample →
           </a>
@@ -885,45 +869,47 @@ export default function Page() {
         <div className="absolute left-[-260px] top-[-160px] h-[560px] w-[560px] rounded-full bg-cyan-400/8 blur-3xl" />
         <div className="absolute right-[-220px] bottom-[-180px] h-[520px] w-[520px] rounded-full bg-orange-500/8 blur-3xl" />
 
-        <div className="relative mx-auto grid max-w-7xl gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:items-stretch">
-          <div className="rounded-[42px] border border-cyan-300/22 bg-gradient-to-br from-cyan-400/[0.09] via-white/[0.035] to-black/20 p-8 shadow-[0_0_70px_rgba(34,211,238,0.08),0_30px_110px_rgba(0,0,0,0.45)] sm:p-10">
-            <SectionEyebrow>Contact us</SectionEyebrow>
-            <h2 className="mt-5 text-5xl font-black uppercase leading-[0.86] tracking-[-0.075em] sm:text-7xl">
-              Send your menu.
-              <span className="block text-[#ff7a00]">We’ll show you what it could look like.</span>
-            </h2>
-            <p className="mt-6 max-w-xl text-lg leading-8 text-white/72">
-              Email your Uber Eats link, DoorDash link or a few current menu photos. We can start with 3 free watermarked samples so you can see the upgrade before committing.
-            </p>
+        <div className="relative mx-auto max-w-5xl">
+          <div className="rounded-[42px] border border-cyan-300/22 bg-gradient-to-br from-cyan-400/[0.09] via-white/[0.035] to-black/20 p-8 shadow-[0_0_70px_rgba(34,211,238,0.08),0_30px_110px_rgba(0,0,0,0.45)] sm:p-10 lg:p-12">
+            <div className="max-w-3xl">
+              <SectionEyebrow>Contact us</SectionEyebrow>
+              <h2 className="mt-5 text-5xl font-black uppercase leading-[0.86] tracking-[-0.075em] sm:text-7xl">
+                Send your menu.
+                <span className="block text-[#ff7a00]">We’ll show you what it could look like.</span>
+              </h2>
+              <p className="mt-6 max-w-2xl text-lg leading-8 text-white/72">
+                Email your Uber Eats link, DoorDash link or a few current menu photos. We can start with 3 free watermarked samples so you can see the upgrade before committing.
+              </p>
 
-            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-              <OrangeButton href="mailto:sales@deliveryignite.com.au?subject=Free%20Sample%20Request%20-%20Delivery%20Ignite">
-                Email Sales
-              </OrangeButton>
-              <GhostButton href="#pricing">View Packages</GhostButton>
+              <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+                <OrangeButton href="mailto:sales@deliveryignite.com.au?subject=Free%20Sample%20Request%20-%20Delivery%20Ignite">
+                  Email Sales
+                </OrangeButton>
+                <GhostButton href="#pricing">View Packages</GhostButton>
+              </div>
+
+              <a
+                href="mailto:sales@deliveryignite.com.au"
+                className="mt-7 inline-flex break-all text-lg font-black tracking-[-0.02em] text-cyan-100 underline decoration-cyan-300/30 underline-offset-8 transition hover:text-[#ff7a00] hover:decoration-orange-400/50"
+              >
+                sales@deliveryignite.com.au
+              </a>
+
+              <div className="mt-8 grid gap-3 sm:grid-cols-3">
+                {[
+                  "Send store link or photos",
+                  "Phone photos are fine",
+                  "Usually reply same day",
+                ].map((item) => (
+                  <div
+                    key={item}
+                    className="rounded-2xl border border-white/10 bg-black/24 px-4 py-3 text-center text-xs font-black uppercase tracking-[0.08em] text-white/64"
+                  >
+                    <span className="mr-2 text-cyan-200">✓</span>{item}
+                  </div>
+                ))}
+              </div>
             </div>
-
-            <a
-              href="mailto:sales@deliveryignite.com.au"
-              className="mt-7 inline-flex text-lg font-black tracking-[-0.02em] text-cyan-100 underline decoration-cyan-300/30 underline-offset-8 transition hover:text-[#ff7a00] hover:decoration-orange-400/50"
-            >
-              sales@deliveryignite.com.au
-            </a>
-          </div>
-
-          <div className="grid gap-5">
-            <ContactCard
-              title="What to send"
-              text="A delivery-app store link, website menu link, or a small batch of current food photos. Phone photos are completely fine."
-            />
-            <ContactCard
-              title="What happens next"
-              text="We review the images, confirm what package makes sense, and prepare free watermarked examples if you want to see the difference first."
-            />
-            <ContactCard
-              title="Built for restaurants"
-              text="Melbourne based, built for Uber Eats, DoorDash, websites and modern restaurant marketing. Same food, better first impression."
-            />
           </div>
         </div>
       </section>
