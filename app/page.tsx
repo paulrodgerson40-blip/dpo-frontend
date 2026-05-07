@@ -887,18 +887,7 @@ export default function Page() {
                 </OrangeButton>
                 <GhostButton href="#pricing">View Packages</GhostButton>
               </div>
-<div className="mt-8 grid gap-3 sm:grid-cols-3">
-                {[
-                  "Just send your store name",
-                  "Phone photos are fine",
-                  "Fast turnaround",
-                ].map((item) => (
-                  <div
-                    key={item}
-                    className="rounded-2xl border border-white/10 bg-black/24 px-4 py-3 text-center text-xs font-black uppercase tracking-[0.08em] text-white/64"
-                  >
-                    <span className="mr-2 text-cyan-200">✓</span>{item}
-                  </div>
+
                 ))}
               </div>
             </div>
