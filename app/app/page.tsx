@@ -1338,6 +1338,7 @@ Type BANNER to confirm.`);
                 <CompareGrid
                   originals={preparedImages.length > 0 ? preparedImages : originalImages}
                   enhancedByFilename={enhancedByFilename}
+                  samples={sampleImages}
                   banners={bannerImages}
                   restaurantSlug={activeRestaurantSlug}
                   emptyText={emptyLibraryText}
@@ -2403,6 +2404,7 @@ function ImageGrid({
 function CompareGrid({
   originals,
   enhancedByFilename,
+  samples,
   banners,
   restaurantSlug,
   emptyText,
@@ -2410,14 +2412,22 @@ function CompareGrid({
 }: {
   originals: LibraryImage[];
   enhancedByFilename: Map<string, LibraryImage>;
+  samples: LibraryImage[];
   banners: LibraryImage[];
   restaurantSlug: string;
   emptyText: string;
   onPreview: (img: PreviewImage) => void;
 }) {
+  const sampleByFilename = useMemo(() => {
+    const map = new Map<string, LibraryImage>();
+    samples.forEach((img) => map.set(img.filename, img));
+    return map;
+  }, [samples]);
+
   const matched = originals.filter((orig) => enhancedByFilename.has(orig.filename));
   const unmatched = originals.filter((orig) => !enhancedByFilename.has(orig.filename));
-  const hasAnyComparisonAssets = Boolean(originals.length || matched.length || banners.length);
+  const sampleMatches = originals.filter((orig) => sampleByFilename.has(orig.filename)).slice(0, 3);
+  const hasAnyComparisonAssets = Boolean(originals.length || matched.length || sampleMatches.length || banners.length);
 
   return (
     <div style={{ marginTop: 22 }}>
@@ -2437,9 +2447,44 @@ function CompareGrid({
         <>
           <div style={compareStatusGrid}>
             <CompareStatusBadge label="Menu pairs" value={matched.length} tone={matched.length > 0 ? "good" : "neutral"} />
+            <CompareStatusBadge label="Samples" value={sampleMatches.length} tone={sampleMatches.length > 0 ? "good" : "neutral"} />
             <CompareStatusBadge label="Missing enhanced" value={unmatched.length} tone={unmatched.length > 0 ? "warn" : "good"} />
             <CompareStatusBadge label="Banners" value={banners.length} tone={banners.length > 0 ? "good" : "neutral"} />
           </div>
+
+          {sampleMatches.length > 0 && (
+            <div style={{ ...comparisonSectionBox, marginTop: 18 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "center", marginBottom: 14, flexWrap: "wrap" }}>
+                <div>
+                  <div style={{ fontWeight: 950, fontSize: 18 }}>Top sample comparisons</div>
+                  <div style={{ marginTop: 4, color: "#64748b", fontSize: 13 }}>
+                    Sample 1–3: prepared original on the left, watermarked enhanced sample on the right.
+                  </div>
+                </div>
+                <div style={matchedPill}>{sampleMatches.length} sample pair(s)</div>
+              </div>
+
+              <div style={{ display: "grid", gap: 18 }}>
+                {sampleMatches.map((orig, index) => {
+                  const sample = sampleByFilename.get(orig.filename);
+                  if (!sample) return null;
+
+                  return (
+                    <div key={`sample-${orig.filename}`} style={comparisonSectionBox}>
+                      <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "center", marginBottom: 12 }}>
+                        <div style={{ fontWeight: 950 }}>Sample {index + 1} — {orig.filename}</div>
+                        <div style={matchedPill}>Watermarked</div>
+                      </div>
+                      <div style={headerComparisonGrid}>
+                        <SideBySideImage label="Original" image={orig} emptyText="No prepared original image." title={`Sample ${index + 1} Original`} onPreview={onPreview} />
+                        <SideBySideImage label="Watermarked enhanced" image={sample} emptyText="No sample image." title={`Sample ${index + 1} Watermarked`} onPreview={onPreview} />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
 
           {banners.length > 0 && (
             <div style={{ ...comparisonSectionBox, marginTop: 18 }}>
@@ -2472,7 +2517,7 @@ function CompareGrid({
               <div>
                 <div style={{ fontWeight: 950, fontSize: 18 }}>Menu image comparison</div>
                 <div style={{ marginTop: 4, color: "#64748b", fontSize: 13 }}>
-                  Original on the left, enhanced on the right.
+                  Prepared original and enhanced output are stitched together in each comparison card.
                 </div>
               </div>
               <div style={matchedPill}>{matched.length} matched</div>
