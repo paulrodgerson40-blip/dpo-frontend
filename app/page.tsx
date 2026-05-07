@@ -870,7 +870,7 @@ export default function Page() {
         <div className="absolute right-[-220px] bottom-[-180px] h-[520px] w-[520px] rounded-full bg-orange-500/8 blur-3xl" />
 
         <div className="relative mx-auto max-w-5xl">
-          <div className="rounded-[42px] border border-cyan-300/22 bg-gradient-to-br from-cyan-400/[0.09] via-white/[0.035] to-black/20 p-8 shadow-[0_0_70px_rgba(34,211,238,0.08),0_30px_110px_rgba(0,0,0,0.45)] sm:p-10 lg:p-12">
+          <div className="rounded-[42px] border border-cyan-300/22 bg-gradient-to-br from-cyan-400/[0.09] via-white/[0.035] to-black/20 p-8 shadow-[0_0_70px_rgba(34,211,238,0.08),0_30px_110px_rgba(0,0,0,0.45)] sm:p-10">
             <div className="max-w-3xl">
               <SectionEyebrow>Contact us</SectionEyebrow>
               <h2 className="mt-5 text-5xl font-black uppercase leading-[0.86] tracking-[-0.075em] sm:text-7xl">
@@ -886,9 +886,6 @@ export default function Page() {
                   Email Sales
                 </OrangeButton>
                 <GhostButton href="#pricing">View Packages</GhostButton>
-              </div>
-
-                ))}
               </div>
             </div>
           </div>
