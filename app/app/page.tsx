@@ -20,6 +20,7 @@ type LibraryImage = {
   filename: string;
   name?: string;
   url?: string;
+  thumb_url?: string;
   size?: number;
   updated_at?: string;
   modified?: number;
@@ -136,11 +137,15 @@ export default function Home() {
     return (images || []).map((img) => {
       const filename = img.filename || img.name || "image";
       const rawUrl = img.url || "";
+      const rawThumbUrl = img.thumb_url || "";
+      const cacheToken = img.modified || Date.now();
+
       return {
         ...img,
         filename,
         name: filename,
-        url: rawUrl && rawUrl.startsWith("http") ? rawUrl : rawUrl ? `${BACKEND_URL}${rawUrl}?t=${img.modified || Date.now()}` : undefined,
+        url: rawUrl && rawUrl.startsWith("http") ? rawUrl : rawUrl ? `${BACKEND_URL}${rawUrl}?t=${cacheToken}` : undefined,
+        thumb_url: rawThumbUrl && rawThumbUrl.startsWith("http") ? rawThumbUrl : rawThumbUrl ? `${BACKEND_URL}${rawThumbUrl}?t=${cacheToken}` : undefined,
       };
     });
   }
@@ -1478,11 +1483,15 @@ function DrinksLibrary({ onPreview }: { onPreview: (img: PreviewImage) => void }
     return (images || []).map((img) => {
       const filename = img.filename || img.name || "image";
       const rawUrl = img.url || "";
+      const rawThumbUrl = img.thumb_url || "";
+      const cacheToken = img.modified || Date.now();
+
       return {
         ...img,
         filename,
         name: filename,
-        url: rawUrl && rawUrl.startsWith("http") ? rawUrl : rawUrl ? `${BACKEND_URL}${rawUrl}?t=${Date.now()}` : undefined,
+        url: rawUrl && rawUrl.startsWith("http") ? rawUrl : rawUrl ? `${BACKEND_URL}${rawUrl}?t=${cacheToken}` : undefined,
+        thumb_url: rawThumbUrl && rawThumbUrl.startsWith("http") ? rawThumbUrl : rawThumbUrl ? `${BACKEND_URL}${rawThumbUrl}?t=${cacheToken}` : undefined,
       };
     });
   }
@@ -2264,6 +2273,7 @@ function ImageGrid({
         >
           {images.map((img) => {
             const url = fullImageUrl(img.url);
+            const thumbUrl = fullImageUrl(img.thumb_url || img.url);
             const selected = selectedKeys?.has(imageSelectKey(folder, img.filename)) || false;
             return (
               <div
@@ -2320,9 +2330,9 @@ function ImageGrid({
                     cursor: "zoom-in",
                   }}
                 >
-                  {url ? (
+                  {thumbUrl ? (
                     <img
-                      src={url}
+                      src={thumbUrl}
                       alt={img.filename}
                       style={{
                         width: "100%",
@@ -2506,7 +2516,7 @@ function CompareGrid({
                     onClick={() => onPreview({ title: "Banner", url: fullImageUrl(banner.url), filename: banner.filename })}
                     style={{ border: "1px solid #e2e8f0", borderRadius: 18, overflow: "hidden", background: "#0f172a", padding: 0, cursor: "zoom-in" }}
                   >
-                    <img src={fullImageUrl(banner.url)} alt={banner.filename} style={{ width: "100%", aspectRatio: "16 / 9", objectFit: "cover", display: "block" }} />
+                    <img src={fullImageUrl(banner.thumb_url || banner.url)} alt={banner.filename} style={{ width: "100%", aspectRatio: "16 / 9", objectFit: "cover", display: "block" }} />
                   </button>
                 ))}
               </div>
@@ -2683,6 +2693,8 @@ function StitchedComparisonCard({
   const [downloading, setDownloading] = useState(false);
   const leftUrl = fullImageUrl(left.url);
   const rightUrl = fullImageUrl(right.url);
+  const leftThumbUrl = fullImageUrl(left.thumb_url || left.url);
+  const rightThumbUrl = fullImageUrl(right.thumb_url || right.url);
 
   async function handleDownload() {
     if (!leftUrl || !rightUrl) return;
@@ -2733,11 +2745,11 @@ function StitchedComparisonCard({
       >
         <div>
           <div style={{ marginBottom: 8, fontWeight: 950, color: "#334155", textAlign: "left" }}>{leftLabel}</div>
-          <img src={leftUrl} alt={left.filename} style={{ width: "100%", height: 230, objectFit: "contain", background: "#f8fafc", borderRadius: 14, display: "block" }} />
+          <img src={leftThumbUrl} alt={left.filename} style={{ width: "100%", height: 230, objectFit: "contain", background: "#f8fafc", borderRadius: 14, display: "block" }} />
         </div>
         <div>
           <div style={{ marginBottom: 8, fontWeight: 950, color: "#334155", textAlign: "left" }}>{rightLabel}</div>
-          <img src={rightUrl} alt={right.filename} style={{ width: "100%", height: 230, objectFit: "contain", background: "#f8fafc", borderRadius: 14, display: "block" }} />
+          <img src={rightThumbUrl} alt={right.filename} style={{ width: "100%", height: 230, objectFit: "contain", background: "#f8fafc", borderRadius: 14, display: "block" }} />
         </div>
       </button>
     </div>
@@ -2760,6 +2772,7 @@ function SideBySideImage({
   wide?: boolean;
 }) {
   const url = fullImageUrl(image?.url);
+  const thumbUrl = fullImageUrl(image?.thumb_url || image?.url);
 
   return (
     <div style={{ background: "white", border: "1px solid #e2e8f0", borderRadius: 20, padding: 12, boxShadow: "0 10px 24px rgba(15,23,42,0.05)" }}>
@@ -2779,7 +2792,7 @@ function SideBySideImage({
             cursor: "zoom-in",
           }}
         >
-          <img src={url} alt={image.filename} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
+          <img src={thumbUrl} alt={image.filename} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
         </button>
       ) : (
         <div style={{ height: wide ? 230 : 180, border: "1px dashed #cbd5e1", borderRadius: 16, display: "grid", placeItems: "center", color: "#64748b", fontWeight: 850, textAlign: "center", padding: 16 }}>
