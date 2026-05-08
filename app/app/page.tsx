@@ -2428,6 +2428,21 @@ function CompareGrid({
   emptyText: string;
   onPreview: (img: PreviewImage) => void;
 }) {
+  type ComparisonItem = {
+    key: string;
+    title: string;
+    badge: string;
+    leftLabel: string;
+    rightLabel: string;
+    left: LibraryImage;
+    right: LibraryImage;
+    outputFilename: string;
+    group: "sample" | "menu";
+  };
+
+  const [selectedComparisonKeys, setSelectedComparisonKeys] = useState<Set<string>>(new Set());
+  const [batchDownloading, setBatchDownloading] = useState(false);
+
   const sampleByFilename = useMemo(() => {
     const map = new Map<string, LibraryImage>();
     samples.forEach((img) => map.set(img.filename, img));
@@ -2437,7 +2452,92 @@ function CompareGrid({
   const matched = originals.filter((orig) => enhancedByFilename.has(orig.filename));
   const unmatched = originals.filter((orig) => !enhancedByFilename.has(orig.filename));
   const sampleMatches = originals.filter((orig) => sampleByFilename.has(orig.filename)).slice(0, 3);
+
+  const sampleComparisonItems: ComparisonItem[] = sampleMatches
+    .map((orig, index) => {
+      const sample = sampleByFilename.get(orig.filename);
+      if (!sample) return null;
+      return {
+        key: `sample::${orig.filename}`,
+        title: `Sample ${index + 1} — ${orig.filename}`,
+        badge: "Watermarked",
+        leftLabel: "Original",
+        rightLabel: "Watermarked enhanced",
+        left: orig,
+        right: sample,
+        outputFilename: `sample_${index + 1}_${orig.filename.replace(/\.[^.]+$/, "")}_comparison.png`,
+        group: "sample" as const,
+      };
+    })
+    .filter(Boolean) as ComparisonItem[];
+
+  const menuComparisonItems: ComparisonItem[] = matched
+    .map((orig) => {
+      const enhanced = enhancedByFilename.get(orig.filename);
+      if (!enhanced) return null;
+      return {
+        key: `menu::${orig.filename}`,
+        title: orig.filename,
+        badge: "Matched",
+        leftLabel: "Original",
+        rightLabel: "Enhanced",
+        left: orig,
+        right: enhanced,
+        outputFilename: `${orig.filename.replace(/\.[^.]+$/, "")}_comparison.png`,
+        group: "menu" as const,
+      };
+    })
+    .filter(Boolean) as ComparisonItem[];
+
+  const allComparisonItems = [...sampleComparisonItems, ...menuComparisonItems];
+  const selectedComparisonItems = allComparisonItems.filter((item) => selectedComparisonKeys.has(item.key));
   const hasAnyComparisonAssets = Boolean(originals.length || matched.length || sampleMatches.length || banners.length);
+
+  function toggleComparisonSelected(key: string) {
+    setSelectedComparisonKeys((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
+      return next;
+    });
+  }
+
+  function selectAllComparisons() {
+    setSelectedComparisonKeys(new Set(allComparisonItems.map((item) => item.key)));
+  }
+
+  function clearComparisonSelection() {
+    setSelectedComparisonKeys(new Set());
+  }
+
+  async function downloadComparisonBatch(items: ComparisonItem[], label: string) {
+    if (!items.length) return;
+
+    setBatchDownloading(true);
+    try {
+      for (const item of items) {
+        const leftUrl = fullImageUrl(item.left.url);
+        const rightUrl = fullImageUrl(item.right.url);
+        if (!leftUrl || !rightUrl) continue;
+
+        await downloadStitchedComparison({
+          leftUrl,
+          rightUrl,
+          filename: item.outputFilename,
+          title: item.title,
+          leftLabel: item.leftLabel,
+          rightLabel: item.rightLabel,
+        });
+
+        // Small delay prevents browsers from blocking rapid multiple downloads.
+        await new Promise((resolve) => window.setTimeout(resolve, 220));
+      }
+    } catch (err) {
+      alert(err instanceof Error ? err.message : `Could not download ${label}`);
+    } finally {
+      setBatchDownloading(false);
+    }
+  }
 
   return (
     <div style={{ marginTop: 22 }}>
@@ -2462,7 +2562,32 @@ function CompareGrid({
             <CompareStatusBadge label="Banners" value={banners.length} tone={banners.length > 0 ? "good" : "neutral"} />
           </div>
 
-          {sampleMatches.length > 0 && (
+          {allComparisonItems.length > 0 && (
+            <div style={{ ...comparisonSectionBox, marginTop: 18, display: "flex", justifyContent: "space-between", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
+              <div>
+                <div style={{ fontWeight: 950, fontSize: 16 }}>Stitched comparison batch actions</div>
+                <div style={{ marginTop: 4, color: "#64748b", fontSize: 13 }}>
+                  Select comparison cards, then download selected or all stitched before/after PNG files.
+                </div>
+              </div>
+              <div style={{ display: "flex", gap: 8, flexWrap: "wrap", justifyContent: "flex-end" }}>
+                <button type="button" onClick={selectAllComparisons} disabled={batchDownloading} style={miniButton(batchDownloading)}>
+                  Select All
+                </button>
+                <button type="button" onClick={clearComparisonSelection} disabled={batchDownloading || selectedComparisonKeys.size === 0} style={miniButton(batchDownloading || selectedComparisonKeys.size === 0)}>
+                  Clear
+                </button>
+                <button type="button" onClick={() => downloadComparisonBatch(selectedComparisonItems, "selected comparisons")} disabled={batchDownloading || selectedComparisonItems.length === 0} style={miniDarkButton(batchDownloading || selectedComparisonItems.length === 0)}>
+                  {batchDownloading ? "Creating..." : `Download Selected (${selectedComparisonItems.length})`}
+                </button>
+                <button type="button" onClick={() => downloadComparisonBatch(allComparisonItems, "all comparisons")} disabled={batchDownloading || allComparisonItems.length === 0} style={miniDarkButton(batchDownloading || allComparisonItems.length === 0)}>
+                  Download All ({allComparisonItems.length})
+                </button>
+              </div>
+            </div>
+          )}
+
+          {sampleComparisonItems.length > 0 && (
             <div style={{ ...comparisonSectionBox, marginTop: 18 }}>
               <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "center", marginBottom: 14, flexWrap: "wrap" }}>
                 <div>
@@ -2471,28 +2596,26 @@ function CompareGrid({
                     Sample 1–3: one stitched comparison card per sample, with prepared original on the left and watermarked enhanced sample on the right.
                   </div>
                 </div>
-                <div style={matchedPill}>{sampleMatches.length} sample pair(s)</div>
+                <div style={matchedPill}>{sampleComparisonItems.length} sample pair(s)</div>
               </div>
 
               <div style={{ display: "grid", gap: 18 }}>
-                {sampleMatches.map((orig, index) => {
-                  const sample = sampleByFilename.get(orig.filename);
-                  if (!sample) return null;
-
-                  return (
-                    <StitchedComparisonCard
-                      key={`sample-${orig.filename}`}
-                      title={`Sample ${index + 1} — ${orig.filename}`}
-                      badge="Watermarked"
-                      leftLabel="Original"
-                      rightLabel="Watermarked enhanced"
-                      left={orig}
-                      right={sample}
-                      outputFilename={`sample_${index + 1}_${orig.filename.replace(/\.[^.]+$/, "")}_comparison.png`}
-                      onPreview={onPreview}
-                    />
-                  );
-                })}
+                {sampleComparisonItems.map((item) => (
+                  <StitchedComparisonCard
+                    key={item.key}
+                    title={item.title}
+                    badge={item.badge}
+                    leftLabel={item.leftLabel}
+                    rightLabel={item.rightLabel}
+                    left={item.left}
+                    right={item.right}
+                    outputFilename={item.outputFilename}
+                    onPreview={onPreview}
+                    selectable
+                    selected={selectedComparisonKeys.has(item.key)}
+                    onToggleSelected={() => toggleComparisonSelected(item.key)}
+                  />
+                ))}
               </div>
             </div>
           )}
@@ -2531,31 +2654,29 @@ function CompareGrid({
                   Each card shows one stitched comparison view and includes a download button for a joined PNG file.
                 </div>
               </div>
-              <div style={matchedPill}>{matched.length} matched</div>
+              <div style={matchedPill}>{menuComparisonItems.length} matched</div>
             </div>
 
-            {matched.length === 0 ? (
+            {menuComparisonItems.length === 0 ? (
               <EmptyBox>No matched enhanced menu images yet.</EmptyBox>
             ) : (
               <div style={{ display: "grid", gap: 18 }}>
-                {matched.map((orig) => {
-                  const enhanced = enhancedByFilename.get(orig.filename);
-                  if (!enhanced) return null;
-
-                  return (
-                    <StitchedComparisonCard
-                      key={orig.filename}
-                      title={orig.filename}
-                      badge="Matched"
-                      leftLabel="Original"
-                      rightLabel="Enhanced"
-                      left={orig}
-                      right={enhanced}
-                      outputFilename={`${orig.filename.replace(/\.[^.]+$/, "")}_comparison.png`}
-                      onPreview={onPreview}
-                    />
-                  );
-                })}
+                {menuComparisonItems.map((item) => (
+                  <StitchedComparisonCard
+                    key={item.key}
+                    title={item.title}
+                    badge={item.badge}
+                    leftLabel={item.leftLabel}
+                    rightLabel={item.rightLabel}
+                    left={item.left}
+                    right={item.right}
+                    outputFilename={item.outputFilename}
+                    onPreview={onPreview}
+                    selectable
+                    selected={selectedComparisonKeys.has(item.key)}
+                    onToggleSelected={() => toggleComparisonSelected(item.key)}
+                  />
+                ))}
               </div>
             )}
           </div>
@@ -2680,6 +2801,9 @@ function StitchedComparisonCard({
   right,
   outputFilename,
   onPreview,
+  selectable = false,
+  selected = false,
+  onToggleSelected,
 }: {
   title: string;
   badge: string;
@@ -2689,6 +2813,9 @@ function StitchedComparisonCard({
   right: LibraryImage;
   outputFilename: string;
   onPreview: (img: PreviewImage) => void;
+  selectable?: boolean;
+  selected?: boolean;
+  onToggleSelected?: () => void;
 }) {
   const [downloading, setDownloading] = useState(false);
   const leftUrl = fullImageUrl(left.url);
@@ -2716,9 +2843,22 @@ function StitchedComparisonCard({
   }
 
   return (
-    <div style={comparisonSectionBox}>
+    <div style={{ ...comparisonSectionBox, borderColor: selected ? "#4f46e5" : "#e2e8f0", boxShadow: selected ? "0 0 0 3px rgba(79,70,229,0.12)" : "none" }}>
       <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "center", marginBottom: 12, flexWrap: "wrap" }}>
-        <div style={{ fontWeight: 950 }}>{title}</div>
+        <div style={{ display: "flex", alignItems: "center", gap: 10, minWidth: 0 }}>
+          {selectable && (
+            <label style={{ display: "flex", alignItems: "center", gap: 8, fontWeight: 950, color: "#334155", cursor: "pointer", flexShrink: 0 }}>
+              <input
+                type="checkbox"
+                checked={selected}
+                onChange={onToggleSelected}
+                style={{ width: 18, height: 18, accentColor: "#4f46e5" }}
+              />
+              Select
+            </label>
+          )}
+          <div style={{ fontWeight: 950, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{title}</div>
+        </div>
         <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
           <div style={matchedPill}>{badge}</div>
           <button type="button" onClick={handleDownload} disabled={downloading} style={miniDarkButton(downloading)}>
@@ -2755,6 +2895,7 @@ function StitchedComparisonCard({
     </div>
   );
 }
+
 
 function SideBySideImage({
   label,
