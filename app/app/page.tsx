@@ -4,6 +4,12 @@ import { useEffect, useMemo, useState } from "react";
 
 const BACKEND_URL = "https://170.64.209.149.sslip.io";
 
+// Delivery Ignite public offer locked for website copy:
+// Essential — $399 + GST — up to 20 items.
+// Full Menu — $599 + GST — up to 50 items.
+// Custom Quote — 50+ items or multi-location clients.
+// Positioning: premium managed service only. No self-serve tools, recurring plans, or AI-credit language.
+
 type RestaurantMode = "new" | "existing";
 type ActiveTab = "originals" | "prepared" | "compare" | "enhanced" | "samples" | "banners";
 type UploadType = "menu";
@@ -1129,7 +1135,7 @@ Type BANNER to confirm.`);
           <Panel>
             <div style={{ display: "flex", justifyContent: "space-between", gap: 14, alignItems: "center" }}>
               <div>
-                <Kicker>Restaurant setup</Kicker>
+                <Kicker>Premium client setup</Kicker>
                 <h2 style={sectionTitle}>Choose library</h2>
               </div>
               <StatusPill text={status} tone={status.toLowerCase().includes("failed") ? "bad" : status.includes("complete") || status === "Approved" || status === "Enhanced" ? "good" : "neutral"} />
@@ -1194,7 +1200,7 @@ Type BANNER to confirm.`);
             <Divider />
 
             <div style={{ marginTop: 18 }}>
-              <Label>Upload original food/menu images</Label>
+              <Label>Upload client food/menu images</Label>
               <input
                 id="file"
                 type="file"
@@ -1203,7 +1209,7 @@ Type BANNER to confirm.`);
                 style={{ ...inputStyle, padding: 12, background: "#f8fafc" }}
               />
               <HelpText>
-                Upload anything for now. Files are accepted as-is and the backend auto-renames them to avoid duplicate filename conflicts.
+                Upload real restaurant food/menu photos or screenshots. The workflow is managed internally so clients never deal with self-serve tools or AI settings.
               </HelpText>
             </div>
 
@@ -1247,14 +1253,14 @@ Type BANNER to confirm.`);
             <Panel>
               <div style={{ display: "flex", justifyContent: "space-between", gap: 18, alignItems: "center" }}>
                 <div>
-                  <Kicker>Active restaurant</Kicker>
+                  <Kicker>Active client</Kicker>
                   <h2 style={{ ...sectionTitle, marginTop: 4 }}>
                     {activeRestaurantName || "No restaurant selected"}
                   </h2>
                   <p style={{ margin: "6px 0 0", color: "#64748b" }}>
                     {activeRestaurantSlug
                       ? `Library folder: ${activeRestaurantSlug}`
-                      : "Create or select a restaurant to manage its images."}
+                      : "Create or select a client restaurant to manage its premium delivery assets."}
                   </p>
                 </div>
 
@@ -1371,7 +1377,7 @@ Type BANNER to confirm.`);
               {activeTab === "samples" && (
                 <ImageGrid
                   title="Samples"
-                  subtitle="Watermarked sales samples created from selected enhanced images. These are separate from full restaurant downloads."
+                  subtitle="Watermarked premium samples created from selected enhanced images. These remain separate from final client exports."
                   images={sampleImages}
                   emptyText="No samples yet. Go to Enhanced, select 3 images, then click Create Samples."
                   folder="samples"
@@ -1388,7 +1394,7 @@ Type BANNER to confirm.`);
               {activeTab === "banners" && (
                 <ImageGrid
                   title="Banners"
-                  subtitle="Final 16:9 restaurant banners composed from exactly 3 selected enhanced menu images."
+                  subtitle="Final platform-ready 16:9 restaurant banners composed from exactly 3 selected enhanced menu images."
                   images={bannerImages}
                   emptyText="No banner yet. Go to Enhanced, select exactly 3 images, then click Create Banner."
                   folder="banners"
@@ -1410,18 +1416,18 @@ Type BANNER to confirm.`);
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 14 }}>
                 <div>
                   <Kicker>Workflow</Kicker>
-                  <h2 style={sectionTitle}>Production path</h2>
+                  <h2 style={sectionTitle}>Managed production path</h2>
                 </div>
                 <StatusPill text={workflowState.badge} tone={workflowState.tone} />
               </div>
 
               <div style={workflowGrid}>
-                <WorkflowStep number="01" title="Original" text="Upload and approve full screenshots/originals. Rename dishes here while the menu context is still visible." />
+                <WorkflowStep number="01" title="Original" text="Upload and approve real client food/menu images. Rename dishes here while the menu context is still visible." />
                 <WorkflowStep number="02" title="Prepared" text="Click Prepare All to crop clean food-only images into original_prepared using the locked Uber modal crop." />
-                <WorkflowStep number="03" title="Enhanced" text="Generate menu-item outputs from prepared images only, keeping screenshots out of Phase B." />
-                <WorkflowStep number="04" title="Comparison" text="Review prepared source images against enhanced outputs before publishing." />
-                <WorkflowStep number="05" title="Samples" text="Create watermarked sales previews from selected enhanced images." />
-                <WorkflowStep number="06" title="Banners" text="Select exactly 3 enhanced menu images to create a composed 16:9 banner." />
+                <WorkflowStep number="03" title="Enhanced" text="Generate premium, realistic menu-item outputs from prepared images only, preserving the actual food and avoiding fake AI fantasy styling." />
+                <WorkflowStep number="04" title="Comparison" text="Review prepared source images against enhanced outputs before client delivery." />
+                <WorkflowStep number="05" title="Samples" text="Create watermarked premium previews from selected enhanced images for the free sample workflow." />
+                <WorkflowStep number="06" title="Banners" text="Select exactly 3 enhanced menu images to create a platform-ready 16:9 banner." />
               </div>
             </Panel>
           </div>
@@ -1909,13 +1915,13 @@ function Hero({ modeTitle, modeSubtitle }: { modeTitle: string; modeSubtitle: st
       <div style={{ position: "relative", display: "flex", justifyContent: "space-between", gap: 24, alignItems: "center" }}>
         <div>
           <div style={{ color: "#93c5fd", fontWeight: 900, letterSpacing: 1.2, textTransform: "uppercase", fontSize: 13 }}>
-            Delivery Platform Optimization
+            Delivery Ignite Managed Production
           </div>
           <h1 style={{ margin: "10px 0 8px", fontSize: 42, lineHeight: 1.05 }}>
-            Restaurant Image Library
+            Premium Delivery Image Library
           </h1>
           <p style={{ margin: 0, color: "#dbeafe", fontSize: 17, maxWidth: 720 }}>
-            Manage screenshots, prepare clean food-only originals, compare old vs new, enhance menu assets, create samples, and generate composed 16:9 banners from enhanced dishes.
+            Premium managed production system for real restaurant photos: prepare clean originals, preserve the actual food, enhance menu assets, create watermarked samples, and generate platform-ready banners.
           </p>
         </div>
 
